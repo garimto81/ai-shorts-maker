@@ -1,0 +1,369 @@
+[
+  {
+    "title": "SM6 휠복원, 새 휠처럼 완벽하게! 휠굴절, 크랙 수리 과정",
+    "description": "SM6 차량의 휠복원 과정을 보여드립니다. 휠굴절과 크랙 확인부터 샌드블라스터, CNC 공정, 클리어 코트 처리까지, 새 휠처럼 완벽하게 복원하는 과정을 상세히 담았습니다. 차주분의 요청에 따라 원복 작업을 진행하여 새차 같은 느낌을 되찾았습니다. 휠복원에 관심 있는 분들께 유용한 정보가 될 것입니다.",
+    "category": "튜토리얼",
+    "tags": [
+      "휠복원",
+      "휠수리",
+      "SM6",
+      "자동차정비",
+      "CNC",
+      "샌드블라스터",
+      "클리어코트",
+      "휠굴절",
+      "휠크랙"
+    ],
+    "content": {
+      "narration": "오늘 입고된차는 sm6 차량입니다.\n차주분이 휠복원 자체를 고민하시다 입고해주셨는데요 \n저희랑 상담후에 새차같은 느낌을 원하신다 하셔서 원복을 원하셨습니다.\n\n우선 탈거후 휠굴절 크랙을 확인해보고 바로 공정에 들어갔습니다.\n\n샌드블라스터로 유분제거를 하고 바로 cnc 공정을 했습니다.\n\n여기서 끝이 아니죠 휠표면을 보호해주는 클리어 코트를 \n처리해주고 공정을 마무리 했더니\n완벽하게 새휠이 되었습니다.\n고객님도 저희도 둘다 만족한 \n공정 이었습니다.\n",
+      "scenes": [
+        {
+          "sequence": 1,
+          "description": "오늘 입고된 SM6 차량 소개",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 2,
+          "description": "휠 복원 고민 후 입고 및 새차 같은 느낌 원복 희망",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 3,
+          "description": "휠 탈거 및 굴절, 크랙 확인",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 4,
+          "description": "샌드블라스터로 유분 제거",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 5,
+          "description": "CNC 공정 진행",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 6,
+          "description": "휠 표면 보호 클리어 코트 처리",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 7,
+          "description": "완벽하게 새 휠로 복원 완료",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 8,
+          "description": "고객과 정비소 모두 만족한 결과",
+          "duration": 3,
+          "visualCues": []
+        }
+      ],
+      "timing": {
+        "totalDuration": 30,
+        "introLength": 6,
+        "mainLength": 18,
+        "outroLength": 6
+      }
+    },
+    "aiPrompts": {
+      "stylePrompt": "자동차정비 업종, 일반인 대상",
+      "structurePrompt": "휠복원 중심의 구조",
+      "tonePrompt": "정보전달"
+    },
+    "id": "mdlv0y6g0v4cbffj31w",
+    "metadata": {
+      "author": "User",
+      "createdAt": "2025-07-27T15:54:42.568Z",
+      "updatedAt": "2025-07-27T15:54:42.568Z",
+      "usageCount": 0,
+      "rating": 0,
+      "isActive": true
+    }
+  },
+  {
+    "title": "BMW X5 휠 기스 복원: 신차급 퍼포먼스로 부활!",
+    "description": "1억 원이 넘는 BMW X5의 휠 기스를 복원하는 과정을 담았습니다. 유분 제거, 세척, 샌딩, 전용 컷팅 등 섬세한 작업을 통해 신차급 퍼포먼스를 되찾았습니다. 작업자의 드림카인 BMW를 향한 열정과 함께, 휠 복원 과정을 상세히 보여드립니다. 구독과 좋아요는 큰 힘이 됩니다!",
+    "category": "튜토리얼",
+    "tags": [
+      "BMW",
+      "X5",
+      "휠복원",
+      "휠기스",
+      "자동차복원",
+      "자동차관리",
+      "튜토리얼",
+      "DIY"
+    ],
+    "content": {
+      "narration": "오늘은 bmw 브랜드의 영원한 스테디 셀러 x5 차량이 입고되었습니다.\n\n1억이 넘어가는 고가의 차량이\n휠기스로 인해서 들어오는 모습이 상당히 가슴이 아팠습니다.\n\n일단 유분제거를 철저히 해주고 \n세척과 샌딩후 전용 컷팅을 \n해서 작업을 했더니\n다시금 신차급 퍼포먼스를 보여줍니다.\n\n작업자로써 너무 만족하게 출고드렸습니다.\n제 드림카인만큼 열씨미 휠깍아서\nBmw 구매하는 날까지 여러분의 구독과 좋아요는 큰 힘이 됩니다.\n",
+      "scenes": [
+        {
+          "sequence": 1,
+          "description": "BMW X5 차량 입고 (영원한 스테디셀러 강조)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 2,
+          "description": "휠 기스 상태 확인 (1억 넘는 고가 차량, 안타까움 표현)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 3,
+          "description": "유분 제거 및 세척 작업 (꼼꼼함 강조)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 4,
+          "description": "샌딩 및 전용 컷팅 작업 (전문성 강조)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 5,
+          "description": "복원 후 휠 상태 (신차급 퍼포먼스 강조)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 6,
+          "description": "출고 (만족감 표현)",
+          "duration": 4,
+          "visualCues": []
+        },
+        {
+          "sequence": 7,
+          "description": "드림카 BMW 구매 목표 (구독/좋아요 요청)",
+          "duration": 4,
+          "visualCues": []
+        }
+      ],
+      "timing": {
+        "totalDuration": 30,
+        "introLength": 6,
+        "mainLength": 18,
+        "outroLength": 6
+      }
+    },
+    "aiPrompts": {
+      "stylePrompt": "자동차정비 업종, 일반인 대상",
+      "structurePrompt": "휠 복원 중심의 구조",
+      "tonePrompt": "친근한"
+    },
+    "id": "mdlv2yudvsxz5sjklfc",
+    "metadata": {
+      "author": "User",
+      "createdAt": "2025-07-27T15:56:16.741Z",
+      "updatedAt": "2025-07-27T15:56:16.741Z",
+      "usageCount": 0,
+      "rating": 0,
+      "isActive": true
+    }
+  },
+  {
+    "title": "포드 익스플로러 휠 유광 블랙 도색 시공으로 차량에 무게감 더하기",
+    "description": "기존 휠 기스와 이미지 변신을 원하셨던 포드 익스플로러 차주님을 위해 휠 유광 블랙 도색 시공을 진행했습니다. 휠 탈거 후 굴절과 크랙 점검, 샌드 블라스트 작업, 표면 샌딩 등 꼼꼼한 전처리 과정을 거쳤습니다. 숙련된 작업자의 도색 작업과 분체도색 마감으로 휠 표면 강성을 극대화했습니다. 유광 블랙 도색으로 차량에 무게감이 더해져 만족스러운 결과를 얻었습니다.",
+    "category": "스토리",
+    "tags": [
+      "휠도색",
+      "블랙도색",
+      "분체도색",
+      "포드",
+      "익스플로러",
+      "자동차튜닝",
+      "휠복원",
+      "자동차정비"
+    ],
+    "content": {
+      "narration": "오늘 방문고객님은 포드사에 익스플로러 차주님이 셨습니다.\n기존휠의 기스와 더불어 새로운 이미지를 원하셨고 \n저희와 오랜상담 끝에 휠에 무게감을\n더해줄수있는 유광 블랙도색을\n시공 하시기로 하셨습니다.\n\n휠을 탈거해서 굴절과 크랙 점검후\n샌드 블라스트 작업으로 유분을 제거후에 표면 샌딩을 했습니다.\n\n이제 작업자의 숙련도가 퀄리티에 직접적인 영향을 미치는 도색작업을 들어갔으며 마무리는 분체도색으로 \n휠표면의 강성을 극대화 시켜서 \n작업의 마무리를 했습니다.\n\n확실히 휠의 색상이 차량에 전체적인 무게감을 더해준같아 너무 만족스런 작업이었습니다.\n",
+      "scenes": [
+        {
+          "sequence": 1,
+          "description": "오늘 방문 고객님은 포드 익스플로러 차주셨습니다! 기존 휠의 기스와 새로운 이미지 변신을 원하셨어요.",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 2,
+          "description": "오랜 상담 끝에 휠에 무게감을 더해줄 유광 블랙 도색 시공을 결정하셨습니다!",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 3,
+          "description": "먼저 휠을 탈거하여 굴절과 크랙을 꼼꼼하게 점검합니다.",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 4,
+          "description": "샌드 블라스트 작업으로 휠 표면의 유분을 제거하고 샌딩 작업을 진행합니다.",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 5,
+          "description": "작업자의 숙련된 기술로 꼼꼼하게 도색 작업을 진행합니다.",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 6,
+          "description": "마무리는 분체 도색으로 휠 표면의 강성을 극대화합니다!",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 7,
+          "description": "유광 블랙 도색으로 차량의 전체적인 무게감이 확실히 더해졌네요!",
+          "duration": 3,
+          "visualCues": []
+        },
+        {
+          "sequence": 8,
+          "description": "정말 만족스러운 작업이었습니다!",
+          "duration": 3,
+          "visualCues": []
+        }
+      ],
+      "timing": {
+        "totalDuration": 30,
+        "introLength": 6,
+        "mainLength": 18,
+        "outroLength": 6
+      }
+    },
+    "aiPrompts": {
+      "stylePrompt": "자동차정비 업종, 일반인 대상",
+      "structurePrompt": "자동차 휠 도색 중심의 구조",
+      "tonePrompt": "친근한"
+    },
+    "id": "mdlv4u7prg3cpyj81ok",
+    "metadata": {
+      "author": "User",
+      "createdAt": "2025-07-27T15:57:44.053Z",
+      "updatedAt": "2025-07-27T15:57:44.053Z",
+      "usageCount": 0,
+      "rating": 0,
+      "isActive": true
+    }
+  },
+  {
+    "title": "벤츠 E클래스 휠복원, 다이아몬드컷팅휠 완벽 재생!",
+    "description": "명품 벤츠 E클래스의 휠, 허름한 신발은 이제 그만! 허브휠복원에서 다이아몬드 컷팅 휠의 흠집을 완벽하게 복원하는 과정을 보여드립니다. 샌드블라스터, CNC, 고온 건조 분체 클리어 도포 등 전문 기술과 꼼꼼한 검수로 휠의 퀄리티를 높이는 방법을 확인하세요. 휠 굴절과 크랙까지 체크하는 섬세함과 발란스 체크, 상도 클리어까지 완벽한 마무리! 벤츠의 품격을 되찾는 휠복원, 지금 바로 영상으로 확인하세요.",
+    "category": "튜토리얼",
+    "tags": [
+      "휠복원",
+      "다이아몬드컷팅휠",
+      "벤츠",
+      "E클래스",
+      "자동차휠",
+      "휠수리",
+      "CNC",
+      "샌드블라스터",
+      "분체도장",
+      "자동차정비"
+    ],
+    "content": {
+      "narration": "허브휠복원 주치의 ○○입니다\n오늘입고된 차량은 벤츠 e클래스 차량입니다.\n명품삼각별의 품격을 자랑하는 벤츠가 지금까지 허름한 신발을 신고다닌것 같아 너무속상합니다.\n\n서둘러 집도를 시작해보려합니다\n일다 다이아몬드 컷팅휠이니\n타르나 이물질 제거를 위해 샌드블라스터 작업을하고\n전문 cnc 기계로 돌려깍기를 하기로 \n결정했습니다.\n다행인것은 휠표면에만 스크레치가 \n확인되고 휠내부에는 굴절이나 크렉이 발견되지 않았습니다.\n\n저희는 꼼꼼하게 크랙 굴절까지 체크하는게 휠복원 집도라 생각하고\n어설프게 액상으로 마감하는게 \n오히려 휠퀄리티를 떨어뜨린다는 생각에 고온건조기 (180도)로 분체클리어를 도포함으로써 \n좀더 견고함을 주려 노력합니다.\n\n결과물을 보시면 완벽한 cnc 공법후\n발란스까지 체크하는 섬세함 마지막\n상도클리어까지  도포\n\n벤츠는 벤츠다울때 진정한 멋이 살아난다고 할까요?\n\n저희 허브휠복원의 집도가 마음에 드셨다면 다들 좋아요 한번씩 부탁드리면서 인사드립니다.\n",
+      "scenes": [
+        {
+          "sequence": 1,
+          "description": "허브휠복원 주치의 ○○입니다. 오늘 입고된 차량은 벤츠 E클래스입니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 2,
+          "description": "명품 삼각별의 품격을 자랑하는 벤츠, 하지만 허름한 휠은 속상합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 3,
+          "description": "다이아몬드 컷팅 휠 복원을 위해 샌드블라스터 작업을 시작합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 4,
+          "description": "전문 CNC 기계로 휠을 정밀하게 돌려깍기 합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 5,
+          "description": "휠 표면 스크래치는 확인되었지만, 다행히 굴절이나 크랙은 없습니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 6,
+          "description": "꼼꼼한 크랙/굴절 체크는 필수! 어설픈 액상 마감은 휠 퀄리티를 떨어뜨립니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 7,
+          "description": "180도 고온 건조기에서 분체 클리어를 도포하여 견고함을 더합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 8,
+          "description": "완벽한 CNC 공법 후 휠 밸런스까지 섬세하게 체크합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 9,
+          "description": "마지막으로 상도 클리어까지 도포합니다.",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 10,
+          "description": "벤츠는 벤츠다울 때 진정한 멋이 살아납니다!",
+          "duration": 2,
+          "visualCues": []
+        },
+        {
+          "sequence": 11,
+          "description": "허브휠복원의 집도가 마음에 드셨다면 좋아요 부탁드립니다!",
+          "duration": 2,
+          "visualCues": []
+        }
+      ],
+      "timing": {
+        "totalDuration": 30,
+        "introLength": 6,
+        "mainLength": 18,
+        "outroLength": 6
+      }
+    },
+    "aiPrompts": {
+      "stylePrompt": "자동차정비 업종, 일반인 대상",
+      "structurePrompt": "휠복원 중심의 구조",
+      "tonePrompt": "친근한"
+    },
+    "id": "mdlv5jghq9dess6wqls",
+    "metadata": {
+      "author": "User",
+      "createdAt": "2025-07-27T15:58:16.769Z",
+      "updatedAt": "2025-07-27T15:58:16.769Z",
+      "usageCount": 0,
+      "rating": 0,
+      "isActive": true
+    }
+  }
+]

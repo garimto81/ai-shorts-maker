@@ -1,0 +1,157 @@
+{
+  "version": "1.6.0",
+  "releaseDate": "2025-07-27",
+  "codename": "Intelligent Sorter",
+  "stability": "stable",
+  "compatibility": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "next": "^14.0.0"
+  },
+  "changelog": {
+    "major": [],
+    "minor": [
+      "스크립트 자동 생성 기능 개선 - 본문 기반 메타데이터 AI 추론"
+    ],
+    "patch": []
+  },
+  "features": {
+    "core": [
+      "지능형 파일 정렬 (파일명 + AI 분석)",
+      "Gemini AI 이미지 내용 분석",
+      "실시간 진행률 표시",
+      "드래그 앤 드롭 인터페이스"
+    ],
+    "technical": [
+      "Next.js 14 기반 웹 애플리케이션",
+      "TypeScript 완전 지원",
+      "Radix UI 컴포넌트 시스템",
+      "환경 변수 기반 보안 관리"
+    ],
+    "supported_formats": [
+      "JPG/JPEG",
+      "PNG",
+      "GIF",
+      "WebP"
+    ]
+  },
+  "performance": {
+    "max_files": 20,
+    "max_file_size": "10MB",
+    "max_total_size": "200MB",
+    "filename_recognition_rate": "95%+",
+    "ai_analysis_accuracy": "85%"
+  },
+  "api": {
+    "gemini_model": "gemini-1.5-pro-vision-latest",
+    "endpoints": [
+      "GET /api/admin/health",
+      "POST /api/sort-files",
+      "GET /api/admin/validate-all"
+    ]
+  },
+  "previous_versions": [
+    {
+      "version": "1.5.1",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.5.0",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": [
+        "파일명 시간 분석 강화 및 이미지 미리보기 기능 추가"
+      ]
+    },
+    {
+      "version": "1.4.0",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": [
+        "아키텍처 개편: 모든 AI 기능을 Gemini AI로 통일"
+      ]
+    },
+    {
+      "version": "1.3.7",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.6",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.5",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.4",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.3",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.2",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.1",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": []
+    },
+    {
+      "version": "1.3.0",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": [
+        "프로젝트 구조 개선으로 ai-shorts 서브 폴더 분리",
+        "버전 관리 시스템 도입",
+        "포괄적인 문서화 시스템 구축",
+        "자동화된 패치 노트 시스템"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "releaseDate": "2025-07-27",
+      "codename": "Gemini Integration",
+      "major_changes": [
+        "Gemini AI 통합",
+        "지능형 파일 정렬 시스템 구현",
+        "영상 길이 30-60초로 조정"
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "releaseDate": "이전",
+      "codename": "Basic Sorting",
+      "major_changes": [
+        "기본 파일 업로드 기능",
+        "파일명 기반 정렬"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "releaseDate": "프로젝트 시작",
+      "codename": "Initial Release",
+      "major_changes": [
+        "프로젝트 초기 설정"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "tutorial-basic",
+    "name": "기본 튜토리얼",
+    "description": "단계별 설명이 포함된 튜토리얼 형식",
+    "structure": {
+      "sections": [
+        {
+          "name": "도입부",
+          "description": "문제 제기 및 목표 제시",
+          "minDuration": 5,
+          "maxDuration": 10,
+          "required": true,
+          "aiPrompt": "시청자의 관심을 끌고 해결할 문제를 명확히 제시하세요."
+        },
+        {
+          "name": "단계별 설명",
+          "description": "순차적인 해결 과정",
+          "minDuration": 20,
+          "maxDuration": 40,
+          "required": true,
+          "aiPrompt": "각 단계를 명확하고 따라하기 쉽게 설명하세요."
+        },
+        {
+          "name": "마무리",
+          "description": "요약 및 추가 팁",
+          "minDuration": 5,
+          "maxDuration": 10,
+          "required": true,
+          "aiPrompt": "핵심 내용을 요약하고 유용한 팁을 제공하세요."
+        }
+      ],
+      "totalDuration": 50,
+      "flexibility": "moderate"
+    },
+    "aiGuidelines": {
+      "contentGuidelines": [
+        "구체적이고 실행 가능한 단계 제시",
+        "전문 용어 사용 시 설명 포함",
+        "시각적 요소 활용 방안 제시"
+      ],
+      "styleGuidelines": [
+        "친근하고 이해하기 쉬운 톤",
+        "적극적이고 격려하는 어조",
+        "간결하면서도 명확한 표현"
+      ],
+      "lengthGuidelines": [
+        "총 30-60초 분량",
+        "각 단계는 5-15초 내외",
+        "핵심 메시지 우선 순위 고려"
+      ]
+    }
+  },
+  {
+    "id": "review-product",
+    "name": "제품 리뷰",
+    "description": "제품의 장단점을 균형있게 분석하는 리뷰 형식",
+    "structure": {
+      "sections": [
+        {
+          "name": "제품 소개",
+          "description": "제품 개요 및 첫인상",
+          "minDuration": 8,
+          "maxDuration": 12,
+          "required": true,
+          "aiPrompt": "제품의 핵심 특징과 첫인상을 생생하게 전달하세요."
+        },
+        {
+          "name": "상세 분석",
+          "description": "기능별 상세 평가",
+          "minDuration": 25,
+          "maxDuration": 35,
+          "required": true,
+          "aiPrompt": "각 기능을 객관적으로 평가하고 실제 사용 경험을 포함하세요."
+        },
+        {
+          "name": "종합 평가",
+          "description": "장단점 정리 및 추천 여부",
+          "minDuration": 7,
+          "maxDuration": 13,
+          "required": true,
+          "aiPrompt": "공정한 종합 평가와 구체적인 추천 대상을 제시하세요."
+        }
+      ],
+      "totalDuration": 50,
+      "flexibility": "moderate"
+    },
+    "aiGuidelines": {
+      "contentGuidelines": [
+        "객관적이고 균형잡힌 평가",
+        "실제 사용 경험과 구체적 예시",
+        "장단점의 명확한 구분"
+      ],
+      "styleGuidelines": [
+        "신뢰할 수 있는 전문적 톤",
+        "공정하고 솔직한 어조",
+        "근거가 명확한 평가"
+      ],
+      "lengthGuidelines": [
+        "총 30-60초 분량",
+        "중요 기능에 충분한 시간 할당",
+        "핵심 포인트 강조"
+      ]
+    }
+  },
+  {
+    "id": "story-narrative",
+    "name": "스토리텔링",
+    "description": "감정적 몰입을 이끄는 스토리 형식",
+    "structure": {
+      "sections": [
+        {
+          "name": "훅",
+          "description": "흥미로운 시작점",
+          "minDuration": 3,
+          "maxDuration": 8,
+          "required": true,
+          "aiPrompt": "시청자의 호기심을 즉시 자극하는 강력한 오프닝을 만드세요."
+        },
+        {
+          "name": "전개",
+          "description": "갈등과 긴장감 조성",
+          "minDuration": 15,
+          "maxDuration": 25,
+          "required": true,
+          "aiPrompt": "감정적 몰입을 높이는 전개와 갈등을 구성하세요."
+        },
+        {
+          "name": "클라이맥스",
+          "description": "절정의 순간",
+          "minDuration": 8,
+          "maxDuration": 15,
+          "required": true,
+          "aiPrompt": "가장 강렬하고 인상적인 순간을 연출하세요."
+        },
+        {
+          "name": "결말",
+          "description": "만족스러운 마무리",
+          "minDuration": 4,
+          "maxDuration": 10,
+          "required": true,
+          "aiPrompt": "깊은 여운을 남기는 의미있는 마무리를 제공하세요."
+        }
+      ],
+      "totalDuration": 50,
+      "flexibility": "flexible"
+    },
+    "aiGuidelines": {
+      "contentGuidelines": [
+        "감정적 연결고리 강화",
+        "시각적 이미지가 풍부한 묘사",
+        "명확한 메시지나 교훈"
+      ],
+      "styleGuidelines": [
+        "몰입감 있는 서술",
+        "감정의 기복을 활용한 리듬",
+        "생생하고 구체적인 표현"
+      ],
+      "lengthGuidelines": [
+        "총 30-60초 분량",
+        "클라이맥스에 가장 많은 시간 할당",
+        "강약 조절을 통한 메리하리"
+      ]
+    }
+  },
+  {
+    "id": "educational-concept",
+    "name": "개념 설명",
+    "description": "복잡한 개념을 쉽게 설명하는 교육 형식",
+    "structure": {
+      "sections": [
+        {
+          "name": "개념 소개",
+          "description": "핵심 개념의 정의",
+          "minDuration": 8,
+          "maxDuration": 12,
+          "required": true,
+          "aiPrompt": "복잡한 개념을 간단하고 명확하게 정의하세요."
+        },
+        {
+          "name": "예시 설명",
+          "description": "구체적인 사례와 비유",
+          "minDuration": 20,
+          "maxDuration": 30,
+          "required": true,
+          "aiPrompt": "일상적인 예시와 비유를 통해 이해를 돕세요."
+        },
+        {
+          "name": "적용 방법",
+          "description": "실생활 활용법",
+          "minDuration": 7,
+          "maxDuration": 15,
+          "required": false,
+          "aiPrompt": "학습한 개념을 실제로 어떻게 활용할 수 있는지 제시하세요."
+        }
+      ],
+      "totalDuration": 50,
+      "flexibility": "moderate"
+    },
+    "aiGuidelines": {
+      "contentGuidelines": [
+        "단계적 이해 과정 설계",
+        "친숙한 비유와 예시 활용",
+        "핵심 포인트 반복 강조"
+      ],
+      "styleGuidelines": [
+        "교육적이면서도 흥미로운 톤",
+        "이해하기 쉬운 속도",
+        "학습자 중심의 설명"
+      ],
+      "lengthGuidelines": [
+        "총 30-60초 분량",
+        "개념별로 충분한 소화 시간",
+        "예시에 가장 많은 시간 할당"
+      ]
+    }
+  }
+]
