@@ -3,6 +3,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ffmpegRenderer, VideoRenderRequest } from '@/lib/ffmpeg-video-renderer-server';
 import { cloudVideoRenderer, CloudVideoRenderRequest } from '@/lib/ffmpeg-cloud-renderer';
+import { mockVideoRenderer } from '@/lib/mock-video-renderer';
 import { z } from 'zod';
 import path from 'path';
 import fs from 'fs';
@@ -80,10 +81,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 환경별 렌더러 선택
     const isCloudEnvironment = process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const useMockRenderer = isDevelopment && process.env.USE_MOCK_RENDERER !== 'false';
     const startTime = Date.now();
     
     let result;
-    if (isCloudEnvironment) {
+    if (useMockRenderer) {
+      console.log('🎭 개발 환경: Mock 렌더러 사용');
+      result = await mockVideoRenderer.render(renderRequest);
+    } else if (isCloudEnvironment) {
       console.log('🌐 클라우드 환경 감지: WebAssembly 렌더러 사용');
       
       const cloudRequest: CloudVideoRenderRequest = {
@@ -131,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success: true,
       data: {
         videoUrl: result.videoUrl,
-        videoPath: result.videoPath,
+        videoPath: 'videoPath' in result ? result.videoPath : undefined,
         duration: result.duration,
         fileSize: result.fileSize,
         resolution: result.resolution,
@@ -189,8 +195,11 @@ async function validateImagePaths(imagePaths: string[]): Promise<string[]> {
       // Blob URL인 경우 - 클라이언트에서 업로드된 파일들
       // 실제로는 intelligent-file-sorter에서 FormData로 전송되어야 함
       throw new Error(`Blob URL은 지원하지 않습니다. FormData를 통해 실제 파일을 업로드해주세요.`);
+    } else if (imagePath.startsWith('/uploads/')) {
+      // 업로드된 파일 경로인 경우 (/uploads/temp/...)
+      fullPath = path.join(process.cwd(), 'public', imagePath);
     } else if (imagePath.startsWith('/')) {
-      // 웹 URL 경로인 경우 (/uploads/...)
+      // 기타 웹 URL 경로인 경우 (/test-images/...)
       fullPath = path.join(process.cwd(), 'public', imagePath);
     } else if (imagePath.startsWith('http')) {
       // HTTP URL인 경우 - 현재는 지원하지 않음
