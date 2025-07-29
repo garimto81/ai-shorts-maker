@@ -1,7 +1,7 @@
 {
   "name": "ai-shorts-maker",
-  "version": "1.6.2",
-  "description": "AI 기반 자동 단편 영상 제작 플랫폼 - 이미지 업로드부터 완성된 비디오까지 원클릭 제작",
+  "version": "1.8.0",
+  "description": "AI 기반 자동 단편 영상 제작 플랫폼 - 실제 이미지 내용 AI 분석으로 완벽한 순서 정렬",
   "private": false,
   "scripts": {
     "dev": "next dev",

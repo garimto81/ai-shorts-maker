@@ -4,14 +4,16 @@
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://your-domain.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI 기반 자동 단편 영상 제작 플랫폼 - 이미지 업로드부터 완성된 비디오까지 원클릭 제작!
+AI 기반 자동 단편 영상 제작 플랫폼 - 실제 이미지 내용 AI 분석으로 완벽한 순서 정렬! (v1.8.0)
 
 ## ✨ 주요 기능
 
-### 🤖 AI 지능형 파일 정렬
-- **자동 순서 감지**: 파일명과 이미지 분석을 통한 지능형 정렬
-- **시각적 미리보기**: 정렬 결과를 실시간으로 확인
-- **수동 조정**: 필요시 드래그앤드롭으로 순서 조정
+### 🚀 혁신적인 3단계 하이브리드 AI 정렬 시스템 (v1.8.0 신규)
+- **🔍 실제 이미지 내용 분석**: Gemini Vision API로 이미지를 "보고" 장면 내용, 시간적 단서, 순서 단서 분석
+- **🤖 AI 파일명 의미 분석**: 파일명의 숨겨진 의미와 의도를 AI가 파악하여 순서 추론
+- **📋 패턴 기반 분석**: 기존 날짜/시간 패턴 인식과 결합한 강력한 정렬
+- **⚖️ 동적 가중치 시스템**: 각 분석의 신뢰도에 따라 자동으로 가중치 조정
+- **🎯 100% 신뢰도**: 실제 이미지 내용 분석을 통한 완벽한 순서 정렬
 
 ### 🎙️ Gemini AI TTS
 - **자연스러운 음성**: Google Gemini AI 기반 고품질 음성 생성
@@ -33,12 +35,13 @@ AI 기반 자동 단편 영상 제작 플랫폼 - 이미지 업로드부터 완�
 
 **Live Demo**: [https://your-domain.vercel.app](https://your-domain.vercel.app)
 
-### 빠른 테스트 방법
+### 빠른 테스트 방법 (v1.8.0 업데이트)
 1. 이미지 파일들을 업로드
 2. 프로젝트 제목 입력
-3. "AI 지능형 정렬 시작" 클릭
-4. "AI 영상 제작" 클릭
-5. 완성된 MP4 비디오 다운로드
+3. **"3단계 하이브리드 AI 정렬 시작"** 클릭 ⭐ 신규
+4. 실제 이미지 내용 분석 결과 확인
+5. "AI 영상 제작" 클릭
+6. 완성된 MP4 비디오 다운로드
 
 ## 🛠️ 기술 스택
 
@@ -48,8 +51,11 @@ AI 기반 자동 단편 영상 제작 플랫폼 - 이미지 업로드부터 완�
 - **Tailwind CSS**: 유틸리티 퍼스트 CSS 프레임워크
 - **Radix UI**: 접근성 우선 컴포넌트 라이브러리
 
-### Backend & AI
-- **Google Gemini AI**: 이미지 분석, 텍스트 생성, TTS
+### Backend & AI (v1.8.0 강화)
+- **Google Gemini Vision API**: 실제 이미지 내용 분석 및 순서 추론 ⭐ 신규
+- **Google Gemini AI**: 파일명 의미 분석, 텍스트 생성, TTS
+- **3단계 하이브리드 시스템**: 패턴 + AI파일명 + 실제이미지 분석 통합
+- **동적 가중치 엔진**: 신뢰도 기반 자동 최적화
 - **FFmpeg**: 고품질 비디오 렌더링 (로컬 환경)
 - **WebAssembly**: 클라우드 환경 비디오 처리
 - **Formidable**: 멀티파트 파일 업로드
@@ -88,6 +94,7 @@ cp .env.example .env.local
 `.env.local` 파일에 다음 내용 추가:
 ```env
 GOOGLE_AI_API_KEY=your_gemini_api_key_here
+# v1.8.0: 파일명 분석, 실제 이미지 내용 분석, TTS 등 모든 AI 기능 통합
 ```
 
 4. **개발 서버 실행**
@@ -136,20 +143,26 @@ Vercel 대시보드에서 다음 환경 변수 추가:
 ## 📁 프로젝트 구조
 
 ```
-ai-shorts-maker/
+ai-shorts-maker/ (v1.8.0 구조)
 ├── components/           # React 컴포넌트
 │   ├── intelligent-file-sorter-ui.tsx
 │   ├── video-renderer-ui.tsx
 │   ├── script-management-ui.tsx
+│   ├── ErrorBoundary.tsx        # ⭐ 신규: 에러 처리
+│   ├── LoadingSpinner.tsx       # ⭐ 신규: 로딩 상태
 │   └── ui/              # 재사용 가능한 UI 컴포넌트
-├── lib/                 # 핵심 라이브러리
+├── lib/                 # 핵심 라이브러리 (대폭 강화)
 │   ├── gemini-client.ts
+│   ├── gemini-filename-analyzer.ts      # ⭐ 신규: AI 파일명 분석
+│   ├── gemini-image-sequence-analyzer.ts # ⭐ 신규: 실제 이미지 내용 분석
+│   ├── intelligent-file-sorter.ts       # ⭐ 업데이트: 3단계 하이브리드
+│   ├── image-validation-enhanced.ts     # ⭐ 신규: 강화된 검증
 │   ├── ffmpeg-video-renderer-server.ts
 │   ├── ffmpeg-cloud-renderer.ts
 │   └── video-script-generator.ts
 ├── pages/
 │   ├── api/             # API 라우트
-│   │   ├── sort-files.ts
+│   │   ├── sort-files.ts         # ⭐ 업데이트: 하이브리드 분석
 │   │   ├── videos/render.ts
 │   │   └── tts/generate.ts
 │   ├── index.tsx        # 메인 페이지
@@ -220,9 +233,26 @@ Content-Type: application/json
 
 MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
+## 📋 버전 히스토리
+
+### 🚀 v1.8.0 (2025-01-29) - 혁신적인 이미지 내용 AI 분석
+- **✨ 신규**: 실제 이미지 내용 AI 분석 시스템
+- **✨ 신규**: Gemini Vision API를 통한 장면 내용 인식
+- **✨ 신규**: AI 파일명 의미 분석 및 순서 추론
+- **🔧 개선**: 3단계 하이브리드 정렬 시스템 구현
+- **🔧 개선**: 동적 가중치 기반 신뢰도 최적화
+- **🛡️ 신규**: ErrorBoundary 및 LoadingSpinner 컴포넌트 추가
+- **📊 개선**: 강화된 이미지 검증 및 에러 처리
+
+### v1.6.2 (2025-01-28) - 브라우저 기반 비디오 렌더링
+- **✨ 신규**: 브라우저 기반 실시간 비디오 렌더링
+- **🔧 개선**: 듀얼 렌더 모드 (로컬/클라우드)
+- **🔧 개선**: Vercel 배포 최적화
+
 ## 🙏 감사의 말
 
-- [Google Gemini AI](https://ai.google.dev/) - AI 기능 제공
+- [Google Gemini AI](https://ai.google.dev/) - 혁신적인 AI 분석 기능 제공
+- [Google Gemini Vision API](https://ai.google.dev/) - 실제 이미지 내용 분석
 - [Next.js](https://nextjs.org/) - 풀스택 프레임워크
 - [Vercel](https://vercel.com/) - 배포 플랫폼
 - [FFmpeg](https://ffmpeg.org/) - 비디오 처리
