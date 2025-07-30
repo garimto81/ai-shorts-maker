@@ -57,13 +57,25 @@ export default function ClientVideoRenderer({
         endTime: seg.endTime
       })) || [];
       
-      // 비디오 렌더링
+      // 동적 시간 계산 (최대 60초, 이미지 수에 따라 조정)
+      const maxDuration = 60;
+      const totalDuration = videoScript?.totalDuration || Math.min(images.length * 3, maxDuration);
+      const durationPerImage = Math.min(Math.max(totalDuration / images.length, 2), 5); // 이미지당 2-5초
+      
+      console.log('📹 비디오 설정:', {
+        totalImages: images.length,
+        totalDuration: totalDuration,
+        durationPerImage: durationPerImage.toFixed(1)
+      });
+      
+      // 비디오 렌더링 (쇼츠 형식 9:16)
       const blob = await renderer.render({
         images: images,
-        duration: 3, // 각 이미지 3초
-        resolution: { width: 1280, height: 720 },
+        duration: durationPerImage, // 동적 계산된 시간
+        resolution: { width: 1080, height: 1920 }, // 9:16 비율
         frameRate: 30,
         transitions: true,
+        maxTotalDuration: maxDuration, // 60초 제한
         subtitles: subtitles
       });
       
@@ -126,8 +138,12 @@ export default function ClientVideoRenderer({
             <h3 className="font-medium text-blue-900 mb-2">렌더링 정보</h3>
             <div className="text-sm space-y-1">
               <div>• 이미지 수: {images.length}개</div>
-              <div>• 예상 길이: {images.length * 3}초</div>
-              <div>• 해상도: 1280×720 (HD)</div>
+              <div>• 예상 길이: {(() => {
+                const maxDuration = 60;
+                const totalDuration = videoScript?.totalDuration || Math.min(images.length * 3, maxDuration);
+                return totalDuration;
+              })()}초 (최대 60초)</div>
+              <div>• 해상도: 1080×1920 (Shorts 9:16)</div>
               <div>• 형식: WebM (VP9)</div>
               <div>• 자막: {videoScript?.narration?.segments?.length || 0}개</div>
             </div>

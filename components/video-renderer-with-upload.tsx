@@ -21,6 +21,7 @@ interface VideoRendererWithUploadProps {
   sortedFiles: SortedFileData[];
   originalFiles: File[];
   projectTitle: string;
+  script?: any; // VideoScript 타입 (필수)
   onRenderComplete?: (result: any) => void;
 }
 
@@ -28,6 +29,7 @@ export default function VideoRendererWithUpload({
   sortedFiles,
   originalFiles,
   projectTitle,
+  script,
   onRenderComplete
 }: VideoRendererWithUploadProps) {
   
@@ -164,24 +166,41 @@ export default function VideoRendererWithUpload({
       images={uploadedImagePaths}
       projectTitle={projectTitle}
       videoScript={{
-        title: projectTitle,
-        totalDuration: Math.max(10, sortedFiles.length * 2), // 이미지당 2초씩
+        title: script?.title || projectTitle,
+        totalDuration: script?.duration || Math.min(Math.max(10, sortedFiles.length * 3), 60), // 60초 제한
         scenes: sortedFiles.map((file, index) => ({
           id: `scene_${index + 1}`,
-          title: `장면 ${index + 1}`,
-          startTime: index * 2,
-          endTime: (index + 1) * 2,
-          duration: 2
+          title: script?.sections?.[index]?.text || `장면 ${index + 1}`,
+          startTime: script?.sections?.[index]?.duration ? 
+            script.sections.slice(0, index).reduce((sum: number, s: any) => sum + s.duration, 0) : 
+            index * Math.min(3, 60 / sortedFiles.length), // 동적 시간 배분
+          endTime: script?.sections?.[index]?.duration ? 
+            script.sections.slice(0, index + 1).reduce((sum: number, s: any) => sum + s.duration, 0) : 
+            (index + 1) * Math.min(3, 60 / sortedFiles.length),
+          duration: script?.sections?.[index]?.duration || Math.min(3, 60 / sortedFiles.length)
         })),
         narration: {
-          segments: sortedFiles.map((file, index) => ({
+          segments: script?.sections?.map((section: any, index: number) => ({
             id: `narration_${index + 1}`,
-            text: `이미지 ${index + 1}: ${file.filename}`,
-            startTime: index * 2,
-            endTime: (index + 1) * 2,
-            duration: 2
+            text: section.text,
+            startTime: script.sections.slice(0, index).reduce((sum: number, s: any) => sum + s.duration, 0),
+            endTime: script.sections.slice(0, index + 1).reduce((sum: number, s: any) => sum + s.duration, 0),
+            duration: section.duration
+          })) || sortedFiles.map((file, index) => ({
+            id: `narration_${index + 1}`,
+            text: `장면 ${index + 1}`,
+            startTime: index * Math.min(3, 60 / sortedFiles.length),
+            endTime: (index + 1) * Math.min(3, 60 / sortedFiles.length),
+            duration: Math.min(3, 60 / sortedFiles.length)
           }))
         }
+      }}
+      // 쇼츠용 9:16 비율 설정
+      defaultSettings={{
+        resolution: '1080x1920',
+        aspectRatio: '9:16',
+        format: 'mp4',
+        quality: 'high'
       }}
       onRenderComplete={onRenderComplete}
     />

@@ -14,7 +14,7 @@ const videoRenderRequestSchema = z.object({
   audioPath: z.string().optional(),
   videoScript: z.object({
     title: z.string(),
-    totalDuration: z.number().min(5).max(300),
+    totalDuration: z.number().min(5).max(60), // 쇼츠 최대 60초 제한
     scenes: z.array(z.any()),
     narration: z.object({
       segments: z.array(z.object({
@@ -26,7 +26,7 @@ const videoRenderRequestSchema = z.object({
   }),
   outputFormat: z.enum(['mp4', 'webm', 'avi']).default('mp4'),
   quality: z.enum(['high', 'medium', 'low']).default('medium'),
-  resolution: z.enum(['1920x1080', '1280x720', '640x360']).default('1280x720'),
+  resolution: z.enum(['1080x1920', '720x1280', '540x960']).default('1080x1920'),
   frameRate: z.union([z.literal(24), z.literal(30), z.literal(60)]).default(30),
   projectTitle: z.string().min(1, '프로젝트 제목이 필요합니다')
 });

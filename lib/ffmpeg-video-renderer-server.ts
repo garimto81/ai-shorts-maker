@@ -22,7 +22,7 @@ export interface VideoRenderRequest {
   // 렌더링 설정
   outputFormat: 'mp4' | 'webm' | 'avi';
   quality: 'high' | 'medium' | 'low';
-  resolution: '1920x1080' | '1280x720' | '640x360';
+  resolution: '1080x1920' | '720x1280' | '540x960';
   frameRate: 24 | 30 | 60;
   
   // 프로젝트 정보

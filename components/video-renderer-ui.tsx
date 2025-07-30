@@ -32,6 +32,12 @@ interface VideoRenderUIProps {
   audioPath?: string; // TTS 생성된 오디오 경로
   videoScript: any; // 영상화 스크립트
   projectTitle: string;
+  defaultSettings?: {
+    resolution?: string;
+    aspectRatio?: string;
+    format?: string;
+    quality?: string;
+  };
   onRenderComplete?: (result: any) => void;
 }
 
@@ -40,6 +46,7 @@ export default function VideoRendererUI({
   audioPath, 
   videoScript, 
   projectTitle,
+  defaultSettings,
   onRenderComplete 
 }: VideoRenderUIProps) {
   
@@ -50,10 +57,16 @@ export default function VideoRendererUI({
   const [renderResult, setRenderResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // 렌더링 설정
-  const [outputFormat, setOutputFormat] = useState<'mp4' | 'webm' | 'avi'>('mp4');
-  const [quality, setQuality] = useState<'high' | 'medium' | 'low'>('medium');
-  const [resolution, setResolution] = useState<'1920x1080' | '1280x720' | '640x360'>('1280x720');
+  // 렌더링 설정 (쇼츠용 9:16 비율)
+  const [outputFormat, setOutputFormat] = useState<'mp4' | 'webm' | 'avi'>(
+    (defaultSettings?.format as 'mp4' | 'webm' | 'avi') || 'mp4'
+  );
+  const [quality, setQuality] = useState<'high' | 'medium' | 'low'>(
+    (defaultSettings?.quality as 'high' | 'medium' | 'low') || 'high'
+  );
+  const [resolution, setResolution] = useState<'1080x1920' | '720x1280' | '540x960'>(
+    (defaultSettings?.resolution as '1080x1920' | '720x1280' | '540x960') || '1080x1920'
+  );
   const [frameRate, setFrameRate] = useState<24 | 30 | 60>(30);
 
   /**
@@ -220,14 +233,14 @@ export default function VideoRendererUI({
                     <Monitor className="w-4 h-4" />
                     해상도
                   </label>
-                  <Select value={resolution} onValueChange={(value: '1920x1080' | '1280x720' | '640x360') => setResolution(value)}>
+                  <Select value={resolution} onValueChange={(value: '1080x1920' | '720x1280' | '540x960') => setResolution(value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1920x1080">Full HD (1920×1080)</SelectItem>
-                      <SelectItem value="1280x720">HD (1280×720)</SelectItem>
-                      <SelectItem value="640x360">SD (640×360)</SelectItem>
+                      <SelectItem value="1080x1920">Full HD Shorts (1080×1920)</SelectItem>
+                      <SelectItem value="720x1280">HD Shorts (720×1280)</SelectItem>
+                      <SelectItem value="540x960">SD Shorts (540×960)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

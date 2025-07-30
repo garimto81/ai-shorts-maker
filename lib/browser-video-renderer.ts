@@ -6,6 +6,7 @@ export interface BrowserVideoRenderRequest {
   resolution: { width: number; height: number };
   frameRate: number;
   transitions?: boolean; // 페이드 전환 효과
+  maxTotalDuration?: number; // 최대 총 길이 (초) - 쇼츠용 60초 제한
   subtitles?: Array<{
     text: string;
     startTime: number;
@@ -102,11 +103,32 @@ export class BrowserVideoRenderer {
   ): Promise<void> {
     const frameDuration = 1000 / request.frameRate; // ms per frame
     const framesPerImage = Math.floor(request.duration * request.frameRate);
+    const maxTotalDuration = request.maxTotalDuration || 60; // 기본 60초 제한
+    
+    console.log('🎬 렌더링 설정:', {
+      totalImages: images.length,
+      durationPerImage: request.duration,
+      maxTotalDuration: maxTotalDuration,
+      estimatedTotalDuration: images.length * request.duration
+    });
+    
+    let totalElapsedTime = 0; // 총 경과 시간 추적
     
     for (let i = 0; i < images.length; i++) {
-      console.log(`🎬 이미지 ${i + 1}/${images.length} 렌더링 중...`);
+      // 60초 제한 체크
+      if (totalElapsedTime >= maxTotalDuration) {
+        console.log(`⏱️ 최대 시간(${maxTotalDuration}초) 도달. 렌더링 중단.`);
+        break;
+      }
       
-      for (let frame = 0; frame < framesPerImage; frame++) {
+      console.log(`🎬 이미지 ${i + 1}/${images.length} 렌더링 중... (경과: ${totalElapsedTime.toFixed(1)}초)`);
+      
+      // 남은 시간 계산
+      const remainingTime = maxTotalDuration - totalElapsedTime;
+      const actualImageDuration = Math.min(request.duration, remainingTime);
+      const actualFramesPerImage = Math.floor(actualImageDuration * request.frameRate);
+      
+      for (let frame = 0; frame < actualFramesPerImage; frame++) {
         // 페이드 전환 효과
         if (request.transitions && frame < 10 && i > 0) {
           // 이전 이미지와 현재 이미지 블렌딩
@@ -119,29 +141,29 @@ export class BrowserVideoRenderer {
         
         // 자막 렌더링
         if (request.subtitles) {
-          const currentTime = (i * request.duration) + (frame / request.frameRate);
+          const currentTime = totalElapsedTime + (frame / request.frameRate);
           this.renderSubtitles(request.subtitles, currentTime);
         }
         
         // 프레임 대기
         await this.delay(frameDuration);
       }
+      
+      // 실제 소요된 시간 업데이트
+      totalElapsedTime += actualImageDuration;
+      
+      // 정확히 60초에 도달하면 중단
+      if (totalElapsedTime >= maxTotalDuration) {
+        console.log(`✅ 정확히 ${maxTotalDuration}초 완료. 렌더링 종료.`);
+        break;
+      }
     }
+    
+    console.log(`🎯 렌더링 완료. 총 길이: ${totalElapsedTime.toFixed(1)}초`);
   }
   
   private drawImage(image: HTMLImageElement, alpha: number = 1): void {
     this.ctx.globalAlpha = alpha;
-    
-    // 이미지를 캔버스에 맞게 스케일링 (aspect ratio 유지)
-    const scale = Math.min(
-      this.canvas.width / image.width,
-      this.canvas.height / image.height
-    );
-    
-    const scaledWidth = image.width * scale;
-    const scaledHeight = image.height * scale;
-    const x = (this.canvas.width - scaledWidth) / 2;
-    const y = (this.canvas.height - scaledHeight) / 2;
     
     // 배경 클리어
     if (alpha === 1) {
@@ -149,8 +171,36 @@ export class BrowserVideoRenderer {
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
     
-    // 이미지 그리기
-    this.ctx.drawImage(image, x, y, scaledWidth, scaledHeight);
+    // 쇼츠용 이미지 크롭 및 스케일링 (전체 화면 채우기)
+    const canvasRatio = this.canvas.width / this.canvas.height;
+    const imageRatio = image.width / image.height;
+    
+    let drawWidth, drawHeight, sourceX, sourceY, sourceWidth, sourceHeight;
+    
+    if (imageRatio > canvasRatio) {
+      // 이미지가 더 넓은 경우 - 좌우 크롭
+      drawWidth = this.canvas.width;
+      drawHeight = this.canvas.height;
+      sourceHeight = image.height;
+      sourceWidth = sourceHeight * canvasRatio;
+      sourceX = (image.width - sourceWidth) / 2;
+      sourceY = 0;
+    } else {
+      // 이미지가 더 높거나 같은 경우 - 상하 크롭 또는 전체 사용
+      drawWidth = this.canvas.width;
+      drawHeight = this.canvas.height;
+      sourceWidth = image.width;
+      sourceHeight = sourceWidth / canvasRatio;
+      sourceX = 0;
+      sourceY = Math.max(0, (image.height - sourceHeight) / 2);
+    }
+    
+    // 이미지 그리기 (크롭된 부분을 전체 캔버스에 맞춤)
+    this.ctx.drawImage(
+      image,
+      sourceX, sourceY, sourceWidth, sourceHeight, // 소스 영역
+      0, 0, drawWidth, drawHeight // 대상 영역
+    );
     
     this.ctx.globalAlpha = 1;
   }
@@ -164,21 +214,50 @@ export class BrowserVideoRenderer {
     );
     
     if (activeSubtitle) {
-      // 자막 스타일
-      this.ctx.font = 'bold 24px Arial';
+      // 쇼츠용 자막 스타일 (더 큰 글씨, 화면 하단 1/4 지점)
+      const fontSize = Math.max(28, this.canvas.width * 0.04); // 캔버스 너비에 비례한 글씨 크기
+      this.ctx.font = `bold ${fontSize}px Arial, sans-serif`;
       this.ctx.fillStyle = 'white';
       this.ctx.strokeStyle = 'black';
-      this.ctx.lineWidth = 3;
+      this.ctx.lineWidth = Math.max(2, fontSize * 0.08); // 글씨 크기에 비례한 테두리
       this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'bottom';
+      this.ctx.textBaseline = 'middle';
       
       const x = this.canvas.width / 2;
-      const y = this.canvas.height - 50;
+      const y = this.canvas.height * 0.8; // 화면 하단 20% 지점
       
-      // 텍스트 그림자 (검은 테두리)
-      this.ctx.strokeText(activeSubtitle.text, x, y);
-      // 흰색 텍스트
-      this.ctx.fillText(activeSubtitle.text, x, y);
+      // 긴 텍스트 처리 (줄바꿈)
+      const words = activeSubtitle.text.split(' ');
+      const maxWidth = this.canvas.width * 0.9; // 화면 너비의 90%
+      const lines: string[] = [];
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = this.ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+      
+      // 여러 줄 자막 렌더링
+      const lineHeight = fontSize * 1.2;
+      const totalHeight = lines.length * lineHeight;
+      const startY = y - (totalHeight / 2) + (lineHeight / 2);
+      
+      lines.forEach((line, index) => {
+        const lineY = startY + (index * lineHeight);
+        
+        // 텍스트 그림자 (검은 테두리)
+        this.ctx.strokeText(line, x, lineY);
+        // 흰색 텍스트
+        this.ctx.fillText(line, x, lineY);
+      });
     }
   }
   
