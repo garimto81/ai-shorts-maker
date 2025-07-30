@@ -61,7 +61,8 @@ export default async function handler(
       emotion = 'excited', 
       gender,
       intensity = 'medium',
-      videoType
+      videoType,
+      voiceId
     } = req.body;
 
     if (!text || typeof text !== 'string') {
@@ -118,7 +119,8 @@ export default async function handler(
       result = await generator.generateEnergeticVoice(text, {
         emotion: emotion as EnergeticEmotion,
         gender: gender as 'male' | 'female' | 'auto',
-        intensity: intensity as 'low' | 'medium' | 'high'
+        intensity: intensity as 'low' | 'medium' | 'high',
+        voiceId: voiceId
       });
     }
 

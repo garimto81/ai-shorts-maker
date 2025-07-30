@@ -108,29 +108,44 @@ export class GeminiTTSEngine {
       const audioData = await this.generateAudioWithGemini(enhancedPrompt, voiceName, request.style);
       
       // 4. 오디오 파일 저장
-      const filename = `tts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.wav`;
+      // ElevenLabs를 사용하는 경우 MP3, 그렇지 않으면 WAV
+      const isMP3 = (request.style === 'excited' || process.env.ELEVENLABS_API_KEY) && 
+                    !audioData.toString().startsWith('RIFF');
+      const filename = `tts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${isMP3 ? 'mp3' : 'wav'}`;
       const audioPath = path.join(this.outputDir, filename);
       
-      // PCM 데이터를 WAV로 변환하여 저장
-      const wavBuffer = this.convertPCMToWAV(audioData);
-      fs.writeFileSync(audioPath, wavBuffer);
+      // 오디오 데이터 처리 및 저장
+      let finalBuffer: Buffer;
+      let duration: number;
       
-      // 5. 오디오 지속 시간 계산
-      const duration = this.calculateAudioDuration(audioData, 24000); // 24kHz 샘플레이트
+      if (isMP3) {
+        // MP3는 그대로 저장
+        finalBuffer = audioData;
+        fs.writeFileSync(audioPath, finalBuffer);
+        // MP3의 경우 대략적인 duration 계산 (정확하지 않음)
+        duration = finalBuffer.length / (128 * 125); // 128kbps 기준
+      } else {
+        // PCM 데이터를 WAV로 변환하여 저장
+        finalBuffer = this.convertPCMToWAV(audioData);
+        fs.writeFileSync(audioPath, finalBuffer);
+        // 5. 오디오 지속 시간 계산
+        duration = this.calculateAudioDuration(audioData, 24000); // 24kHz 샘플레이트
+      }
       
       console.log('✅ TTS 변환 완료:', {
         audioPath: `/audio/${filename}`,
         duration: Math.round(duration * 100) / 100 + '초',
-        fileSize: Math.round(wavBuffer.length / 1024) + 'KB'
+        fileSize: Math.round(finalBuffer.length / 1024) + 'KB',
+        format: isMP3 ? 'mp3' : 'wav'
       });
 
       return {
         success: true,
-        audioBuffer: wavBuffer,
+        audioBuffer: finalBuffer,
         audioPath: `/audio/${filename}`,
         duration,
-        format: 'wav',
-        sampleRate: 24000,
+        format: isMP3 ? 'mp3' : 'wav',
+        sampleRate: isMP3 ? 44100 : 24000,
         channels: 1
       };
 
@@ -246,7 +261,8 @@ export class GeminiTTSEngine {
           
           if (result.success && result.audioBuffer) {
             console.log('✅ 활기찬 음성 생성 성공!');
-            return this.convertMP3toPCM(result.audioBuffer);
+            // MP3를 직접 반환 (PCM 변환 생략)
+            return result.audioBuffer;
           }
         }
       } catch (error) {
@@ -283,8 +299,8 @@ export class GeminiTTSEngine {
           
           if (result.success && result.audioBuffer) {
             console.log('✅ ElevenLabs로 음성 생성 성공!');
-            // MP3를 PCM으로 변환 (WAV 형식 맞추기 위해)
-            return this.convertMP3toPCM(result.audioBuffer);
+            // MP3를 직접 반환 (PCM 변환 생략)
+            return result.audioBuffer;
           }
         }
       } catch (error) {

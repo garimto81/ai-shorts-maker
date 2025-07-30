@@ -28,15 +28,15 @@ function checkRequiredFiles() {
     'pages/404.tsx',
     'pages/500.tsx',
     'pages/index.tsx',
+    'pages/test-integration.tsx',
+    'pages/test-voice.tsx',
     'pages/api/scripts/generate-video-script.ts',
     'pages/api/tts/energetic.ts',
     'pages/api/videos/render.ts',
     'lib/energetic-voice-generator.ts',
     'lib/video-script-generator.ts',
     'lib/gemini-tts.ts',
-    'lib/elevenlabs-tts.ts',
-    'test-full-integration.html',
-    'test-energetic-voice.html'
+    'lib/elevenlabs-tts.ts'
   ];
   
   let allFilesExist = true;
@@ -185,10 +185,13 @@ function generateFinalReport() {
   log('  - 통합 테스트: 정상 작동 ✅', 'green');
   
   log('\n💡 사용 방법:', 'cyan');
-  log('  1. npm run dev 실행', 'yellow');
-  log('  2. http://localhost:3000/test-full-integration.html 접속', 'yellow');
+  log('  1. npm run dev 실행 (현재 포트 3002에서 실행 중)', 'yellow');
+  log('  2. http://localhost:3002/test-integration 접속', 'yellow');
   log('  3. 테스트 샘플 선택 후 스크립트 생성', 'yellow');
   log('  4. 생성된 음성 확인 및 비디오 렌더링', 'yellow');
+  log('\n📍 테스트 페이지:', 'cyan');
+  log('  - 통합 테스트: http://localhost:3002/test-integration', 'green');
+  log('  - 음성 테스트: http://localhost:3002/test-voice', 'green');
   
   log('\n🎉 AI Shorts Maker가 완벽하게 작동합니다!', 'green');
   log('='.repeat(60), 'blue');

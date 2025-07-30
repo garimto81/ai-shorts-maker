@@ -12,6 +12,7 @@ export interface EnergeticVoiceConfig {
   emotion: EnergeticEmotion;
   gender?: 'male' | 'female' | 'auto';
   intensity?: 'low' | 'medium' | 'high';
+  voiceId?: string; // 특정 목소리 선택 (선택사항)
 }
 
 // 음성 모델 정보
@@ -100,6 +101,13 @@ export class EnergeticVoiceGenerator {
   }
 
   /**
+   * 사용 가능한 목소리 목록 가져오기
+   */
+  getAvailableVoices(): VoiceModel[] {
+    return ENERGETIC_VOICE_MODELS;
+  }
+
+  /**
    * 활기찬 음성 생성
    */
   async generateEnergeticVoice(
@@ -159,6 +167,13 @@ export class EnergeticVoiceGenerator {
    * 음성 모델 선택
    */
   private selectVoiceModel(config: EnergeticVoiceConfig): VoiceModel {
+    // 특정 음성 ID가 지정된 경우
+    if (config.voiceId) {
+      const specificVoice = ENERGETIC_VOICE_MODELS.find(v => v.id === config.voiceId);
+      if (specificVoice) return specificVoice;
+      console.warn(`지정된 음성 ID를 찾을 수 없습니다: ${config.voiceId}. 자동 선택으로 전환합니다.`);
+    }
+
     let candidates = ENERGETIC_VOICE_MODELS;
 
     // 성별 필터링
