@@ -105,7 +105,7 @@ export class GeminiTTSEngine {
       
       // 실제 구현에서는 Gemini 2.5 TTS API 사용
       // 현재는 시뮬레이션 버전으로 구현
-      const audioData = await this.generateAudioWithGemini(enhancedPrompt, voiceName);
+      const audioData = await this.generateAudioWithGemini(enhancedPrompt, voiceName, request.style);
       
       // 4. 오디오 파일 저장
       const filename = `tts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.wav`;
@@ -218,11 +218,43 @@ export class GeminiTTSEngine {
    * Gemini를 사용한 오디오 생성
    * ElevenLabs 또는 Google Cloud TTS API를 사용하여 실제 음성 생성
    */
-  private async generateAudioWithGemini(prompt: string, voiceName: string): Promise<Buffer> {
+  private async generateAudioWithGemini(prompt: string, voiceName: string, style?: string): Promise<Buffer> {
     console.log('📝 TTS 프롬프트:', prompt.substring(0, 100) + '...');
     console.log('🎤 선택된 음성:', voiceName);
+    console.log('🎨 스타일:', style || 'neutral');
     
-    // 1. ElevenLabs 우선 시도
+    // 1. 'excited' 스타일인 경우 활기찬 음성 생성기 사용
+    if (style === 'excited' && process.env.ELEVENLABS_API_KEY) {
+      try {
+        console.log('🎉 활기찬 음성 생성기 사용...');
+        const { getEnergeticVoiceGenerator } = await import('./energetic-voice-generator');
+        const energeticGenerator = getEnergeticVoiceGenerator();
+        
+        if (energeticGenerator) {
+          // 원본 텍스트 추출 (스타일 프리픽스 제거)
+          const textMatch = prompt.match(/: (.+)$/);
+          const originalText = textMatch ? textMatch[1] : prompt;
+          
+          // 성별 결정 (Gemini 음성 기반)
+          const gender = (voiceName === 'Kore' || voiceName === 'Aoede') ? 'female' : 'male';
+          
+          const result = await energeticGenerator.generateEnergeticVoice(originalText, {
+            emotion: 'enthusiastic',
+            gender: gender,
+            intensity: 'high'
+          });
+          
+          if (result.success && result.audioBuffer) {
+            console.log('✅ 활기찬 음성 생성 성공!');
+            return this.convertMP3toPCM(result.audioBuffer);
+          }
+        }
+      } catch (error) {
+        console.error('⚠️ 활기찬 음성 생성 실패, 일반 ElevenLabs로 폴백:', error);
+      }
+    }
+    
+    // 2. ElevenLabs 일반 음성 시도
     if (process.env.ELEVENLABS_API_KEY) {
       try {
         console.log('🎙️ ElevenLabs API 사용 시도...');

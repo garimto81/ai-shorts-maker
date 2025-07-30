@@ -1,0 +1,23 @@
+{
+  "id": 6,
+  "name": "숫자와단위_자연스럽게",
+  "text": "이 상품의 가격은 35,000원입니다. 현재 30% 할인해서 24,500원에 구매하실 수 있어요.",
+  "description": "숫자와 단위의 자연스러운 읽기",
+  "processedText": "<speak>이<break time=\"50ms\"/> 상품의 가격은<break time=\"50ms\"/> 35,000<break time=\"100ms\"/>원입니다. 현재 30<break time=\"50ms\"/>퍼센트 할인해서 24,500<break time=\"100ms\"/>원에 구매하실 수 있어요.</speak>",
+  "voiceSettings": {
+    "stability": 0.45,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852919610_mmrkt40oz.mp3",
+    "duration": 11,
+    "format": "mp3",
+    "textLength": 173,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:21:59.818Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852919610_mmrkt40oz.mp3"
+}

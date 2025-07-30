@@ -1,0 +1,26 @@
+{
+  "id": 1,
+  "name": "신나는_아침인사",
+  "text": "좋은 아침이에요! 오늘도 활기차게 시작해볼까요? 정말 멋진 하루가 될 거예요!",
+  "gender": "female",
+  "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+  "voice_name": "Elli (활기찬 여성)",
+  "emotion": "excited",
+  "processedText": "<speak><prosody rate=\"108%\" pitch=\"+8%\">좋은 아침이에요!<break time=\"100ms\"/> 오늘도 활기차게 시작해볼까<prosody pitch=\"+15%\">요?</prosody> <emphasis level=\"strong\">정말</emphasis> 멋진 하루가 될 거예요!<break time=\"100ms\"/></prosody></speak>",
+  "voiceSettings": {
+    "stability": 0.42,
+    "similarity_boost": 0.63,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753853962597_hr8fvun3r.mp3",
+    "duration": 13,
+    "format": "mp3",
+    "textLength": 211,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:39:22.808Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753853962597_hr8fvun3r.mp3"
+}

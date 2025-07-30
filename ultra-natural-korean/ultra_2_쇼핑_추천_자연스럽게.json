@@ -1,0 +1,25 @@
+{
+  "id": 2,
+  "name": "쇼핑_추천_자연스럽게",
+  "text": "이 제품 정말 좋아요! 제가 써봤는데, 진짜 만족스러웠어요. 지금 50% 할인 중이니까 놓치지 마세요!",
+  "preset": "emotional_story",
+  "emotion": "excited",
+  "description": "감정이 담긴 제품 추천",
+  "processedText": "<speak>이<break time=\"50ms\"/> 제품 <emphasis level=\"moderate\">정말</emphasis> 좋아요! 제가<break time=\"50ms\"/> 써봤는데, <emphasis level=\"moderate\">진짜</emphasis> 만족스러웠어요. 지금 50<break time=\"50ms\"/>퍼센트 할인 중이니까 놓치지 마세요!</speak>",
+  "voiceSettings": {
+    "stability": 0.48,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852906136_vw0dpisc7.mp3",
+    "duration": 13,
+    "format": "mp3",
+    "textLength": 210,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:21:46.360Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852906136_vw0dpisc7.mp3"
+}

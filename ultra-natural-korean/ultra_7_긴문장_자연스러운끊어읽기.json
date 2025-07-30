@@ -1,0 +1,24 @@
+{
+  "id": 7,
+  "name": "긴문장_자연스러운끊어읽기",
+  "text": "오늘은 날씨가 좋아서, 친구들과 함께 공원에 갔는데, 사람들이 정말 많더라고요. 그래서 우리는 조용한 카페로 자리를 옮겼어요.",
+  "pausePattern": "conversational",
+  "description": "긴 문장의 자연스러운 리듬",
+  "processedText": "<speak>오늘은<break time=\"50ms\"/> 날씨가<break time=\"50ms\"/> 좋아서, 친구들과 함께 공원에 갔는데, 사람들이<break time=\"50ms\"/> 정말 많더라고요. <break time=\"200ms\"/>그래서<break time=\"100ms\"/> 우리는<break time=\"50ms\"/> 조용한 카페로 자리를 옮겼어요.</speak>",
+  "voiceSettings": {
+    "stability": 0.45,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852922977_hq4p66sbi.mp3",
+    "duration": 13,
+    "format": "mp3",
+    "textLength": 207,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:22:03.182Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852922977_hq4p66sbi.mp3"
+}

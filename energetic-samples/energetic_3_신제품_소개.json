@@ -1,0 +1,26 @@
+{
+  "id": 3,
+  "name": "신제품_소개",
+  "text": "와! 드디어 공개합니다! 여러분이 기다리던 바로 그 제품! 정말 놀라운 기능들이 가득해요!",
+  "gender": "female",
+  "voice_id": "AZnzlk1XvdvUeBnXmlld",
+  "voice_name": "Domi (발랄한 여성)",
+  "emotion": "enthusiastic",
+  "processedText": "<speak><prosody rate=\"112%\" pitch=\"+12%\"><prosody pitch=\"+15%\" rate=\"110%\">와!</prosody><break time=\"100ms\"/> 드디어 공개합니다!<break time=\"100ms\"/> 여러분이 기다리던 바로 그 제품!<break time=\"100ms\"/> <emphasis level=\"strong\">정말</emphasis> 놀라운 기능들이 가득해요!<break time=\"100ms\"/></prosody></speak>",
+  "voiceSettings": {
+    "stability": 0.42,
+    "similarity_boost": 0.63,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753853969036_jz6clv60s.mp3",
+    "duration": 17,
+    "format": "mp3",
+    "textLength": 273,
+    "voice_id": "AZnzlk1XvdvUeBnXmlld",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:39:29.242Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753853969036_jz6clv60s.mp3"
+}

@@ -1,0 +1,24 @@
+{
+  "id": 3,
+  "name": "뉴스_앵커톤",
+  "text": "오늘 서울 지역의 날씨는 맑음입니다. 낮 최고기온은 25도로 예상되며, 일교차가 크니 겉옷을 준비하시기 바랍니다.",
+  "preset": "news_anchor",
+  "description": "뉴스 앵커의 차분한 전달",
+  "processedText": "<speak>오늘 서울 지역의 날씨는<break time=\"50ms\"/> 맑음입니다. 낮 최고기온은<break time=\"50ms\"/> 25도로 예상되며, 일교차가<break time=\"50ms\"/> 크니 겉옷을 준비하시기 바랍니다.</speak>",
+  "voiceSettings": {
+    "stability": 0.55,
+    "similarity_boost": 0.7,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852909654_mbljsmhle.mp3",
+    "duration": 9,
+    "format": "mp3",
+    "textLength": 138,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:21:49.884Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852909654_mbljsmhle.mp3"
+}

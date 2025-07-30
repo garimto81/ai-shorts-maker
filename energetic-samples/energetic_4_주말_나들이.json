@@ -1,0 +1,26 @@
+{
+  "id": 4,
+  "name": "주말_나들이",
+  "text": "이번 주말엔 뭐하실 거예요? 날씨도 좋고 정말 나가기 딱 좋은 날이에요! 같이 즐거운 시간 보내요!",
+  "gender": "male",
+  "voice_id": "pNInz6obpgDQGcFmaJgB",
+  "voice_name": "Adam (친근한 남성)",
+  "emotion": "cheerful",
+  "processedText": "<speak><prosody rate=\"105%\" pitch=\"+7%\">이번 주말엔 뭐하실 거예<prosody pitch=\"+15%\">요?</prosody> 날씨도 좋고 <emphasis level=\"strong\">정말</emphasis> 나가기 딱 좋은 날이에요!<break time=\"100ms\"/> 같이 즐거운 시간 보내요!<break time=\"100ms\"/></prosody></speak>",
+  "voiceSettings": {
+    "stability": 0.42,
+    "similarity_boost": 0.63,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753853972183_1p95hdcl4.mp3",
+    "duration": 14,
+    "format": "mp3",
+    "textLength": 223,
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:39:32.405Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753853972183_1p95hdcl4.mp3"
+}

@@ -1,0 +1,25 @@
+{
+  "id": 5,
+  "name": "감정표현_기쁨",
+  "text": "와! 드디어 합격했어요! 정말 기뻐요! 그동안 응원해주셔서 감사합니다!",
+  "emotion": "happy",
+  "sentenceType": "exclamation",
+  "description": "기쁜 감정이 담긴 표현",
+  "processedText": "<speak>와! 드디어 합격했어요! <emphasis level=\"moderate\">정말</emphasis> 기뻐요! 그동안 응원해주셔서 감사합니다!</speak>",
+  "voiceSettings": {
+    "stability": 0.48,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852915567_4xigvv6xu.mp3",
+    "duration": 6,
+    "format": "mp3",
+    "textLength": 92,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:21:55.779Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852915567_4xigvv6xu.mp3"
+}

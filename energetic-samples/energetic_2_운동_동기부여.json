@@ -1,0 +1,26 @@
+{
+  "id": 2,
+  "name": "운동_동기부여",
+  "text": "자! 이제 시작해봅시다! 할 수 있어요! 우리 함께 목표를 향해 달려가요! 파이팅!",
+  "gender": "male",
+  "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+  "voice_name": "Josh (활기찬 남성)",
+  "emotion": "motivated",
+  "processedText": "<speak><prosody rate=\"110%\" pitch=\"+10%\" volume=\"loud\">자!<break time=\"100ms\"/> 이제 시작해봅시다!<break time=\"100ms\"/> 할 수 있어요!<break time=\"100ms\"/> 우리 함께 목표를 향해 달려가요!<break time=\"100ms\"/> <prosody pitch=\"+20%\" rate=\"120%\">파이팅</prosody>!<break time=\"100ms\"/></prosody></speak>",
+  "voiceSettings": {
+    "stability": 0.42,
+    "similarity_boost": 0.63,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753853965696_7w762107v.mp3",
+    "duration": 17,
+    "format": "mp3",
+    "textLength": 268,
+    "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:39:25.907Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753853965696_7w762107v.mp3"
+}

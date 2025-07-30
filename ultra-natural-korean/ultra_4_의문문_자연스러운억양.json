@@ -1,0 +1,24 @@
+{
+  "id": 4,
+  "name": "의문문_자연스러운억양",
+  "text": "혹시 이거 어떻게 사용하는지 아세요? 설명서를 봐도 잘 모르겠어요.",
+  "sentenceType": "question",
+  "description": "자연스러운 의문문 억양",
+  "processedText": "<speak>혹시 이거 어떻게 사용하는지 아세<prosody pitch=\"+20<break time=\"50ms\"/>퍼센트\">요?</prosody> 설명서를 봐도 잘 모르겠어요.</speak>",
+  "voiceSettings": {
+    "stability": 0.45,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753852912652_pn5nd1x54.mp3",
+    "duration": 7,
+    "format": "mp3",
+    "textLength": 106,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T05:21:52.874Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753852912652_pn5nd1x54.mp3"
+}
