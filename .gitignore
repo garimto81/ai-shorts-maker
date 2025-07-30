@@ -72,9 +72,13 @@ temp/
 /public/audio/
 /temp/
 
+# Generated test images
+/public/test-images/*.png
+
 # Test files
 test-*.js
 test-*.ts
+test-*.json
 debug-*.js
 
 # Backup files

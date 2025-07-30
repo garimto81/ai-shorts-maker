@@ -379,7 +379,10 @@ export class TTSConfigBuilder {
 
   enablePostProcessing(options: Partial<AdvancedTTSConfig['post_processing']>): this {
     this.config.post_processing = {
-      ...this.config.post_processing,
+      normalize_volume: this.config.post_processing?.normalize_volume ?? true,
+      remove_silence: this.config.post_processing?.remove_silence ?? false,
+      enhance_clarity: this.config.post_processing?.enhance_clarity ?? true,
+      compress_dynamic_range: this.config.post_processing?.compress_dynamic_range ?? false,
       ...options
     };
     return this;

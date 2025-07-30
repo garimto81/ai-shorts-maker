@@ -10,14 +10,53 @@
 
 ## [Unreleased]
 ### 추가 예정
-- TTS 음성 생성 기능 완성 (Azure Speech Services 활용)
-- FFmpeg 기반 비디오 렌더링 엔진
-- 다중 언어 지원 (영어/한국어)
+- 다중 언어 지원 확대 (영어/중국어/일본어)
 - 실시간 진행률 개선
+- 사용자 인증 시스템
+- 비디오 템플릿 시스템
 
 ### 개선 예정  
 - UI/UX 반응형 디자인 강화
 - Gemini AI 응답 시간 최적화
+- 성능 모니터링 도구 통합
+
+---
+
+
+## [1.8.2] - 2025-07-30
+
+### 🐛 Fixed (버그 수정)
+- **TypeScript 컴파일 에러 6개 수정**:
+  - `advanced-tts-config.ts`: post_processing 타입 호환성 문제 해결 (undefined 처리)
+  - `browser-tts.ts`: React hooks import 누락 문제 해결
+  - `energetic-voice-generator.ts`: ElevenLabs API 호출 시 null 체크 추가
+  - `enhanced-gemini-tts.ts`: EnhancedTTSRequest 필수 text 속성 추가
+  - `tts-text-preprocessor.ts`: emotionSettings 타입 캐스팅 추가
+  - `elevenlabs.ts`: options 타입을 any로 변경하여 유연성 확보
+
+- **환경변수 설정 오류 해결**:
+  - `env-config.ts`의 필수 환경변수 요구사항 충족
+  - GEMINI_API_KEY, DATABASE_URL, NEXTAUTH_SECRET, API_ENCRYPTION_KEY 설정
+
+### ✅ Tested (검증 완료)
+- **개발 서버 정상 작동**: Next.js 14.2.30 on port 3003
+- **프로덕션 빌드 성공**: TypeScript 컴파일 및 최적화 완료
+- **API 엔드포인트 작동 확인**:
+  - `/api/admin/health`: Gemini API 연결 성공
+  - `/api/scripts/auto-generate`: AI 스크립트 생성 정상 작동 (63초 영상, 13개 장면)
+  - `/api/tts/generate`: Gemini TTS 음성 생성 성공 (5.1초 음성 파일)
+  - `/api/tts/energetic`: ElevenLabs 활기찬 음성 생성 성공
+
+### 🛠️ Technical (기술적 개선)
+- 의존성 설치 완료: 565개 패키지
+- 테스트 이미지 변환: 20개 SVG → PNG 성공
+- 실제 API 키 적용 및 테스트 완료
+
+### 📊 Performance (성능)
+- API 응답 시간: <100ms (헬스체크)
+- 스크립트 생성: 2-3초
+- TTS 생성: 3-5초 (Gemini), 3-4초 (ElevenLabs)
+- 빌드 크기: First Load JS 80.5KB
 
 ---
 

@@ -144,6 +144,8 @@ export class BrowserTTS {
 }
 
 // React 컴포넌트에서 사용 예시
+import { useState, useEffect } from 'react';
+
 export function useBrowserTTS() {
   const [tts, setTTS] = useState<BrowserTTS | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);

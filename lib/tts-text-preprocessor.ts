@@ -197,7 +197,7 @@ export class TTSTextPreprocessor {
       }
     };
 
-    const settings = emotionSettings[emotion] || emotionSettings['neutral'];
+    const settings = emotionSettings[emotion as keyof typeof emotionSettings] || emotionSettings['neutral'];
     
     // 전체 텍스트에 감정 설정 적용
     return `<prosody rate="${settings.rate}" pitch="${settings.pitch}" volume="${settings.volume}">${text}</prosody>`;

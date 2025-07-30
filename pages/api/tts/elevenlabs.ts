@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // 비디오 타입에 따른 설정 가져오기
-    let options = {
+    let options: any = {
       voice_id: validatedData.voice_id,
       model_id: validatedData.model_id,
       voice_settings: validatedData.voice_settings

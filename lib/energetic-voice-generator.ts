@@ -124,14 +124,14 @@ export class EnergeticVoiceGenerator {
       const voiceSettings = this.getEnergeticVoiceSettings(config.intensity);
       
       // 4. ElevenLabs API 호출
-      const result = await this.elevenLabs.textToSpeech(processedText, {
+      const result = await this.elevenLabs?.textToSpeech(processedText, {
         voice_id: voiceModel.id,
         model_id: 'eleven_multilingual_v2',
         voice_settings: voiceSettings,
         enable_ssml_parsing: true
       } as any);
 
-      if (result.success) {
+      if (result && result.success) {
         return {
           success: true,
           audioUrl: result.audioPath,
@@ -142,7 +142,7 @@ export class EnergeticVoiceGenerator {
       } else {
         return {
           success: false,
-          error: result.error
+          error: result?.error || 'TTS 생성 실패'
         };
       }
 

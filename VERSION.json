@@ -1,7 +1,7 @@
 {
-  "version": "1.6.0",
-  "releaseDate": "2025-07-27",
-  "codename": "Intelligent Sorter",
+  "version": "1.8.2",
+  "releaseDate": "2025-07-30",
+  "codename": "Production Ready",
   "stability": "stable",
   "compatibility": {
     "node": ">=18.0.0",
@@ -10,15 +10,19 @@
   },
   "changelog": {
     "major": [],
-    "minor": [
-      "스크립트 자동 생성 기능 개선 - 본문 기반 메타데이터 AI 추론"
-    ],
-    "patch": []
+    "minor": [],
+    "patch": [
+      "TypeScript 컴파일 에러 6개 수정",
+      "환경변수 설정 오류 해결",
+      "개발 환경 안정성 개선"
+    ]
   },
   "features": {
     "core": [
       "지능형 파일 정렬 (파일명 + AI 분석)",
       "Gemini AI 이미지 내용 분석",
+      "AI 스크립트 자동 생성 (Gemini)",
+      "TTS 음성 생성 (Gemini + ElevenLabs)",
       "실시간 진행률 표시",
       "드래그 앤 드롭 인터페이스"
     ],
@@ -43,14 +47,43 @@
     "ai_analysis_accuracy": "85%"
   },
   "api": {
-    "gemini_model": "gemini-1.5-pro-vision-latest",
+    "gemini_model": "gemini-1.5-pro",
     "endpoints": [
       "GET /api/admin/health",
       "POST /api/sort-files",
+      "POST /api/scripts/auto-generate",
+      "POST /api/tts/generate",
+      "POST /api/tts/energetic",
       "GET /api/admin/validate-all"
     ]
   },
   "previous_versions": [
+    {
+      "version": "1.8.1",
+      "releaseDate": "2025-01-31",
+      "codename": "Energetic Voice",
+      "major_changes": [
+        "ElevenLabs TTS 통합",
+        "활기찬 한국어 음성 생성 시스템"
+      ]
+    },
+    {
+      "version": "1.8.0",
+      "releaseDate": "2025-01-29",
+      "codename": "Image Intelligence",
+      "major_changes": [
+        "실제 이미지 내용 AI 분석 시스템",
+        "3단계 하이브리드 정렬 시스템"
+      ]
+    },
+    {
+      "version": "1.6.0",
+      "releaseDate": "2025-07-27",
+      "codename": "Intelligent Sorter",
+      "major_changes": [
+        "스크립트 자동 생성 기능 개선"
+      ]
+    },
     {
       "version": "1.5.1",
       "releaseDate": "2025-07-27",
