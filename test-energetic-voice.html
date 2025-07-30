@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>활기찬 음성 생성 테스트</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .generate-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .generate-btn:hover {
+            background-color: #45a049;
+        }
+        .generate-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .preset-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .preset-btn:hover {
+            background-color: #1976D2;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        .result h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #f44336;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .success {
+            color: #4CAF50;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .emotion-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .emotion-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .emotion-btn.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .presets {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .presets h4 {
+            margin-top: 0;
+            color: #666;
+        }
+        .preset-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .preset-item:hover {
+            background-color: #e3f2fd;
+            transform: translateX(5px);
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .info-box h4 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 활기찬 한국어 음성 생성 테스트</h1>
+        
+        <div class="info-box">
+            <h4>ℹ️ 테스트 환경 안내</h4>
+            <p>1. 서버가 실행 중이어야 합니다: <code>npm run dev</code></p>
+            <p>2. ElevenLabs API 키가 설정되어 있어야 합니다</p>
+            <p>3. 생성된 음성은 아래에서 바로 재생할 수 있습니다</p>
+        </div>
+
+        <form id="voiceForm">
+            <div class="form-group">
+                <label for="text">텍스트 입력 (필수)</label>
+                <textarea id="text" name="text" placeholder="변환할 텍스트를 입력하세요...">안녕하세요! 오늘은 정말 좋은 날이에요! 여러분과 함께할 수 있어서 기뻐요!</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>감정 선택</label>
+                <div class="emotion-buttons">
+                    <button type="button" class="emotion-btn active" data-emotion="excited">😊 신남 (Excited)</button>
+                    <button type="button" class="emotion-btn" data-emotion="motivated">💪 동기부여 (Motivated)</button>
+                    <button type="button" class="emotion-btn" data-emotion="enthusiastic">🎯 열정적 (Enthusiastic)</button>
+                    <button type="button" class="emotion-btn" data-emotion="cheerful">😄 명랑함 (Cheerful)</button>
+                    <button type="button" class="emotion-btn" data-emotion="celebratory">🎊 축하 (Celebratory)</button>
+                </div>
+                <input type="hidden" id="emotion" name="emotion" value="excited">
+            </div>
+
+            <div class="form-group">
+                <label for="gender">성별</label>
+                <select id="gender" name="gender">
+                    <option value="">자동 선택</option>
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="intensity">강도</label>
+                <select id="intensity" name="intensity">
+                    <option value="low">낮음</option>
+                    <option value="medium" selected>중간</option>
+                    <option value="high">높음</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="videoType">비디오 타입 (선택)</label>
+                <select id="videoType" name="videoType">
+                    <option value="">직접 설정</option>
+                    <option value="advertisement">광고</option>
+                    <option value="tutorial">튜토리얼</option>
+                    <option value="motivation">동기부여</option>
+                    <option value="celebration">축하</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="generate-btn" id="generateBtn">🎤 음성 생성하기</button>
+            </div>
+        </form>
+
+        <div class="presets">
+            <h4>🎯 빠른 테스트 프리셋</h4>
+            <div class="preset-item" onclick="applyPreset('광고')">
+                📢 <strong>광고</strong> - "지금 바로 만나보세요! 놓치면 후회하는 특별한 기회!"
+            </div>
+            <div class="preset-item" onclick="applyPreset('동기부여')">
+                💪 <strong>동기부여</strong> - "할 수 있습니다! 당신의 꿈을 향해 달려가세요!"
+            </div>
+            <div class="preset-item" onclick="applyPreset('축하')">
+                🎉 <strong>축하</strong> - "축하드려요! 정말 대단한 성과를 이루셨네요!"
+            </div>
+            <div class="preset-item" onclick="applyPreset('튜토리얼')">
+                📚 <strong>튜토리얼</strong> - "자, 이제 함께 배워볼까요? 아주 쉽고 재미있어요!"
+            </div>
+        </div>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>생성 결과</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/tts/energetic';
+        const form = document.getElementById('voiceForm');
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const generateBtn = document.getElementById('generateBtn');
+
+        // 감정 버튼 이벤트
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('emotion').value = this.getAttribute('data-emotion');
+            });
+        });
+
+        // 프리셋 적용 함수
+        function applyPreset(type) {
+            const presets = {
+                '광고': {
+                    text: '지금 바로 만나보세요! 놓치면 후회하는 특별한 기회! 이번 주말까지 특별 할인!',
+                    videoType: 'advertisement',
+                    emotion: 'enthusiastic',
+                    intensity: 'high'
+                },
+                '동기부여': {
+                    text: '할 수 있습니다! 당신의 꿈을 향해 달려가세요! 포기하지 마세요! 파이팅!',
+                    videoType: 'motivation',
+                    emotion: 'motivated',
+                    intensity: 'high',
+                    gender: 'male'
+                },
+                '축하': {
+                    text: '축하드려요! 정말 대단한 성과를 이루셨네요! 너무너무 기뻐요!',
+                    videoType: 'celebration',
+                    emotion: 'celebratory',
+                    intensity: 'medium',
+                    gender: 'female'
+                },
+                '튜토리얼': {
+                    text: '자, 이제 함께 배워볼까요? 아주 쉽고 재미있어요! 차근차근 따라해보세요!',
+                    videoType: 'tutorial',
+                    emotion: 'cheerful',
+                    intensity: 'medium'
+                }
+            };
+
+            const preset = presets[type];
+            if (preset) {
+                document.getElementById('text').value = preset.text;
+                document.getElementById('videoType').value = preset.videoType || '';
+                document.getElementById('emotion').value = preset.emotion || 'excited';
+                document.getElementById('intensity').value = preset.intensity || 'medium';
+                document.getElementById('gender').value = preset.gender || '';
+
+                // 감정 버튼 업데이트
+                document.querySelectorAll('.emotion-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-emotion') === preset.emotion) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // 폼 제출 이벤트
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {
+                text: formData.get('text'),
+                emotion: formData.get('emotion'),
+                gender: formData.get('gender') || undefined,
+                intensity: formData.get('intensity'),
+                videoType: formData.get('videoType') || undefined
+            };
+
+            // 빈 값 제거
+            Object.keys(data).forEach(key => {
+                if (!data[key]) delete data[key];
+            });
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ 생성 중...';
+            resultDiv.style.display = 'block';
+            resultContent.innerHTML = '<div class="loading">음성을 생성하고 있습니다...</div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultContent.innerHTML = `
+                        <div class="success">✅ 음성 생성 성공!</div>
+                        <p><strong>사용된 음성:</strong> ${result.data.voiceUsed}</p>
+                        <p><strong>감정:</strong> ${result.data.emotion}</p>
+                        <p><strong>강도:</strong> ${result.data.intensity}</p>
+                        <p><strong>길이:</strong> ${result.data.duration}초</p>
+                        <audio controls autoplay>
+                            <source src="${result.data.audioUrl}" type="audio/wav">
+                            브라우저가 오디오 재생을 지원하지 않습니다.
+                        </audio>
+                    `;
+                } else {
+                    resultContent.innerHTML = `<div class="error">❌ 오류: ${result.error}</div>`;
+                }
+            } catch (error) {
+                resultContent.innerHTML = `
+                    <div class="error">
+                        ❌ 서버 연결 실패<br>
+                        서버가 실행 중인지 확인하세요: <code>npm run dev</code>
+                    </div>
+                `;
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🎤 음성 생성하기';
+            }
+        });
+
+        // 서버 상태 확인
+        async function checkServer() {
+            try {
+                const response = await fetch(API_URL, { method: 'GET' });
+                if (response.ok) {
+                    console.log('✅ API 서버 연결 성공');
+                }
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="error">
+                        ⚠️ 서버에 연결할 수 없습니다.<br>
+                        터미널에서 <code>npm run dev</code> 명령으로 서버를 시작하세요.
+                    </div>
+                `;
+            }
+        }
+
+        // 페이지 로드 시 서버 확인
+        checkServer();
+    </script>
+</body>
+</html>

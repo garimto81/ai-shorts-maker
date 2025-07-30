@@ -12,6 +12,7 @@ import fs from 'fs';
 const videoRenderRequestSchema = z.object({
   images: z.array(z.string()).min(1, '최소 1개 이상의 이미지가 필요합니다').max(50, '최대 50개의 이미지만 지원됩니다'),
   audioPath: z.string().optional(),
+  audioUrl: z.string().optional(), // 음성 생성 API로부터 받은 URL
   videoScript: z.object({
     title: z.string(),
     totalDuration: z.number().min(5).max(60), // 쇼츠 최대 60초 제한
@@ -22,7 +23,12 @@ const videoRenderRequestSchema = z.object({
         endTime: z.number(),
         text: z.string()
       }))
-    })
+    }),
+    audio: z.object({
+      audioUrl: z.string(),
+      duration: z.number(),
+      voiceUsed: z.string()
+    }).optional()
   }),
   outputFormat: z.enum(['mp4', 'webm', 'avi']).default('mp4'),
   quality: z.enum(['high', 'medium', 'low']).default('medium'),
@@ -60,8 +66,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 오디오 파일 경로 검증 (있는 경우)
     let validatedAudioPath: string | undefined;
+    
+    // 1. audioPath가 직접 제공된 경우
     if (validatedData.audioPath) {
       validatedAudioPath = await validateAudioPath(validatedData.audioPath);
+    }
+    // 2. audioUrl이 제공된 경우 (음성 생성 API에서)
+    else if (validatedData.audioUrl) {
+      validatedAudioPath = await validateAudioPath(validatedData.audioUrl);
+    }
+    // 3. videoScript.audio에 오디오 정보가 있는 경우
+    else if (validatedData.videoScript.audio?.audioUrl) {
+      validatedAudioPath = await validateAudioPath(validatedData.videoScript.audio.audioUrl);
     }
 
     // 렌더링 요청 구성

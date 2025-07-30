@@ -1,0 +1,60 @@
+<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradfood1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F57C00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB74D;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dx="5" dy="5" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 배경 -->
+  <rect width="1080" height="1920" fill="url(#gradfood1)" />
+  
+  <!-- 패턴 -->
+  <circle cx="1002.4518408197328" cy="523.3537372914673" r="155.33163980973598" fill="#FF9800" opacity="0.3" /><circle cx="948.5747803477386" cy="1090.8622665460841" r="55.36965052217751" fill="#FF9800" opacity="0.3" /><circle cx="845.2880483558354" cy="1347.0150349405483" r="244.363868521149" fill="#FF9800" opacity="0.3" /><circle cx="905.3314954879032" cy="1866.5313350188699" r="158.10352900061667" fill="#FF9800" opacity="0.3" /><circle cx="731.1000375951397" cy="1709.5799489791832" r="52.48633153498443" fill="#FF9800" opacity="0.3" /><circle cx="1009.7803766111011" cy="1496.5022671106292" r="94.50020940553854" fill="#FF9800" opacity="0.3" /><circle cx="868.5301606197095" cy="42.33992149768255" r="150.0393772373895" fill="#FF9800" opacity="0.3" /><circle cx="63.86178116651777" cy="1228.752176445961" r="106.7011807484334" fill="#FF9800" opacity="0.3" /><circle cx="93.86885970309544" cy="1265.8069521951168" r="61.266867902892976" fill="#FF9800" opacity="0.3" /><circle cx="941.4988127561899" cy="1478.3606139108335" r="214.99740565368253" fill="#FF9800" opacity="0.3" />
+  
+  <!-- 메인 텍스트 -->
+  <text x="540" y="860" 
+        font-family="Arial, sans-serif" 
+        font-size="120" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white"
+        filter="url(#shadow)">
+    맛있는
+  </text>
+  
+  <!-- 부제목 -->
+  <text x="540" y="1010" 
+        font-family="Arial, sans-serif" 
+        font-size="60" 
+        text-anchor="middle" 
+        fill="white"
+        filter="url(#shadow)">
+    샘플 이미지 1
+  </text>
+  
+  <!-- 프레임 -->
+  <rect x="100" y="100" width="880" height="1720" 
+        stroke="white" stroke-width="5" fill="none" />
+  
+  <!-- 카테고리 표시 -->
+  <text x="540" y="1770" 
+        font-family="Arial, sans-serif" 
+        font-size="40" 
+        text-anchor="middle" 
+        fill="white"
+        opacity="0.8">
+    FOOD CATEGORY
+  </text>
+</svg>

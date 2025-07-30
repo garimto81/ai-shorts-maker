@@ -1,0 +1,60 @@
+<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradabstract2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6A1B9A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#AB47BC;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dx="5" dy="5" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 배경 -->
+  <rect width="1080" height="1920" fill="url(#gradabstract2)" />
+  
+  <!-- 패턴 -->
+  <circle cx="499.38924404670115" cy="5.135725205188635" r="175.40540308256945" fill="#8E24AA" opacity="0.3" /><circle cx="551.6347965348452" cy="246.2761711176914" r="90.46572613283442" fill="#8E24AA" opacity="0.3" /><circle cx="432.14924996867" cy="1657.1437537737902" r="154.00212402585817" fill="#8E24AA" opacity="0.3" /><circle cx="2.3648520828862285" cy="1451.6414488408082" r="242.61646788151677" fill="#8E24AA" opacity="0.3" /><circle cx="968.3398304230326" cy="1414.188465660479" r="77.28007993926357" fill="#8E24AA" opacity="0.3" /><circle cx="440.8973505059639" cy="1827.8077070661118" r="160.4109546534759" fill="#8E24AA" opacity="0.3" /><circle cx="879.1347761463531" cy="180.8265541553189" r="157.61738435810656" fill="#8E24AA" opacity="0.3" /><circle cx="313.94576632021676" cy="1588.6528162405668" r="117.35455538665303" fill="#8E24AA" opacity="0.3" /><circle cx="988.039983728952" cy="90.94360841469225" r="155.7936997594971" fill="#8E24AA" opacity="0.3" /><circle cx="873.3125696332688" cy="1719.6017478453687" r="113.2717485287404" fill="#8E24AA" opacity="0.3" />
+  
+  <!-- 메인 텍스트 -->
+  <text x="540" y="860" 
+        font-family="Arial, sans-serif" 
+        font-size="120" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white"
+        filter="url(#shadow)">
+    창의
+  </text>
+  
+  <!-- 부제목 -->
+  <text x="540" y="1010" 
+        font-family="Arial, sans-serif" 
+        font-size="60" 
+        text-anchor="middle" 
+        fill="white"
+        filter="url(#shadow)">
+    샘플 이미지 2
+  </text>
+  
+  <!-- 프레임 -->
+  <rect x="100" y="100" width="880" height="1720" 
+        stroke="white" stroke-width="5" fill="none" />
+  
+  <!-- 카테고리 표시 -->
+  <text x="540" y="1770" 
+        font-family="Arial, sans-serif" 
+        font-size="40" 
+        text-anchor="middle" 
+        fill="white"
+        opacity="0.8">
+    ABSTRACT CATEGORY
+  </text>
+</svg>
