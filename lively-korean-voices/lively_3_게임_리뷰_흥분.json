@@ -1,0 +1,25 @@
+{
+  "id": 3,
+  "name": "게임_리뷰_흥분",
+  "text": "와! 이거 진짜 미쳤어요! 그래픽 보세요! 이런 게임은 처음이에요! 여러분도 꼭 해보세요! 강추!",
+  "settings": {
+    "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+    "voice_settings": {
+      "stability": 0.35,
+      "similarity_boost": 0.6,
+      "style": 0.95,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "흥분된 게임 리뷰어 스타일",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845638479_8r93esrms.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 54,
+    "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:38.699Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845638479_8r93esrms.mp3"
+}

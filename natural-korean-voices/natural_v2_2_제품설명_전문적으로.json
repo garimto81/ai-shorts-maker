@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": 2,
+    "name": "제품설명_전문적으로",
+    "text": "이번에 출시된 2025년형 신제품은 기존 모델 대비 30퍼센트 향상된 성능을 자랑합니다.",
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "settings": {
+      "stability": 0.65,
+      "similarity_boost": 0.72,
+      "style": 0,
+      "use_speaker_boost": true
+    },
+    "description": "Adam 음성 - 전문적인 제품 설명"
+  },
+  "processedText": "이번에 출시된 이천이십오년형 신제품은 기존 모델 대비 삼십퍼센트 향상된 성능을 자랑합니다..",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846096280_jddb4wpmm.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 51,
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:16.490Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846096280_jddb4wpmm.mp3"
+}

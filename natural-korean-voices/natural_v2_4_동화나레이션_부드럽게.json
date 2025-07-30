@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": 4,
+    "name": "동화나레이션_부드럽게",
+    "text": "옛날 옛적에 아름다운 숲 속에 작은 토끼가 살고 있었어요. 토끼는 매일 아침 일찍 일어나 산책을 했답니다.",
+    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+    "settings": {
+      "stability": 0.58,
+      "similarity_boost": 0.7,
+      "style": 0,
+      "use_speaker_boost": true
+    },
+    "description": "Bella 음성 - 부드러운 동화 나레이션"
+  },
+  "processedText": "옛날 옛적에 아름다운 숲 속에 작은 토끼가 살고 있었어요.. 토끼는 매일 아침 일찍 일어나 산책을 했답니다..",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846103093_4f2fw9lzs.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 61,
+    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:23.306Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846103093_4f2fw9lzs.mp3"
+}

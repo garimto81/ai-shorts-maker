@@ -1,0 +1,28 @@
+{
+  "id": "emotion_극도_흥분",
+  "name": "극도_흥분",
+  "text": "와! 정말 놀라운 특가! 오늘만 가능해요! 서두르세요!",
+  "voice_config": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.3,
+      "similarity_boost": 0.55,
+      "style": 1,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "emphasis": true
+  },
+  "processedText": "와!! 정말 놀라운 특가!! 오늘만 가능해요!! 서두르세요!!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846711784_jss209hi2.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 34,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:31.986Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846711784_jss209hi2.mp3"
+}

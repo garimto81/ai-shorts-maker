@@ -1,0 +1,27 @@
+{
+  "id": 3,
+  "name": "광고_감정표현",
+  "text": "와! 정말 놀라운 기회! 지금 바로 확인하세요! 놓치면 후회해요!",
+  "model": "eleven_multilingual_v2",
+  "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+  "settings": {
+    "stability": 0.4,
+    "similarity_boost": 0.6,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "enable_ssml": true,
+  "ssml_text": "<speak>와!<break time='0.2s'/> 정말 놀라운 기회!<break time='0.3s'/> <emphasis>지금 바로</emphasis> 확인하세요!<break time='0.2s'/> 놓치면 후회해요!</speak>",
+  "description": "SSML emphasis 태그로 강조",
+  "processedText": "<speak>와!<break time='0.2s'/> 정말 놀라운 기회!<break time='0.3s'/> <emphasis>지금 바로</emphasis> 확인하세요!<break time='0.2s'/> 놓치면 후회해요!</speak>",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753851341453_17guxcjvo.mp3",
+    "duration": 8,
+    "format": "mp3",
+    "textLength": 132,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T04:55:41.666Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753851341453_17guxcjvo.mp3"
+}

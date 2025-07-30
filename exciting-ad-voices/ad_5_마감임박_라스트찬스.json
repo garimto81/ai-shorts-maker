@@ -1,0 +1,29 @@
+{
+  "id": 5,
+  "name": "마감임박_라스트찬스",
+  "text": "마감 임박! 재고 단 10개! 지금 아니면 영원히 없어요! 후회하기 전에 지금 클릭하세요!",
+  "voice_config": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.33,
+      "similarity_boost": 0.55,
+      "style": 1,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "final_urgency": true,
+    "scarcity": true
+  },
+  "processedText": "마감 임박!.. 재고 단 10개!.. 지금 아니면 영원히 없어요!.. 후회하기 전에 지금 클릭하세요!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846708533_a3zlpsmwm.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 56,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:28.861Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846708533_a3zlpsmwm.mp3"
+}

@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": 3,
+    "name": "쇼핑라이브_활기차게",
+    "text": "여러분! 오늘만 특별 할인! 지금 주문하시면 50퍼센트 할인된 가격에 만나보실 수 있어요!",
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.48,
+      "similarity_boost": 0.65,
+      "style": 0,
+      "use_speaker_boost": true
+    },
+    "description": "Elli 음성 - 활기찬 쇼핑 라이브"
+  },
+  "processedText": "여러분!. 오늘만 특별 할인!. 지금 주문하시면 오십퍼센트 할인된 가격에 만나보실 수 있어요!.",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846099692_hysisuqec.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 53,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:19.906Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846099692_hysisuqec.mp3"
+}

@@ -1,0 +1,17 @@
+{
+  "id": 2,
+  "name": "친근한_튜토리얼",
+  "text": "여러분 안녕하세요! 오늘은 정말 쉽고 재미있는 DIY 프로젝트를 준비했어요. 집에서 누구나 따라할 수 있으니 천천히 함께 해봐요.",
+  "video_type": "tutorial",
+  "description": "친근하고 따뜻한 여성 목소리 (Rachel)",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845344371_hvzpwfuiw.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 72,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:15:44.581Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753845344371_hvzpwfuiw.mp3"
+}

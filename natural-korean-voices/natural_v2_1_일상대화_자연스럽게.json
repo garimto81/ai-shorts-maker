@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": 1,
+    "name": "일상대화_자연스럽게",
+    "text": "안녕하세요 여러분, 오늘은 정말 좋은 날씨네요. 다들 어떻게 지내셨나요?",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "settings": {
+      "stability": 0.52,
+      "similarity_boost": 0.68,
+      "style": 0,
+      "use_speaker_boost": true
+    },
+    "description": "Rachel 음성 - 자연스러운 일상 대화"
+  },
+  "processedText": "안녕하세요 여러분,. 오늘은 정말 좋은 날씨네요.. 다들 어떻게 지내셨나요?",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846092927_4zz8omve2.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 42,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:13.151Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846092927_4zz8omve2.mp3"
+}

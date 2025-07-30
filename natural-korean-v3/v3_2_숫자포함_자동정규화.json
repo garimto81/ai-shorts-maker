@@ -1,0 +1,26 @@
+{
+  "id": 2,
+  "name": "숫자포함_자동정규화",
+  "text": "2025년 신제품이 50% 할인된 가격으로 출시됩니다. 단 3일간만 진행됩니다.",
+  "model": "eleven_multilingual_v2",
+  "voice_id": "pNInz6obpgDQGcFmaJgB",
+  "settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.7,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "enable_ssml": false,
+  "description": "Multilingual v2의 자동 숫자 정규화 테스트",
+  "processedText": "2025년 신제품이 50% 할인된 가격으로 출시됩니다. 단 3일간만 진행됩니다.",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753851338560_arqemo7yw.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 44,
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T04:55:38.773Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753851338560_arqemo7yw.mp3"
+}

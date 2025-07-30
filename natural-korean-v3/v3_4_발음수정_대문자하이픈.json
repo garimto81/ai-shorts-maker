@@ -1,0 +1,27 @@
+{
+  "id": 4,
+  "name": "발음수정_대문자하이픈",
+  "text": "BMW와 AI 기술이 만나 새로운 DIY 솔루션을 제공합니다.",
+  "model": "eleven_multilingual_v2",
+  "voice_id": "21m00Tcm4TlvDq8ikWAM",
+  "settings": {
+    "stability": 0.55,
+    "similarity_boost": 0.7,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "preprocessed_text": "B-M-W와 A-I 기술이 만나 새로운 D-I-Y 솔루션을 제공합니다.",
+  "enable_ssml": false,
+  "description": "영어 약어를 하이픈으로 분리",
+  "processedText": "B-M-W와 A-I 기술이 만나 새로운 D-I-Y 솔루션을 제공합니다.",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753851344412_pa7n9yve2.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 39,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T04:55:44.748Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753851344412_pa7n9yve2.mp3"
+}

@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": 5,
+    "name": "유튜브리뷰_캐주얼하게",
+    "text": "안녕하세요! 오늘은 최근에 구매한 노트북 리뷰를 해볼게요. 일주일 사용해본 솔직한 후기입니다.",
+    "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+    "settings": {
+      "stability": 0.55,
+      "similarity_boost": 0.68,
+      "style": 0,
+      "use_speaker_boost": true
+    },
+    "description": "Josh 음성 - 캐주얼한 유튜브 리뷰"
+  },
+  "processedText": "안녕하세요!. 오늘은 최근에 구매한 노트북 리뷰를 해볼게요.. 일주일 사용해본 솔직한 후기입니다..",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846106263_d3a9jeojl.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 55,
+    "voice_id": "TxGEqnHWrfWFTfGW9XjX",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:26.475Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846106263_d3a9jeojl.mp3"
+}

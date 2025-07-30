@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "name": "자동차정비_전문가",
+  "text": "안녕하세요. 오늘은 BMW 520d의 엔진오일 교환 방법을 알려드리겠습니다. 먼저 차량을 평평한 곳에 주차하고 엔진을 충분히 식혀주세요.",
+  "video_type": "auto_repair",
+  "description": "전문적이고 신뢰감 있는 남성 목소리 (Adam)",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845340167_g84p1ocbp.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 76,
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:15:40.381Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753845340167_g84p1ocbp.mp3"
+}

@@ -1,0 +1,17 @@
+{
+  "id": 5,
+  "name": "교육용_설명",
+  "text": "오늘 배울 내용은 인공지능의 기본 원리입니다. 먼저 머신러닝이 무엇인지 이해하고, 실제로 어떻게 활용되는지 단계별로 살펴보겠습니다.",
+  "video_type": "educational",
+  "description": "명확하고 이해하기 쉬운 여성 목소리 (Rachel)",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845357457_nrsagtv1f.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 73,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:15:57.662Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753845357457_nrsagtv1f.mp3"
+}

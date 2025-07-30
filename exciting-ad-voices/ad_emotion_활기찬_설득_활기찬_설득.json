@@ -1,0 +1,28 @@
+{
+  "id": "emotion_활기찬_설득",
+  "name": "활기찬_설득",
+  "text": "와! 정말 놀라운 특가! 오늘만 가능해요! 서두르세요!",
+  "voice_config": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.38,
+      "similarity_boost": 0.6,
+      "style": 0.95,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "emphasis": true
+  },
+  "processedText": "와!! 정말 놀라운 특가!! 오늘만 가능해요!! 서두르세요!!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846714615_c5zsya4s8.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 34,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:34.822Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846714615_c5zsya4s8.mp3"
+}

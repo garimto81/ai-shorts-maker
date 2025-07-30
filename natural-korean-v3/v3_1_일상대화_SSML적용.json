@@ -1,0 +1,27 @@
+{
+  "id": 1,
+  "name": "일상대화_SSML적용",
+  "text": "안녕하세요, 오늘 날씨가 정말 좋네요. 산책하기 딱 좋은 날씨예요.",
+  "model": "eleven_multilingual_v2",
+  "voice_id": "21m00Tcm4TlvDq8ikWAM",
+  "settings": {
+    "stability": 0.45,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "enable_ssml": true,
+  "ssml_text": "<speak>안녕하세요,<break time='0.3s'/> 오늘 날씨가 정말 좋네요.<break time='0.5s'/> 산책하기 딱 좋은 날씨예요.</speak>",
+  "description": "SSML로 자연스러운 쉼 추가",
+  "processedText": "<speak>안녕하세요,<break time='0.3s'/> 오늘 날씨가 정말 좋네요.<break time='0.5s'/> 산책하기 딱 좋은 날씨예요.</speak>",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753851335194_o6oxz6ocb.mp3",
+    "duration": 6,
+    "format": "mp3",
+    "textLength": 92,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T04:55:35.426Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753851335194_o6oxz6ocb.mp3"
+}

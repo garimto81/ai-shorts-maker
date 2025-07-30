@@ -1,0 +1,25 @@
+{
+  "id": 1,
+  "name": "신나는_쇼핑_추천",
+  "text": "여러분! 오늘 정말 대박 아이템을 가져왔어요! 이거 진짜 놓치면 후회해요! 지금 바로 확인해보세요!",
+  "settings": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "voice_settings": {
+      "stability": 0.4,
+      "similarity_boost": 0.6,
+      "style": 1,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "쇼핑 라이브처럼 신나는 톤",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845630991_n0fyvxib0.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 55,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:31.205Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845630991_n0fyvxib0.mp3"
+}

@@ -1,0 +1,29 @@
+{
+  "id": 3,
+  "name": "타임세일_카운트다운",
+  "text": "타임세일 시작! 24시간 한정! 최대 70% 할인! 품절되기 전에 서두르세요! 기회는 단 한 번뿐!",
+  "voice_config": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.38,
+      "similarity_boost": 0.58,
+      "style": 1,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "number_emphasis": true,
+    "urgency": true
+  },
+  "processedText": "타임세일 시작! 이십사! 시간! 한정! 최대 칠십 퍼센트! 할인! 품절되기 전에 서두르세요! 기회는 단 한 번뿐!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846701321_aojdkvhcq.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 63,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:21.527Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846701321_aojdkvhcq.mp3"
+}

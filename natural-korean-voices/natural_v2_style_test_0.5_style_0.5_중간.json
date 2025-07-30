@@ -1,0 +1,26 @@
+{
+  "sample": {
+    "id": "style_test_0.5",
+    "name": "style_0.5_중간",
+    "text": "안녕하세요 여러분, 오늘 날씨가 정말 좋네요. 모두 행복한 하루 보내세요!",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "settings": {
+      "stability": 0.52,
+      "similarity_boost": 0.68,
+      "style": 0.5,
+      "use_speaker_boost": true
+    },
+    "description": "Style=0.5 비교 테스트"
+  },
+  "processedText": "안녕하세요 여러분,. 오늘 날씨가 정말 좋네요.. 모두 행복한 하루 보내세요!.",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846112399_92e7xdzjf.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 44,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:28:32.618Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846112399_92e7xdzjf.mp3"
+}

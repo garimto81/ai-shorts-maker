@@ -1,0 +1,25 @@
+{
+  "id": "compare_신나는설정",
+  "name": "신나는설정",
+  "text": "안녕하세요! 오늘은 정말 신나는 소식을 전해드릴게요! 여러분 준비되셨나요?",
+  "settings": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "voice_settings": {
+      "stability": 0.4,
+      "similarity_boost": 0.6,
+      "style": 0.95,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "설정 비교: 신나는설정",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845652014_cco5l7j83.mp3",
+    "duration": 3,
+    "format": "mp3",
+    "textLength": 41,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:52.236Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845652014_cco5l7j83.mp3"
+}

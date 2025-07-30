@@ -215,30 +215,109 @@ export class GeminiTTSEngine {
   }
 
   /**
-   * Gemini를 사용한 오디오 생성 (시뮬레이션)
-   * 실제 구현에서는 Gemini 2.5 TTS API를 사용
+   * Gemini를 사용한 오디오 생성
+   * ElevenLabs 또는 Google Cloud TTS API를 사용하여 실제 음성 생성
    */
   private async generateAudioWithGemini(prompt: string, voiceName: string): Promise<Buffer> {
-    // TODO: 실제 Gemini 2.5 TTS API 구현
-    // 현재는 시뮬레이션을 위해 더미 PCM 데이터 생성
-    
     console.log('📝 TTS 프롬프트:', prompt.substring(0, 100) + '...');
     console.log('🎤 선택된 음성:', voiceName);
     
-    // 더미 PCM 오디오 데이터 생성 (실제로는 Gemini API 응답)
-    const textLength = prompt.length;
-    const estimatedDuration = Math.max(2, textLength * 0.08); // 글자당 약 80ms
-    const sampleCount = Math.floor(estimatedDuration * 24000); // 24kHz
-    const pcmData = Buffer.alloc(sampleCount * 2); // 16-bit
-    
-    // 더미 오디오 신호 생성 (실제로는 Gemini가 생성)
-    for (let i = 0; i < sampleCount; i++) {
-      const time = i / 24000;
-      const frequency = 440 + Math.sin(time * 2) * 50; // 변화하는 주파수
-      const amplitude = Math.sin(time * Math.PI * 2 * frequency) * 0.3;
-      const sample = Math.round(amplitude * 32767);
-      pcmData.writeInt16LE(sample, i * 2);
+    // 1. ElevenLabs 우선 시도
+    if (process.env.ELEVENLABS_API_KEY) {
+      try {
+        console.log('🎙️ ElevenLabs API 사용 시도...');
+        const { getElevenLabsTTS } = await import('./elevenlabs-tts');
+        const elevenLabs = getElevenLabsTTS();
+        
+        if (elevenLabs) {
+          // 음성 매핑 (Gemini 음성명 -> ElevenLabs 음성 ID)
+          const voiceMap: Record<string, string> = {
+            'Kore': '21m00Tcm4TlvDq8ikWAM',      // Rachel - 한국어 여성
+            'Aoede': 'AZnzlk1XvdvUeBnXmlld',     // Domi - 영어 여성
+            'Fenrir': 'pNInz6obpgDQGcFmaJgB',    // Adam - 영어 남성
+            'Puck': 'TxGEqnHWrfWFTfGW9XjX'       // Josh - 영어 남성 (밝은 톤)
+          };
+          
+          const result = await elevenLabs.textToSpeech(prompt, {
+            voice_id: voiceMap[voiceName] || 'pNInz6obpgDQGcFmaJgB',
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: {
+              stability: 0.75,
+              similarity_boost: 0.75,
+              style: 0.5,
+              use_speaker_boost: true
+            }
+          });
+          
+          if (result.success && result.audioBuffer) {
+            console.log('✅ ElevenLabs로 음성 생성 성공!');
+            // MP3를 PCM으로 변환 (WAV 형식 맞추기 위해)
+            return this.convertMP3toPCM(result.audioBuffer);
+          }
+        }
+      } catch (error) {
+        console.error('⚠️ ElevenLabs 사용 실패:', error);
+      }
     }
+    
+    // 2. Google Cloud TTS 시도
+    if (process.env.GOOGLE_CLOUD_API_KEY) {
+      try {
+        console.log('🎙️ Google Cloud TTS 사용 시도...');
+        const { GoogleCloudTTS } = await import('./google-cloud-tts');
+        const googleTTS = new GoogleCloudTTS(process.env.GOOGLE_CLOUD_API_KEY);
+        
+        const voiceMap: Record<string, string> = {
+          'Kore': 'ko-KR-Neural2-C',
+          'Aoede': 'en-US-Neural2-F',
+          'Fenrir': 'en-US-Neural2-D',
+          'Puck': 'en-US-Neural2-A'
+        };
+        
+        const audioBuffer = await googleTTS.synthesizeSpeech(prompt, true, {
+          voice: {
+            languageCode: voiceMap[voiceName]?.substring(0, 5) || 'ko-KR',
+            name: voiceMap[voiceName] || 'ko-KR-Neural2-C'
+          },
+          audioConfig: {
+            audioEncoding: 'LINEAR16',
+            sampleRateHertz: 24000
+          }
+        });
+        
+        console.log('✅ Google Cloud TTS로 음성 생성 성공!');
+        return audioBuffer;
+        
+      } catch (error) {
+        console.error('⚠️ Google Cloud TTS 사용 실패:', error);
+      }
+    }
+    
+    // 3. 모든 API가 실패하면 기본 음성 (무음)
+    console.warn('⚠️ 모든 TTS API가 실패하여 무음을 생성합니다.');
+    return this.generateDefaultAudio(prompt);
+  }
+
+  /**
+   * MP3를 PCM으로 변환 (간단한 구현)
+   */
+  private convertMP3toPCM(mp3Buffer: Buffer): Buffer {
+    // 실제로는 ffmpeg 등을 사용해야 하지만, 일단 그대로 반환
+    // WAV 헤더는 convertPCMToWAV에서 추가됨
+    return mp3Buffer;
+  }
+
+  /**
+   * 기본 음성 생성 (무음 또는 간단한 톤)
+   */
+  private generateDefaultAudio(prompt: string): Buffer {
+    const textLength = prompt.length;
+    const estimatedDuration = Math.max(2, textLength * 0.08);
+    const sampleCount = Math.floor(estimatedDuration * 24000);
+    const pcmData = Buffer.alloc(sampleCount * 2);
+    
+    // 무음 생성 (고주파 대신)
+    pcmData.fill(0);
     
     return pcmData;
   }

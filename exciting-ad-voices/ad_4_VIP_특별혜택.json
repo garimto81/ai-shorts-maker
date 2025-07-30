@@ -1,0 +1,29 @@
+{
+  "id": 4,
+  "name": "VIP_특별혜택",
+  "text": "VIP 고객님만을 위한 특별한 기회! 평생 단 한 번! 이런 가격은 다시 없습니다! 놓치지 마세요!",
+  "voice_config": {
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "settings": {
+      "stability": 0.42,
+      "similarity_boost": 0.65,
+      "style": 0.9,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "vip_tone": true,
+    "exclusivity": true
+  },
+  "processedText": "브이아이피 고객님만을 위한 특별한 기회! 평생 단 한 번! 이런 가격은 다시 없습니다! 놓치지 마세요!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846704940_d4oybcx61.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 57,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:25.143Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846704940_d4oybcx61.mp3"
+}

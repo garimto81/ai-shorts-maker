@@ -1,0 +1,17 @@
+{
+  "id": 3,
+  "name": "신나는_광고",
+  "text": "지금 바로 만나보세요! 2025년 최신 기술이 적용된 혁신적인 제품! 놓치면 후회하는 특별한 기회, 오늘만 50% 할인!",
+  "video_type": "advertisement",
+  "description": "활기차고 열정적인 여성 목소리 (Elli)",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845348390_m3wyxck53.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 67,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:15:48.649Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753845348390_m3wyxck53.mp3"
+}

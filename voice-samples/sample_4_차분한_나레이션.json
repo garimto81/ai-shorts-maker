@@ -1,0 +1,17 @@
+{
+  "id": 4,
+  "name": "차분한_나레이션",
+  "text": "깊은 밤, 도시의 불빛이 하나둘 꺼져갑니다. 고요한 적막 속에서 새로운 이야기가 시작되려 하고 있습니다. 이것은 우리 모두의 이야기입니다.",
+  "video_type": "narration",
+  "description": "차분하고 안정적인 나레이터 목소리 (Bill)",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845353091_i1eoqgd90.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 77,
+    "voice_id": "pqHfZKP75CvOlQylNhV4",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:15:53.295Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753845353091_i1eoqgd90.mp3"
+}

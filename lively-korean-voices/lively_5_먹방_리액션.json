@@ -1,0 +1,25 @@
+{
+  "id": 5,
+  "name": "먹방_리액션",
+  "text": "우와! 이 맛 진짜 장난 아니에요! 바삭바삭하고 고소하고! 여러분 이거 꼭 드셔보세요! 대박!",
+  "settings": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "voice_settings": {
+      "stability": 0.38,
+      "similarity_boost": 0.58,
+      "style": 0.98,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "먹방 크리에이터의 리액션",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845645698_d3nk1ln4n.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 52,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:45.926Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845645698_d3nk1ln4n.mp3"
+}

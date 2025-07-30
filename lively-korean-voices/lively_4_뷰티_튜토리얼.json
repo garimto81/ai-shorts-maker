@@ -1,0 +1,25 @@
+{
+  "id": 4,
+  "name": "뷰티_튜토리얼",
+  "text": "자! 이제 이 제품을 이렇게 톡톡 두드려서 발라주세요! 와! 정말 예쁘지 않나요? 여러분도 쉽게 따라할 수 있어요!",
+  "settings": {
+    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+    "voice_settings": {
+      "stability": 0.5,
+      "similarity_boost": 0.68,
+      "style": 0.85,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "친근하고 활기찬 뷰티 크리에이터",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845642199_g4ak9m0vr.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 64,
+    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:42.409Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845642199_g4ak9m0vr.mp3"
+}

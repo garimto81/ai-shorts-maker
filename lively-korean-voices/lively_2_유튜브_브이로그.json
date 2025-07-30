@@ -1,0 +1,25 @@
+{
+  "id": 2,
+  "name": "유튜브_브이로그",
+  "text": "안녕하세요 여러분! 오늘은 정말 재미있는 하루였어요! 아침부터 이런 일이 있었는데요, 진짜 깜짝 놀랐어요!",
+  "settings": {
+    "voice_id": "AZnzlk1XvdvUeBnXmlld",
+    "voice_settings": {
+      "stability": 0.45,
+      "similarity_boost": 0.65,
+      "style": 0.9,
+      "use_speaker_boost": true
+    }
+  },
+  "description": "젊고 발랄한 브이로거 스타일",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753845634836_dpkhy4xu5.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 59,
+    "voice_id": "AZnzlk1XvdvUeBnXmlld",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:20:35.045Z",
+  "listen_url": "http://localhost:3000/audio/elevenlabs_1753845634836_dpkhy4xu5.mp3"
+}

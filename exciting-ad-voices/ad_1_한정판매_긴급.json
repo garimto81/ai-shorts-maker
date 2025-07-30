@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "한정판매_긴급",
+  "text": "지금 이 순간! 단 100개 한정! 놓치면 정말 후회해요! 3, 2, 1... 지금 바로 주문하세요!",
+  "voice_config": {
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "settings": {
+      "stability": 0.35,
+      "similarity_boost": 0.6,
+      "style": 1,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "emphasis": true,
+    "exclamation": true,
+    "countdown": true
+  },
+  "processedText": "지금! 이 순간!! 단 100개 한정!! 놓치면 정말 후회해요!! 삼!... 이!... 일!...... 지금! 바로! 주문하세요!!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846693606_z63gh18s0.mp3",
+    "duration": 5,
+    "format": "mp3",
+    "textLength": 73,
+    "voice_id": "MF3mGyEYCl7XYWbV9V6O",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:13.819Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846693606_z63gh18s0.mp3"
+}

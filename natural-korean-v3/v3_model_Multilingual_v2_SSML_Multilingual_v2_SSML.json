@@ -1,0 +1,27 @@
+{
+  "id": "model_Multilingual_v2_SSML",
+  "name": "Multilingual_v2_SSML",
+  "text": "안녕하세요! 오늘은 정말 좋은 날이에요. 모두 행복한 하루 보내세요!",
+  "model": "eleven_multilingual_v2",
+  "voice_id": "21m00Tcm4TlvDq8ikWAM",
+  "settings": {
+    "stability": 0.45,
+    "similarity_boost": 0.65,
+    "style": 0,
+    "use_speaker_boost": true
+  },
+  "enable_ssml": true,
+  "ssml_text": "<speak>안녕하세요!<break time='0.3s'/> 오늘은 정말 좋은 날이에요.<break time='0.5s'/> 모두 행복한 하루 보내세요!</speak>",
+  "description": "eleven_multilingual_v2 모델 테스트",
+  "processedText": "<speak>안녕하세요!<break time='0.3s'/> 오늘은 정말 좋은 날이에요.<break time='0.5s'/> 모두 행복한 하루 보내세요!</speak>",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753851352645_h16fjnqq9.mp3",
+    "duration": 6,
+    "format": "mp3",
+    "textLength": 93,
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T04:55:52.863Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753851352645_h16fjnqq9.mp3"
+}

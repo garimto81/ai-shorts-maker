@@ -1,0 +1,29 @@
+{
+  "id": 2,
+  "name": "신제품_런칭",
+  "text": "드디어 공개합니다! 2025년 최고의 혁신! 여러분이 기다리던 바로 그 제품! 오늘만 특별 가격!",
+  "voice_config": {
+    "voice_id": "AZnzlk1XvdvUeBnXmlld",
+    "settings": {
+      "stability": 0.4,
+      "similarity_boost": 0.62,
+      "style": 0.95,
+      "use_speaker_boost": true
+    }
+  },
+  "preprocessing": {
+    "year_conversion": true,
+    "emphasis": true
+  },
+  "processedText": "드디어 공개합니다!! 이천이십오년 최고의 혁신!! 여러분이 기다리던 바로! 그 제품!! 오늘만 특별 가격!!",
+  "result": {
+    "audioUrl": "/audio/elevenlabs_1753846697252_rhsl3i4u8.mp3",
+    "duration": 4,
+    "format": "mp3",
+    "textLength": 60,
+    "voice_id": "AZnzlk1XvdvUeBnXmlld",
+    "model_id": "eleven_multilingual_v2"
+  },
+  "generated_at": "2025-07-30T03:38:17.458Z",
+  "audio_url": "http://localhost:3000/audio/elevenlabs_1753846697252_rhsl3i4u8.mp3"
+}
