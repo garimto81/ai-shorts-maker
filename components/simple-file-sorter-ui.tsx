@@ -34,6 +34,7 @@ export default function SimpleFileSorterUI() {
   const [files, setFiles] = useState<File[]>([]);
   const [sortedFiles, setSortedFiles] = useState<SortedFile[]>([]);
   const [projectTitle, setProjectTitle] = useState('');
+  const [isInitialSort, setIsInitialSort] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   const [currentStep, setCurrentStep] = useState<'upload' | 'title' | 'script' | 'preview' | 'video'>('upload');
   const [generatedScript, setGeneratedScript] = useState<VideoScript | null>(null);
@@ -116,9 +117,7 @@ export default function SimpleFileSorterUI() {
       case 'desc':
         return SimpleFileSorter.sortFilesByNameDesc(files);
       case 'asc':
-        return [...files].sort((a, b) => 
-          a.name.localeCompare(b.name, 'ko-KR', { numeric: true, sensitivity: 'base' })
-        );
+        return SimpleFileSorter.sortFilesByNameAsc(files);
       case 'manual':
       case 'number':
         return files; // 수동 정렬 및 번호 입력의 경우 현재 순서 유지
@@ -198,8 +197,10 @@ export default function SimpleFileSorterUI() {
   // 파일 추가 시 자동 정렬 및 썸네일 생성
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
     const allFiles = [...files, ...newFiles];
-    const sorted = sortFiles(allFiles, sortMode);
+    // 초기 업로드 시에는 현재 정렬 모드로 정렬
+    const sorted = isInitialSort ? sortFiles(allFiles, sortMode) : allFiles;
     setFiles(sorted);
+    setIsInitialSort(false);
 
     // 정렬된 파일 정보 생성
     const sortedFileData = await Promise.all(
@@ -376,6 +377,9 @@ export default function SimpleFileSorterUI() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
+      {/* Version indicator for debugging */}
+      <div className="text-xs text-gray-400 text-center mb-2">v2.0.1 - 정렬 기능 포함</div>
+      
       {files.length > 0 && (
         <div className="mb-4 flex justify-end">
           <Button variant="outline" onClick={handleReset}>
@@ -401,6 +405,15 @@ export default function SimpleFileSorterUI() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
+          <div className="mb-4">
+            <Upload className="w-12 h-12 mx-auto text-gray-400" />
+            <p className="mt-2 text-sm text-gray-600">
+              이미지 파일을 드래그하거나 클릭하여 업로드하세요
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              지원 형식: JPG, PNG, GIF, WebP (최대 20개)
+            </p>
+          </div>
           <label className="cursor-pointer">
             <input
               type="file"
@@ -584,7 +597,8 @@ export default function SimpleFileSorterUI() {
               <span>
                 {sortMode === 'desc' && '파일명 내림차순'}
                 {sortMode === 'asc' && '파일명 오름차순'}
-                {sortMode === 'manual' && '수동 정렬'}
+                {sortMode === 'manual' && '드래그 정렬'}
+                {sortMode === 'number' && '번호 입력 정렬'}
               </span>
             </div>
           </div>
