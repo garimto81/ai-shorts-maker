@@ -17,8 +17,9 @@
     "version:minor": "node scripts/version-manager.js minor",
     "version:major": "node scripts/version-manager.js major",
     "version:current": "node -e \"console.log(require('./package.json').version)\"",
-    "deploy": "vercel --prod",
-    "deploy:preview": "vercel",
+    "deploy": "vercel --prod --force",
+    "deploy:preview": "vercel --force",
+    "vercel:init": "vercel link --yes",
     "build:analyze": "ANALYZE=true npm run build",
     "export": "next export",
     "postbuild": "echo 'Build completed successfully'"
