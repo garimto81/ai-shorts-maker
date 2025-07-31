@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정렬 기능 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .sorting-demo {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .file-list {
+            margin: 20px 0;
+        }
+        .file-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f0f0f0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            cursor: move;
+        }
+        .file-item.dragging {
+            opacity: 0.5;
+        }
+        .file-number {
+            width: 30px;
+            height: 30px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button.active {
+            background-color: #007bff;
+            color: white;
+        }
+        button:not(.active) {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        button:hover:not(.active) {
+            background-color: #d0d0d0;
+        }
+        .mode-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            margin-left: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Shorts Maker - 정렬 기능 테스트</h1>
+    
+    <div class="sorting-demo">
+        <div class="test-info">
+            <strong>테스트 안내:</strong> 이것은 정렬 기능이 정상적으로 작동하는지 확인하기 위한 데모입니다.<br>
+            실제 배포된 버전에서도 동일한 기능이 작동해야 합니다.
+        </div>
+
+        <div class="buttons">
+            <button onclick="setSortMode('desc')" id="desc-btn" class="active">파일명 내림차순 (Z→A)</button>
+            <button onclick="setSortMode('asc')" id="asc-btn">파일명 오름차순 (A→Z)</button>
+            <button onclick="setSortMode('manual')" id="manual-btn">드래그로 순서 변경</button>
+            <button onclick="setSortMode('number')" id="number-btn">번호 직접 입력</button>
+        </div>
+
+        <div class="mode-info" id="mode-info">
+            현재 모드: 파일명 내림차순
+        </div>
+
+        <div class="file-list" id="file-list"></div>
+    </div>
+
+    <script>
+        // 샘플 파일 데이터
+        let files = [
+            { name: 'image_001.jpg' },
+            { name: 'photo_abc.png' },
+            { name: 'picture_xyz.jpg' },
+            { name: '사진_가.jpg' },
+            { name: '그림_나.png' },
+            { name: 'file_999.gif' },
+            { name: 'img_010.webp' },
+            { name: 'snapshot_zzz.jpg' }
+        ];
+
+        let currentMode = 'desc';
+        let draggedItem = null;
+
+        // 정렬 함수들
+        function sortDesc(files) {
+            return [...files].sort((a, b) => 
+                b.name.localeCompare(a.name, 'ko-KR', { numeric: true, sensitivity: 'base' })
+            );
+        }
+
+        function sortAsc(files) {
+            return [...files].sort((a, b) => 
+                a.name.localeCompare(b.name, 'ko-KR', { numeric: true, sensitivity: 'base' })
+            );
+        }
+
+        // 정렬 모드 설정
+        function setSortMode(mode) {
+            currentMode = mode;
+            
+            // 버튼 활성화 상태 업데이트
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(mode + '-btn').classList.add('active');
+            
+            // 모드 정보 업데이트
+            const modeTexts = {
+                'desc': '파일명 내림차순',
+                'asc': '파일명 오름차순',
+                'manual': '드래그 정렬',
+                'number': '번호 입력 정렬'
+            };
+            
+            const modeInfo = document.getElementById('mode-info');
+            modeInfo.textContent = `현재 모드: ${modeTexts[mode]}`;
+            
+            if (mode === 'manual') {
+                modeInfo.innerHTML += '<br>💡 파일을 드래그하여 순서를 변경할 수 있습니다.';
+            } else if (mode === 'number') {
+                modeInfo.innerHTML += '<br>🔢 각 파일의 번호를 직접 입력하여 순서를 변경할 수 있습니다.';
+            }
+            
+            // 정렬 적용
+            if (mode === 'desc') {
+                files = sortDesc(files);
+            } else if (mode === 'asc') {
+                files = sortAsc(files);
+            }
+            
+            renderFiles();
+        }
+
+        // 파일 목록 렌더링
+        function renderFiles() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.draggable = currentMode === 'manual';
+                
+                item.innerHTML = `
+                    <div class="file-number">${index + 1}</div>
+                    <div style="flex: 1;">${file.name}</div>
+                    ${currentMode === 'number' ? 
+                        `<input type="number" min="1" max="${files.length}" value="${index + 1}" 
+                         onchange="handleNumberChange(${index}, this.value)">` : ''}
+                `;
+                
+                if (currentMode === 'manual') {
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('drop', handleDrop);
+                    item.addEventListener('dragend', handleDragEnd);
+                }
+                
+                fileList.appendChild(item);
+            });
+        }
+
+        // 번호 입력 처리
+        function handleNumberChange(currentIndex, newPosition) {
+            const position = parseInt(newPosition);
+            if (isNaN(position) || position < 1 || position > files.length) return;
+            
+            const targetIndex = position - 1;
+            if (currentIndex === targetIndex) return;
+            
+            const [movedFile] = files.splice(currentIndex, 1);
+            files.splice(targetIndex, 0, movedFile);
+            renderFiles();
+        }
+
+        // 드래그 앤 드롭 처리
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(e.currentTarget.parentNode, e.clientY);
+            if (afterElement == null) {
+                e.currentTarget.parentNode.appendChild(draggedItem);
+            } else {
+                e.currentTarget.parentNode.insertBefore(draggedItem, afterElement);
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            updateFilesOrder();
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedItem = null;
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.file-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function updateFilesOrder() {
+            const items = document.querySelectorAll('.file-item');
+            const newFiles = [];
+            items.forEach((item, index) => {
+                const fileName = item.querySelector('div:nth-child(2)').textContent;
+                const file = files.find(f => f.name === fileName);
+                if (file) newFiles.push(file);
+            });
+            files = newFiles;
+            renderFiles();
+        }
+
+        // 초기 렌더링
+        setSortMode('desc');
+    </script>
+</body>
+</html>

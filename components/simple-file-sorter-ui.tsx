@@ -380,6 +380,16 @@ export default function SimpleFileSorterUI() {
       {/* Version indicator for debugging */}
       <div className="text-xs text-gray-400 text-center mb-2">v2.0.1 - 정렬 기능 포함</div>
       
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h1 className="text-2xl font-bold text-center text-blue-900 mb-2">
+          AI Shorts Maker - 간단한 파일 정렬 버전
+        </h1>
+        <p className="text-center text-blue-700 text-sm">
+          이미지를 업로드하면 4가지 정렬 방식을 사용할 수 있습니다:<br/>
+          내림차순 (Z→A) | 오름차순 (A→Z) | 드래그 정렬 | 번호 입력
+        </p>
+      </div>
+      
       {files.length > 0 && (
         <div className="mb-4 flex justify-end">
           <Button variant="outline" onClick={handleReset}>
