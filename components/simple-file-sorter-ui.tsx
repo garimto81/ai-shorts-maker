@@ -28,7 +28,7 @@ interface SortedFile {
   thumbnail?: string;
 }
 
-type SortMode = 'desc' | 'asc' | 'manual';
+type SortMode = 'desc' | 'asc' | 'manual' | 'number';
 
 export default function SimpleFileSorterUI() {
   const [files, setFiles] = useState<File[]>([]);
@@ -120,7 +120,8 @@ export default function SimpleFileSorterUI() {
           a.name.localeCompare(b.name, 'ko-KR', { numeric: true, sensitivity: 'base' })
         );
       case 'manual':
-        return files; // 수동 정렬의 경우 현재 순서 유지
+      case 'number':
+        return files; // 수동 정렬 및 번호 입력의 경우 현재 순서 유지
       default:
         return files;
     }
@@ -130,7 +131,7 @@ export default function SimpleFileSorterUI() {
   const handleSortModeChange = useCallback(async (newMode: SortMode) => {
     setSortMode(newMode);
     
-    if (newMode === 'manual') {
+    if (newMode === 'manual' || newMode === 'number') {
       // 수동 정렬 모드에서는 현재 순서 유지
       return;
     }
@@ -162,7 +163,7 @@ export default function SimpleFileSorterUI() {
 
   // 수동 파일 순서 변경
   const moveFile = useCallback((fromIndex: number, toIndex: number) => {
-    if (sortMode !== 'manual') return;
+    if (sortMode !== 'manual' && sortMode !== 'number') return;
     
     const newFiles = [...files];
     const newSortedFiles = [...sortedFiles];
@@ -182,6 +183,17 @@ export default function SimpleFileSorterUI() {
     setFiles(newFiles);
     setSortedFiles(newSortedFiles);
   }, [files, sortedFiles, sortMode]);
+
+  // 번호 입력으로 순서 변경
+  const handleNumberInput = useCallback((fileIndex: number, newPosition: string) => {
+    const position = parseInt(newPosition);
+    if (isNaN(position) || position < 1 || position > files.length) return;
+    
+    const targetIndex = position - 1;
+    if (fileIndex === targetIndex) return;
+    
+    moveFile(fileIndex, targetIndex);
+  }, [files.length, moveFile]);
 
   // 파일 추가 시 자동 정렬 및 썸네일 생성
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
@@ -426,12 +438,24 @@ export default function SimpleFileSorterUI() {
               size="sm"
               onClick={() => handleSortModeChange('manual')}
             >
-              직접 드래그하여 순서 변경
+              드래그로 순서 변경
+            </Button>
+            <Button
+              variant={sortMode === 'number' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSortModeChange('number')}
+            >
+              번호 직접 입력
             </Button>
           </div>
           {sortMode === 'manual' && (
             <div className="mt-2 text-sm text-blue-600 bg-blue-50 rounded p-2">
               💡 이미지를 드래그하여 순서를 변경할 수 있습니다.
+            </div>
+          )}
+          {sortMode === 'number' && (
+            <div className="mt-2 text-sm text-green-600 bg-green-50 rounded p-2">
+              🔢 각 이미지의 번호를 직접 입력하여 순서를 변경할 수 있습니다. (1부터 {files.length}까지)
             </div>
           )}
         </div>
@@ -512,9 +536,21 @@ export default function SimpleFileSorterUI() {
                   </div>
                   
                   {/* 순서 번호 */}
-                  <div className="absolute top-1 left-1 bg-black text-white px-1.5 py-0.5 rounded text-xs font-medium">
-                    {index + 1}
-                  </div>
+                  {sortMode === 'number' ? (
+                    <input
+                      type="number"
+                      min="1"
+                      max={files.length}
+                      value={index + 1}
+                      onChange={(e) => handleNumberInput(index, e.target.value)}
+                      className="absolute top-1 left-1 w-12 px-1 py-0.5 text-xs font-medium text-center bg-white border border-gray-300 rounded"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <div className="absolute top-1 left-1 bg-black text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                      {index + 1}
+                    </div>
+                  )}
                   
                   {/* 삭제 버튼 */}
                   <button
