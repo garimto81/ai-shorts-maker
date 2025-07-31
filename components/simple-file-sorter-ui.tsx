@@ -28,7 +28,7 @@ interface SortedFile {
   thumbnail?: string;
 }
 
-type SortMode = 'desc' | 'asc' | 'ai' | 'manual';
+type SortMode = 'desc' | 'asc' | 'manual';
 
 export default function SimpleFileSorterUI() {
   const [files, setFiles] = useState<File[]>([]);
@@ -119,9 +119,8 @@ export default function SimpleFileSorterUI() {
         return [...files].sort((a, b) => 
           a.name.localeCompare(b.name, 'ko-KR', { numeric: true, sensitivity: 'base' })
         );
-      case 'ai':
       case 'manual':
-        return files; // AI 분석이나 수동 정렬의 경우 현재 순서 유지
+        return files; // 수동 정렬의 경우 현재 순서 유지
       default:
         return files;
     }
@@ -133,12 +132,6 @@ export default function SimpleFileSorterUI() {
     
     if (newMode === 'manual') {
       // 수동 정렬 모드에서는 현재 순서 유지
-      return;
-    }
-    
-    if (newMode === 'ai') {
-      // AI 분석 정렬 (향후 구현)
-      setError('AI 분석 정렬은 곧 구현될 예정입니다.');
       return;
     }
     
@@ -412,36 +405,35 @@ export default function SimpleFileSorterUI() {
       {/* 정렬 옵션 버튼들 */}
       {files.length > 0 && currentStep !== 'video' && (
         <div className="mb-4">
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
+            <span className="text-sm font-medium text-gray-700">정렬 방식:</span>
             <Button
               variant={sortMode === 'desc' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleSortModeChange('desc')}
             >
-              내림차순
+              파일명 내림차순 (Z→A)
             </Button>
             <Button
               variant={sortMode === 'asc' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleSortModeChange('asc')}
             >
-              오름차순
-            </Button>
-            <Button
-              variant={sortMode === 'ai' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleSortModeChange('ai')}
-            >
-              AI 분석
+              파일명 오름차순 (A→Z)
             </Button>
             <Button
               variant={sortMode === 'manual' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleSortModeChange('manual')}
             >
-              직접 수정
+              직접 드래그하여 순서 변경
             </Button>
           </div>
+          {sortMode === 'manual' && (
+            <div className="mt-2 text-sm text-blue-600 bg-blue-50 rounded p-2">
+              💡 이미지를 드래그하여 순서를 변경할 수 있습니다.
+            </div>
+          )}
         </div>
       )}
 
@@ -453,23 +445,55 @@ export default function SimpleFileSorterUI() {
               {sortedFiles.map((sortedFile, index) => (
                 <div 
                   key={index} 
-                  className="relative"
+                  className={`relative ${
+                    sortMode === 'manual' 
+                      ? 'cursor-move hover:shadow-lg transition-shadow duration-200' 
+                      : ''
+                  }`}
                   draggable={sortMode === 'manual'}
                   onDragStart={(e) => {
                     if (sortMode === 'manual') {
                       e.dataTransfer.setData('text/plain', index.toString());
+                      e.dataTransfer.effectAllowed = 'move';
+                      // 드래그 중인 이미지에 투명도 적용
+                      const target = e.currentTarget as HTMLElement;
+                      target.style.opacity = '0.5';
                     }
+                  }}
+                  onDragEnd={(e) => {
+                    // 드래그 종료 시 투명도 복원
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.opacity = '1';
                   }}
                   onDragOver={(e) => {
                     if (sortMode === 'manual') {
                       e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                    }
+                  }}
+                  onDragEnter={(e) => {
+                    if (sortMode === 'manual') {
+                      // 드롭 영역에 들어왔을 때 하이라이트
+                      const target = e.currentTarget as HTMLElement;
+                      target.classList.add('border-2', 'border-blue-500');
+                    }
+                  }}
+                  onDragLeave={(e) => {
+                    if (sortMode === 'manual') {
+                      // 드롭 영역을 떠났을 때 하이라이트 제거
+                      const target = e.currentTarget as HTMLElement;
+                      target.classList.remove('border-2', 'border-blue-500');
                     }
                   }}
                   onDrop={(e) => {
                     if (sortMode === 'manual') {
                       e.preventDefault();
                       const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                      moveFile(fromIndex, index);
+                      const target = e.currentTarget as HTMLElement;
+                      target.classList.remove('border-2', 'border-blue-500');
+                      if (fromIndex !== index) {
+                        moveFile(fromIndex, index);
+                      }
                     }
                   }}
                 >
@@ -501,10 +525,12 @@ export default function SimpleFileSorterUI() {
                     <X className="w-3 h-3" />
                   </button>
                   
-                  {/* 수동 정렬 핸들 */}
+                  {/* 수동 정렬 표시 */}
                   {sortMode === 'manual' && (
-                    <div className="absolute bottom-1 left-1 bg-blue-500 text-white px-1 rounded text-xs cursor-move" title="드래그하여 순서 변경">
-                      ⋮⋮
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="bg-blue-500 bg-opacity-90 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        드래그
+                      </div>
                     </div>
                   )}
                   
@@ -522,7 +548,6 @@ export default function SimpleFileSorterUI() {
               <span>
                 {sortMode === 'desc' && '파일명 내림차순'}
                 {sortMode === 'asc' && '파일명 오름차순'}
-                {sortMode === 'ai' && 'AI 분석 정렬'}
                 {sortMode === 'manual' && '수동 정렬'}
               </span>
             </div>
