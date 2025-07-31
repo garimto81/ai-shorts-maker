@@ -1,6 +1,6 @@
 {
   "name": "ai-shorts-maker",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "AI 기반 자동 단편 영상 제작 플랫폼 - 파일명 기반 자동 정렬과 AI 스크립트 생성",
   "private": false,
   "scripts": {
