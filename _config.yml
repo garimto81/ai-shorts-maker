@@ -1,0 +1,5 @@
+# GitHub Pages 설정
+theme: jekyll-theme-minimal
+title: AI Shorts Maker
+description: 간단한 파일 정렬 시스템 - 이미지를 업로드하고 원하는 순서로 정렬하세요
+show_downloads: false

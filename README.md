@@ -1,10 +1,9 @@
 # AI Shorts Maker 🎬
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/garimto81/ai-shorts-maker&env=GOOGLE_AI_API_KEY&project-name=ai-shorts-maker&repository-name=ai-shorts-maker)
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://ai-shorts-maker.vercel.app)
+[![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-blue)](https://garimto81.github.io/ai-shorts-maker/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI 기반 자동 단편 영상 제작 플랫폼 - 간단한 파일 정렬 시스템 (v2.0.1)
+간단한 파일 정렬 시스템 - 브라우저에서 실행되는 정적 웹 애플리케이션 (v2.0.1)
 
 ## ✨ 주요 기능
 
@@ -32,7 +31,7 @@ AI 기반 자동 단편 영상 제작 플랫폼 - 간단한 파일 정렬 시스
 
 ## 🚀 온라인 데모
 
-**Live Demo**: [https://ai-shorts-maker.vercel.app](https://ai-shorts-maker.vercel.app)
+**Live Demo**: [https://garimto81.github.io/ai-shorts-maker/](https://garimto81.github.io/ai-shorts-maker/)
 
 ### 빠른 테스트 방법
 1. 이미지 파일들을 업로드
