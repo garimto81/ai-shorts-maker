@@ -47,6 +47,10 @@ jobs:
           npm run build
           echo "Build completed. Checking output directory..."
           ls -la out/
+          echo "Adding .nojekyll file for GitHub Pages..."
+          touch out/.nojekyll
+          echo "Final out directory contents:"
+          ls -la out/
         env:
           NODE_ENV: production
           
