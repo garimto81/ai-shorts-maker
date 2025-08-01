@@ -1,24 +1,22 @@
-name: 🚀 GitHub Pages 배포 (GH-Pages 방식 - 비활성화됨)
+name: 🚀 GitHub Pages 배포 (Actions 방식)
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-  # push:
-  #   branches: [main]
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
-  actions: read
-  deployments: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout
@@ -69,9 +67,19 @@ jobs:
           fi
           echo "✅ Output verification successful"
           
-      - name: 🚀 Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: 📄 Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          force_orphan: true
+          path: ./out
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
