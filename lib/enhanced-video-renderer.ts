@@ -502,9 +502,9 @@ export class EnhancedVideoRenderer {
   static isSupported(): boolean {
     return !!(
       navigator.mediaDevices &&
-      HTMLCanvasElement.prototype.captureStream &&
-      MediaRecorder &&
-      AudioContext
+      typeof HTMLCanvasElement.prototype.captureStream !== 'undefined' &&
+      typeof MediaRecorder !== 'undefined' &&
+      typeof AudioContext !== 'undefined'
     );
   }
 }
