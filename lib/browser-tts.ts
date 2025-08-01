@@ -1,6 +1,8 @@
 // 브라우저 기반 TTS - 클라이언트 사이드 음성 합성
 // 서버 API 없이도 작동하는 대안
 
+import { useState, useEffect } from 'react';
+
 export class BrowserTTS {
   private synth: SpeechSynthesis;
   private voices: SpeechSynthesisVoice[] = [];

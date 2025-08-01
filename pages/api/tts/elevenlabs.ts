@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (validatedData.video_type && !validatedData.voice_id) {
       const recommendedSettings = elevenLabs.getRecommendedSettings(validatedData.video_type);
-      options = { ...options, ...recommendedSettings };
+      options = { ...options, ...recommendedSettings } as any;
     }
 
     // TTS 생성

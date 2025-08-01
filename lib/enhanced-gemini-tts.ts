@@ -27,7 +27,7 @@ export class EnhancedGeminiTTS extends GeminiTTSEngine {
    */
   async generateNaturalSpeech(
     text: string,
-    options: EnhancedTTSRequest = {}
+    options: Partial<EnhancedTTSRequest> = {}
   ): Promise<EnhancedTTSResult> {
     console.log('🎙️ 향상된 TTS 생성 시작');
     
@@ -107,7 +107,7 @@ export class EnhancedGeminiTTS extends GeminiTTSEngine {
       documentary: ['역사', '발견', '연구', '과학', '사실']
     };
 
-    const options: EnhancedTTSRequest = {
+    const options: Partial<EnhancedTTSRequest> = {
       videoType,
       keywords: keywordMap[videoType] || [],
       formalTone: ['news', 'documentary', 'educational'].includes(videoType),
@@ -130,7 +130,7 @@ export class EnhancedGeminiTTS extends GeminiTTSEngine {
     const preprocessedScript = this.preprocessor.preprocessAutoRepairScript(script);
 
     // 자동차 정비 전용 설정
-    const autoRepairOptions: EnhancedTTSRequest = {
+    const autoRepairOptions: Partial<EnhancedTTSRequest> = {
       preset: 'auto_repair_narration',
       keywords: [
         '휠복원', '휠수리', '샌드블라스터', 'CNC', '클리어코트',
@@ -147,7 +147,7 @@ export class EnhancedGeminiTTS extends GeminiTTSEngine {
   /**
    * 설정 결정 로직
    */
-  private determineConfig(options: EnhancedTTSRequest): Partial<AdvancedTTSConfig> {
+  private determineConfig(options: Partial<EnhancedTTSRequest>): Partial<AdvancedTTSConfig> {
     // 1. 커스텀 설정이 있으면 우선 사용
     if (options.customConfig) {
       return options.customConfig;

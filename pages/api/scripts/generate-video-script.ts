@@ -23,7 +23,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       images = [],
       videoStyle = 'educational',
       generateAudio = false,
-      voiceStyle = 'energetic'
+      voiceStyle = 'energetic',
+      useUploadedAudio = false,
+      uploadedAudioPath,
+      voiceId,
+      emotion,
+      intensity
     } = req.body as {
       scriptId?: string;
       baseScript?: SampleScript;
@@ -32,6 +37,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       videoStyle?: 'educational' | 'entertainment' | 'promotional' | 'documentary';
       generateAudio?: boolean;
       voiceStyle?: 'energetic' | 'normal' | 'calm';
+      useUploadedAudio?: boolean;
+      uploadedAudioPath?: string;
+      voiceId?: string;
+      emotion?: string;
+      intensity?: string;
     };
 
     // 기본 스크립트 검증
@@ -87,9 +97,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       narrationSegments: result.narration.segments.length
     });
 
-    // 음성 생성 (요청된 경우)
+    // 음성 처리 (업로드된 음성 파일 또는 TTS 생성)
     let audioData = null;
-    if (generateAudio && result.narration.fullText) {
+    
+    if (useUploadedAudio && uploadedAudioPath) {
+      // 업로드된 음성 파일 사용
+      console.log('업로드된 음성 파일 사용:', uploadedAudioPath);
+      
+      // 업로드된 음성 파일의 전체 경로를 public 디렉토리 기준으로 설정
+      const audioPath = uploadedAudioPath.startsWith('/') ? uploadedAudioPath : `/${uploadedAudioPath}`;
+      
+      audioData = {
+        audioUrl: audioPath,
+        duration: result.totalDuration, // 스크립트 전체 길이를 사용
+        voiceUsed: '사용자 업로드 음성'
+      };
+      
+      console.log('업로드 음성 설정 완료:', audioData);
+      
+    } else if (generateAudio && result.narration.fullText) {
       try {
         console.log('음성 생성 시작...');
         

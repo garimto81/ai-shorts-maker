@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: true,
   swcMinify: true,
+  basePath: process.env.NODE_ENV === 'production' ? '/ai-shorts-maker' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/ai-shorts-maker' : '',
   
-  // 이미지 최적화
+  // 이미지 최적화 비활성화 (정적 사이트용)
   images: {
-    domains: ['localhost', 'vercel.app'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    formats: ['image/webp', 'image/avif'],
+    unoptimized: true,
   },
   
   // 프로덕션 최적화
@@ -34,7 +34,7 @@ const nextConfig = {
     return config;
   },
   
-  // API 라우트 헤더 설정
+  // 헤더 설정 (FFmpeg WebAssembly + CORS)
   async headers() {
     return [
       {
@@ -51,6 +51,20 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Headers',
             value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+      {
+        // FFmpeg WebAssembly를 위한 보안 헤더
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
           },
         ],
       },

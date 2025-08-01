@@ -144,7 +144,7 @@ export class GeminiTTSEngine {
         audioBuffer: finalBuffer,
         audioPath: `/audio/${filename}`,
         duration,
-        format: isMP3 ? 'mp3' : 'wav',
+        format: 'wav' as 'wav' | 'pcm',
         sampleRate: isMP3 ? 44100 : 24000,
         channels: 1
       };

@@ -70,15 +70,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 1. audioPath가 직접 제공된 경우
     if (validatedData.audioPath) {
       validatedAudioPath = await validateAudioPath(validatedData.audioPath);
+      console.log('직접 제공된 audioPath 사용:', validatedAudioPath);
     }
     // 2. audioUrl이 제공된 경우 (음성 생성 API에서)
     else if (validatedData.audioUrl) {
       validatedAudioPath = await validateAudioPath(validatedData.audioUrl);
+      console.log('audioUrl 사용:', validatedAudioPath);
     }
-    // 3. videoScript.audio에 오디오 정보가 있는 경우
+    // 3. videoScript.audio에 오디오 정보가 있는 경우 (스크립트 생성에서)
     else if (validatedData.videoScript.audio?.audioUrl) {
       validatedAudioPath = await validateAudioPath(validatedData.videoScript.audio.audioUrl);
+      console.log('videoScript.audio.audioUrl 사용:', validatedAudioPath);
     }
+    
+    console.log('🔊 최종 오디오 경로:', validatedAudioPath || '없음');
 
     // 렌더링 요청 구성
     const renderRequest: VideoRenderRequest = {
@@ -248,25 +253,40 @@ async function validateImagePaths(imagePaths: string[]): Promise<string[]> {
 async function validateAudioPath(audioPath: string): Promise<string> {
   let fullPath: string;
   
-  if (audioPath.startsWith('/')) {
-    // 웹 URL 경로인 경우
+  console.log('🔍 오디오 경로 검증 시작:', audioPath);
+  
+  if (audioPath.startsWith('/temp-uploads/')) {
+    // 임시 업로드 파일인 경우
     fullPath = path.join(process.cwd(), 'public', audioPath);
+    console.log('임시 업로드 파일 경로:', fullPath);
+  } else if (audioPath.startsWith('/tts-audio/')) {
+    // TTS 생성 파일인 경우
+    fullPath = path.join(process.cwd(), 'public', audioPath);
+    console.log('TTS 오디오 파일 경로:', fullPath);
+  } else if (audioPath.startsWith('/')) {
+    // 기타 웹 URL 경로인 경우
+    fullPath = path.join(process.cwd(), 'public', audioPath);
+    console.log('공용 파일 경로:', fullPath);
   } else {
     // 상대 경로인 경우
     fullPath = path.resolve(audioPath);
+    console.log('절대 경로 변환:', fullPath);
   }
   
   // 파일 존재 확인
   if (!fs.existsSync(fullPath)) {
+    console.error('❌ 오디오 파일을 찾을 수 없음:', fullPath);
     throw new Error(`오디오 파일을 찾을 수 없습니다: ${fullPath}`);
   }
   
   // 오디오 파일 형식 확인
   const ext = path.extname(fullPath).toLowerCase();
   if (!['.wav', '.mp3', '.m4a', '.aac', '.ogg'].includes(ext)) {
+    console.error('❌ 지원하지 않는 오디오 형식:', ext);
     throw new Error(`지원하지 않는 오디오 형식: ${ext}`);
   }
   
+  console.log('✅ 오디오 파일 검증 완료:', fullPath);
   return fullPath;
 }
 

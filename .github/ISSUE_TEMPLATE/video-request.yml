@@ -1,0 +1,126 @@
+name: 🎬 비디오 생성 요청
+description: AI Shorts 비디오 생성을 요청합니다
+title: "[Video Request] "
+labels: ["video-request", "pending"]
+assignees:
+  - garimto81
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎥 AI Shorts 비디오 생성 요청
+        이 템플릿을 사용하여 새로운 비디오 생성을 요청하세요.
+
+  - type: input
+    id: title
+    attributes:
+      label: 비디오 제목
+      description: 생성할 비디오의 제목을 입력하세요
+      placeholder: "예: 우리 회사 신제품 소개"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: video-type
+    attributes:
+      label: 비디오 타입
+      description: 비디오의 목적을 선택하세요
+      options:
+        - 홍보/광고 (promotional)
+        - 교육/튜토리얼 (educational)
+        - 제품 소개 (product)
+        - 이벤트/행사 (event)
+        - 기타 (other)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 비디오 설명
+      description: 비디오의 내용과 목적을 자세히 설명해주세요
+      placeholder: |
+        비디오의 주요 내용:
+        - 
+        - 
+        
+        타겟 audience:
+        
+        원하는 분위기/톤:
+    validations:
+      required: true
+
+  - type: textarea
+    id: images
+    attributes:
+      label: 이미지 URL 목록
+      description: 사용할 이미지들의 URL을 한 줄에 하나씩 입력하세요
+      placeholder: |
+        https://example.com/image1.jpg
+        https://example.com/image2.jpg
+        https://example.com/image3.jpg
+      render: plain text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: voice-style
+    attributes:
+      label: 음성 스타일
+      description: 원하는 음성 스타일을 선택하세요
+      options:
+        - 활기찬/에너지틱 (energetic)
+        - 차분한/전문적 (professional)
+        - 친근한/따뜻한 (friendly)
+        - 중립적 (neutral)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: duration
+    attributes:
+      label: 예상 비디오 길이
+      description: 원하는 비디오 길이를 선택하세요
+      options:
+        - 15-30초 (Short)
+        - 30-60초 (Standard)
+        - 60-90초 (Long)
+        - 90초 이상 (Extended)
+    validations:
+      required: true
+
+  - type: textarea
+    id: script-suggestion
+    attributes:
+      label: 스크립트 제안 (선택사항)
+      description: 특정 나레이션이나 스크립트가 있다면 입력하세요
+      placeholder: |
+        원하는 나레이션 내용이나 키워드를 입력하세요.
+        AI가 자동으로 스크립트를 생성하지만, 특별히 포함하고 싶은 내용이 있다면 여기에 작성해주세요.
+
+  - type: checkboxes
+    id: features
+    attributes:
+      label: 추가 기능
+      description: 원하는 추가 기능을 선택하세요
+      options:
+        - label: 자막 포함
+          required: false
+        - label: 배경음악 추가
+          required: false
+        - label: 전환 효과
+          required: false
+        - label: 로고/워터마크
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 확인사항
+      description: 다음 사항을 확인해주세요
+      options:
+        - label: 제공한 이미지들의 저작권을 보유하고 있습니다
+          required: true
+        - label: 생성된 비디오는 상업적 용도로 사용될 수 있음을 이해합니다
+          required: true

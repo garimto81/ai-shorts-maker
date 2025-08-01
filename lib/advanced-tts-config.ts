@@ -378,10 +378,7 @@ export class TTSConfigBuilder {
   }
 
   enablePostProcessing(options: Partial<AdvancedTTSConfig['post_processing']>): this {
-    this.config.post_processing = {
-      ...this.config.post_processing,
-      ...options
-    };
+    this.config.post_processing = Object.assign(this.config.post_processing || {}, options) as AdvancedTTSConfig['post_processing'];
     return this;
   }
 

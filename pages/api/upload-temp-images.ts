@@ -1,4 +1,4 @@
-// API 엔드포인트: 임시 이미지 파일 업로드 (v1.6.1)
+// API 엔드포인트: 임시 이미지 및 음성 파일 업로드 (v2.0.0)
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingForm, File as FormidableFile } from 'formidable';
@@ -33,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const form = new IncomingForm({
       uploadDir: tempUploadDir,
       keepExtensions: true,
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 20, // 최대 20개 파일
+      maxFileSize: 50 * 1024 * 1024, // 50MB (음성 파일 고려)
+      maxFiles: 21, // 최대 20개 이미지 + 1개 음성 파일
     });
 
     const { files } = await new Promise<{ files: any }>((resolve, reject) => {
@@ -44,13 +44,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     });
 
-    console.log('📁 임시 이미지 업로드 요청:', {
-      fileCount: Array.isArray(files.images) ? files.images.length : (files.images ? 1 : 0)
+    console.log('📁 임시 파일 업로드 요청:', {
+      imageCount: Array.isArray(files.images) ? files.images.length : (files.images ? 1 : 0),
+      hasAudio: !!files.audio
     });
 
     // 업로드된 파일들 처리
     const uploadedImages: string[] = [];
     const imageFiles = Array.isArray(files.images) ? files.images : (files.images ? [files.images] : []);
+    let uploadedAudioPath: string = '';
     
     for (let i = 0; i < imageFiles.length; i++) {
       const file = imageFiles[i] as FormidableFile;
@@ -79,7 +81,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const webPath = `/temp-uploads/${safeFileName}`;
       uploadedImages.push(webPath);
       
-      console.log(`✅ 파일 업로드 완료: ${safeFileName}`);
+      console.log(`✅ 이미지 업로드 완료: ${safeFileName}`);
+    }
+
+    // 음성 파일 처리
+    if (files.audio) {
+      const audioFile = Array.isArray(files.audio) ? files.audio[0] : files.audio as FormidableFile;
+      
+      if (audioFile && audioFile.filepath) {
+        // 파일 확장자 확인
+        const ext = path.extname(audioFile.originalFilename || '').toLowerCase();
+        if (['.mp3', '.wav', '.m4a', '.aac', '.ogg'].includes(ext)) {
+          // 안전한 파일명 생성
+          const timestamp = Date.now();
+          const safeFileName = `temp_audio_${timestamp}${ext}`;
+          const finalPath = path.join(tempUploadDir, safeFileName);
+          
+          // 파일 이동
+          fs.renameSync(audioFile.filepath, finalPath);
+          
+          // 웹 접근 가능한 경로로 변환
+          uploadedAudioPath = `/temp-uploads/${safeFileName}`;
+          
+          console.log(`✅ 음성 파일 업로드 완료: ${safeFileName}`);
+        } else {
+          console.warn(`지원하지 않는 음성 파일 형식: ${ext}`);
+        }
+      }
     }
 
     if (uploadedImages.length === 0) {
@@ -89,18 +117,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    console.log('✅ 임시 이미지 업로드 완료:', {
-      count: uploadedImages.length,
-      paths: uploadedImages
+    console.log('✅ 임시 파일 업로드 완료:', {
+      imageCount: uploadedImages.length,
+      imagePaths: uploadedImages,
+      audioPath: uploadedAudioPath
     });
 
     return res.status(200).json({
       success: true,
       data: {
         imagePaths: uploadedImages,
-        count: uploadedImages.length
+        audioPath: uploadedAudioPath,
+        count: uploadedImages.length,
+        hasAudio: !!uploadedAudioPath
       },
-      message: '이미지가 성공적으로 업로드되었습니다.'
+      message: `파일이 성공적으로 업로드되었습니다. (이미지: ${uploadedImages.length}개${uploadedAudioPath ? ', 음성: 1개' : ''})`
     });
 
   } catch (error: any) {

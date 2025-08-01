@@ -5,7 +5,7 @@
   "private": false,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/prepare-static-export.js",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -13,14 +13,12 @@
     "validate-env": "node -e \"require('./lib/env-config').initializeEnvironment()\"",
     "health-check": "node -e \"require('./lib/api-validators').validateAllApiKeys().then(console.log)\"",
     "test-apis": "npm run validate-env && npm run health-check",
+    "create-test-assets": "node scripts/create-test-video-assets.js",
     "version:patch": "node scripts/version-manager.js patch",
     "version:minor": "node scripts/version-manager.js minor",
     "version:major": "node scripts/version-manager.js major",
     "version:current": "node -e \"console.log(require('./package.json').version)\"",
-    "deploy": "vercel --prod",
-    "deploy:preview": "vercel",
     "build:analyze": "ANALYZE=true npm run build",
-    "export": "next export",
     "postbuild": "echo 'Build completed successfully'"
   },
   "dependencies": {

@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="600" fill="#DDA0DD"/>
+          <text x="400" y="250" font-family="Arial" font-size="48" font-weight="bold" 
+                text-anchor="middle" fill="#FFFFFF">이미지 6</text>
+          <text x="400" y="320" font-family="Arial" font-size="48" font-weight="bold" 
+                text-anchor="middle" fill="#FFFFFF">보라색</text>
+          <text x="400" y="380" font-family="Arial" font-size="24" 
+                text-anchor="middle" fill="#FFFFFF">테스트용 이미지 06</text>
+        </svg>

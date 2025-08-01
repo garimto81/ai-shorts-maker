@@ -1,7 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import fs from 'fs';
-import { createCanvas } from 'canvas';
+
+// Canvas는 선택적 import (서버 환경에서만 사용)
+let createCanvas: any;
+try {
+  createCanvas = require('canvas').createCanvas;
+} catch (error) {
+  console.warn('Canvas module not available - using mock');
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

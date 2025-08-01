@@ -161,7 +161,6 @@ export class BrowserVideoRenderer {
 
   private async startImageSequence(request: BrowserVideoRenderRequest): Promise<void> {
     const { images, duration, transitions, subtitles, onProgress } = request;
-    const totalDuration = images.length * duration * 1000; // ms
     
     for (let i = 0; i < images.length; i++) {
       const image = images[i];

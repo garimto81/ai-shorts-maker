@@ -21,7 +21,10 @@ import {
   Settings,
   Key,
   Database,
-  AlertTriangle
+  AlertTriangle,
+  Mic,
+  Volume2,
+  FileAudio
 } from 'lucide-react';
 
 interface ApiKeyStatus {
@@ -217,10 +220,14 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs defaultValue="api-keys" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="api-keys" className="gap-2">
             <Key className="w-4 h-4" />
             API 키
+          </TabsTrigger>
+          <TabsTrigger value="audio" className="gap-2">
+            <Mic className="w-4 h-4" />
+            음성 설정
           </TabsTrigger>
           <TabsTrigger value="health" className="gap-2">
             <Activity className="w-4 h-4" />
@@ -374,6 +381,152 @@ export default function AdminSettingsPage() {
                   </AlertDescription>
                 </Alert>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 음성 설정 탭 */}
+        <TabsContent value="audio" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mic className="w-5 h-5" />
+                음성 및 오디오 설정
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* TTS 기본 설정 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Volume2 className="w-4 h-4" />
+                  TTS 기본 설정
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 음성 스타일</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="energetic">활기찬 (Energetic)</option>
+                      <option value="normal">보통 (Normal)</option>
+                      <option value="calm">차분한 (Calm)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 감정</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="excited">흥미로운</option>
+                      <option value="motivated">동기부여</option>
+                      <option value="enthusiastic">열정적인</option>
+                      <option value="cheerful">명랑한</option>
+                      <option value="celebratory">축하하는</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 강도</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="low">낮음</option>
+                      <option value="medium">보통</option>
+                      <option value="high">높음</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 나레이션 속도</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="slow">느림</option>
+                      <option value="normal">보통</option>
+                      <option value="fast">빠름</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* 파일 업로드 설정 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <FileAudio className="w-4 h-4" />
+                  오디오 파일 업로드 설정
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">최대 파일 크기</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="25">25MB</option>
+                      <option value="50">50MB</option>
+                      <option value="100">100MB</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">지원 형식</label>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Badge variant="secondary">MP3</Badge>
+                      <Badge variant="secondary">WAV</Badge>
+                      <Badge variant="secondary">M4A</Badge>
+                      <Badge variant="secondary">AAC</Badge>
+                      <Badge variant="secondary">OGG</Badge>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-800">오디오 파일 업로드 팁</p>
+                      <p className="text-blue-700 mt-1">
+                        • 최적의 품질을 위해 48kHz, 16-bit 또는 그 이상의 품질을 권장합니다<br/>
+                        • 배경 소음이 적은 깨끗한 음성을 사용하세요<br/>
+                        • 비디오 길이에 맞는 적절한 음성 길이를 유지하세요
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 렌더링 설정 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">렌더링 기본값</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 비디오 품질</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="low">낮음 (빠른 처리)</option>
+                      <option value="medium">보통 (권장)</option>
+                      <option value="high">높음 (최고 품질)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 해상도</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="540x960">540x960 (빠른 처리)</option>
+                      <option value="720x1280">720x1280 (권장)</option>
+                      <option value="1080x1920">1080x1920 (최고 품질)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">기본 프레임 레이트</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="24">24 FPS</option>
+                      <option value="30">30 FPS (권장)</option>
+                      <option value="60">60 FPS</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  설정 저장
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

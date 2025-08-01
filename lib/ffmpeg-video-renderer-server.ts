@@ -1,4 +1,4 @@
-// 서버사이드 FFmpeg 기반 비디오 렌더링 엔진 (v1.6.1)
+// 서버사이드 FFmpeg 기반 비디오 렌더링 엔진 (v2.0.0 - 음성 합성 강화)
 
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';

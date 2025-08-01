@@ -132,6 +132,10 @@ export class EnergeticVoiceGenerator {
       const voiceSettings = this.getEnergeticVoiceSettings(config.intensity);
       
       // 4. ElevenLabs API 호출
+      if (!this.elevenLabs) {
+        throw new Error('ElevenLabs TTS not initialized');
+      }
+      
       const result = await this.elevenLabs.textToSpeech(processedText, {
         voice_id: voiceModel.id,
         model_id: 'eleven_multilingual_v2',
@@ -341,18 +345,6 @@ export class EnergeticVoiceGenerator {
     return this.generateEnergeticVoice(text, config);
   }
 
-  /**
-   * 사용 가능한 활기찬 음성 목록
-   */
-  getAvailableVoices() {
-    return ENERGETIC_VOICE_MODELS.map(model => ({
-      id: model.id,
-      name: model.name,
-      gender: model.gender,
-      characteristics: model.characteristics,
-      suitable_for: this.getSuitableEmotions(model.name)
-    }));
-  }
 
   /**
    * 음성별 적합한 감정 추천

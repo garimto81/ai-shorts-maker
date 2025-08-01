@@ -69,7 +69,7 @@ export default function ClientVideoRenderer({
       });
       
       // 비디오 렌더링 (쇼츠 형식 9:16)
-      const blob = await renderer.render({
+      const result = await renderer.render({
         images: images,
         duration: durationPerImage, // 동적 계산된 시간
         resolution: { width: 1080, height: 1920 }, // 9:16 비율
@@ -82,18 +82,22 @@ export default function ClientVideoRenderer({
       clearInterval(progressInterval);
       setProgress(100);
       
-      // Blob URL 생성
-      const url = URL.createObjectURL(blob);
-      setVideoBlob(blob);
-      setVideoUrl(url);
-      
-      console.log('✅ 클라이언트 비디오 렌더링 완료:', {
-        size: Math.round(blob.size / 1024 / 1024 * 10) / 10 + 'MB',
-        type: blob.type
-      });
-      
-      // 완료 콜백
-      onRenderComplete?.(blob);
+      if (result.success && result.videoBlob) {
+        // Blob URL 생성
+        const url = URL.createObjectURL(result.videoBlob);
+        setVideoBlob(result.videoBlob);
+        setVideoUrl(url);
+        
+        console.log('✅ 클라이언트 비디오 렌더링 완료:', {
+          size: Math.round(result.videoBlob.size / 1024 / 1024 * 10) / 10 + 'MB',
+          type: result.videoBlob.type
+        });
+        
+        // 완료 콜백
+        onRenderComplete?.(result.videoBlob);
+      } else {
+        throw new Error(result.error || '비디오 생성 실패');
+      }
       
     } catch (err: any) {
       console.error('❌ 렌더링 오류:', err);
