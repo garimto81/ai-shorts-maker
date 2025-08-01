@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
+import AudioGuide from './audio-guide';
+import { SortableImageList } from './sortable-image-list';
+import { ImageSorter, SortableImage } from '@/lib/image-sorter';
 import { 
   Upload, 
   Play, 
@@ -15,7 +18,9 @@ import {
   Loader2,
   FolderOpen,
   X,
-  Image
+  Image,
+  HelpCircle,
+  ArrowUpDown
 } from 'lucide-react';
 
 interface VideoScript {
@@ -63,11 +68,20 @@ export default function ModernShortsCreator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Sorting states
+  const [showSorting, setShowSorting] = useState(false);
+  
   // Voice related states
   const [voices, setVoices] = useState<any[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState('');
   const [emotion, setEmotion] = useState<EnergeticEmotion>('excited');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');
+  
+  // Audio upload states  
+  const [audioMode, setAudioMode] = useState<'tts' | 'upload'>('tts');
+  const [uploadedAudioFile, setUploadedAudioFile] = useState<File | null>(null);
+  const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string>('');
+  const [showAudioGuide, setShowAudioGuide] = useState(false);
   
   // Results
   const [currentScript, setCurrentScript] = useState<VideoScript | null>(null);
@@ -145,6 +159,63 @@ export default function ModernShortsCreator() {
     addLog('success', `${newFiles.length}개 파일 추가됨`);
   };
 
+  // Handle audio file upload
+  const handleAudioUpload = async (file: File) => {
+    setError(null);
+    addLog('info', `음성 파일 업로드 시도: ${file.name}`);
+    
+    // 파일 타입 검증
+    const allowedTypes = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/aac', 'audio/ogg'];
+    const isValidType = allowedTypes.some(type => file.type === type) || 
+                       file.name.toLowerCase().match(/\.(mp3|wav|m4a|aac|ogg)$/);
+    
+    if (!isValidType) {
+      const errorMsg = `지원하지 않는 파일 형식입니다. 지원 형식: MP3, WAV, M4A, AAC, OGG`;
+      setError(errorMsg);
+      addLog('error', errorMsg);
+      return;
+    }
+    
+    // 파일 크기 검증 (50MB 제한)
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      const errorMsg = `파일 크기가 너무 큽니다. 최대 크기: 50MB (현재: ${(file.size / 1024 / 1024).toFixed(1)}MB)`;
+      setError(errorMsg);
+      addLog('error', errorMsg);
+      return;
+    }
+    
+    // 파일 길이가 너무 짧거나 긴지 확인 (선택적)
+    try {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(file);
+      
+      audio.addEventListener('loadedmetadata', () => {
+        const duration = audio.duration;
+        if (duration < 1) {
+          const errorMsg = '음성 파일이 너무 짧습니다 (최소 1초 필요)';
+          setError(errorMsg);
+          addLog('warning', errorMsg);
+        } else if (duration > 300) { // 5분 제한
+          const errorMsg = '음성 파일이 너무 깁니다 (최대 5분 권장)';
+          setError(errorMsg);
+          addLog('warning', errorMsg);
+        } else {
+          addLog('info', `음성 길이: ${duration.toFixed(1)}초`);
+        }
+        URL.revokeObjectURL(objectUrl);
+      });
+      
+      audio.src = objectUrl;
+    } catch (audioError) {
+      addLog('warning', '음성 파일 메타데이터를 읽을 수 없습니다');
+    }
+    
+    setUploadedAudioFile(file);
+    setUploadedAudioUrl(URL.createObjectURL(file));
+    addLog('success', `음성 파일 업로드 완료: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+  };
+
   // File input handler
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []).filter(file => 
@@ -162,6 +233,40 @@ export default function ModernShortsCreator() {
     setFiles(newFiles);
     setSortedFiles(newSortedFiles);
     addLog('info', `파일 제거됨: ${sortedFiles[index].originalName}`);
+  };
+
+  // Convert SortedFile to SortableImage for sorting component
+  const convertToSortableImages = (sortedFiles: SortedFile[]): SortableImage[] => {
+    return sortedFiles.map((sortedFile, index) => ({
+      id: `${sortedFile.sortedIndex}_${sortedFile.originalName}`,
+      path: sortedFile.thumbnail || '',
+      filename: sortedFile.originalName,
+      fileSize: sortedFile.file.size,
+      uploadTime: sortedFile.file.lastModified,
+      index: sortedFile.sortedIndex
+    }));
+  };
+
+  // Handle manual sorting updates
+  const handleSortingUpdate = (sortedImages: SortableImage[]) => {
+    // Create a mapping of sorted images by filename
+    const sortedImageMap = new Map(sortedImages.map((img, index) => [img.filename, index]));
+    
+    // Reorder the sortedFiles based on the new sorting
+    const reorderedSortedFiles = [...sortedFiles].sort((a, b) => {
+      const indexA = sortedImageMap.get(a.originalName) ?? 999;
+      const indexB = sortedImageMap.get(b.originalName) ?? 999;
+      return indexA - indexB;
+    });
+
+    // Update sortedIndex for each file
+    const updatedSortedFiles = reorderedSortedFiles.map((file, index) => ({
+      ...file,
+      sortedIndex: index
+    }));
+
+    setSortedFiles(updatedSortedFiles);
+    addLog('success', '이미지 순서가 업데이트되었습니다');
   };
 
   // Generate script
@@ -182,6 +287,13 @@ export default function ModernShortsCreator() {
         formData.append('images', file);
       });
       
+      // Add uploaded audio file if present
+      let uploadedAudioPath = '';
+      if (audioMode === 'upload' && uploadedAudioFile) {
+        formData.append('audio', uploadedAudioFile);
+        addLog('info', '음성 파일 업로드 중...');
+      }
+      
       const uploadResponse = await fetch('/api/upload-temp-images', {
         method: 'POST',
         body: formData
@@ -192,7 +304,8 @@ export default function ModernShortsCreator() {
         const uploadResult = await uploadResponse.json();
         if (uploadResult.success) {
           imagePaths = uploadResult.data.imagePaths;
-          addLog('success', '이미지 업로드 완료');
+          uploadedAudioPath = uploadResult.data.audioPath || '';
+          addLog('success', '파일 업로드 완료');
         }
       }
       
@@ -216,11 +329,13 @@ export default function ModernShortsCreator() {
           },
           narrationSpeed: 'normal',
           videoStyle: videoStyle,
-          generateAudio: true,
+          generateAudio: audioMode === 'tts',
           voiceStyle: 'energetic',
           voiceId: selectedVoiceId,
           emotion: emotion,
           intensity: intensity,
+          useUploadedAudio: audioMode === 'upload',
+          uploadedAudioPath: uploadedAudioPath,
           imagePaths: imagePaths
         })
       });
@@ -296,8 +411,14 @@ export default function ModernShortsCreator() {
 
   // Generate video
   const generateVideo = async () => {
-    if (!currentScript || !currentScript.audio) {
-      setError('먼저 스크립트와 음성을 생성해주세요');
+    if (!currentScript) {
+      setError('먼저 스크립트를 생성해주세요');
+      return;
+    }
+    
+    // 음성이 없는 경우 확인
+    if (!currentScript.audio && audioMode === 'tts') {
+      setError('음성이 생성되지 않았습니다. 다시 시도해주세요.');
       return;
     }
     
@@ -306,14 +427,34 @@ export default function ModernShortsCreator() {
     addLog('info', '비디오 렌더링 시작...');
     
     try {
+      // Upload temp images first to get proper file paths
+      const formData = new FormData();
+      files.forEach((file, index) => {
+        formData.append('images', file);
+      });
+      
+      const uploadResponse = await fetch('/api/upload-temp-images', {
+        method: 'POST',
+        body: formData
+      });
+      
+      let imagePaths: string[] = [];
+      if (uploadResponse.ok) {
+        const uploadResult = await uploadResponse.json();
+        if (uploadResult.success) {
+          imagePaths = uploadResult.data.imagePaths;
+          addLog('success', '이미지 파일 업로드 완료');
+        }
+      }
+      
       const response = await fetch('/api/videos/render', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          images: sortedFiles.map(f => f.thumbnail),
-          audioUrl: currentScript.audio.audioUrl,
+          images: imagePaths,
+          audioUrl: currentScript.audio?.audioUrl,
           videoScript: currentScript,
           outputFormat: 'mp4',
           quality: 'medium',
@@ -530,34 +671,170 @@ export default function ModernShortsCreator() {
                 {/* Uploaded Files */}
                 {sortedFiles.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="font-semibold mb-3">업로드된 이미지 ({sortedFiles.length}개)</h3>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                      {sortedFiles.map((file, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={file.thumbnail}
-                            alt={file.originalName}
-                            className="w-full aspect-square object-cover rounded-lg"
-                          />
-                          <button
-                            onClick={() => removeFile(index)}
-                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                          <div className="absolute top-1 left-1 bg-black text-white text-xs px-1 rounded">
-                            {index + 1}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold">업로드된 이미지 ({sortedFiles.length}개)</h3>
+                      <button
+                        onClick={() => setShowSorting(!showSorting)}
+                        className="flex items-center gap-2 px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <ArrowUpDown className="w-4 h-4" />
+                        {showSorting ? '정렬 숨기기' : '정렬하기'}
+                      </button>
                     </div>
+                    
+                    {!showSorting ? (
+                      // Simple grid view
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {sortedFiles.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={file.thumbnail}
+                              alt={file.originalName}
+                              className="w-full aspect-square object-cover rounded-lg"
+                            />
+                            <button
+                              onClick={() => removeFile(index)}
+                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                            <div className="absolute top-1 left-1 bg-black text-white text-xs px-1 rounded">
+                              {index + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      // Sortable view
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <SortableImageList
+                          images={convertToSortableImages(sortedFiles)}
+                          onSortChange={handleSortingUpdate}
+                          enableAISort={false}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Voice Selection */}
+                {/* Audio Mode Selection */}
                 {sortedFiles.length > 0 && (
                   <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-semibold mb-3">목소리 설정</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold">🎵 음성 옵션</h3>
+                      <button
+                        onClick={() => setShowAudioGuide(!showAudioGuide)}
+                        className="flex items-center gap-1 px-2 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        도움말
+                      </button>
+                    </div>
+                    
+                    {/* Audio Guide */}
+                    {showAudioGuide && (
+                      <div className="mb-6">
+                        <AudioGuide />
+                      </div>
+                    )}
+                    
+                    <div className="mb-6">
+                      <div className="flex space-x-4 mb-4">
+                        <button
+                          onClick={() => setAudioMode('tts')}
+                          className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                            audioMode === 'tts' 
+                              ? 'border-blue-500 bg-blue-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <Mic className="w-6 h-6 mx-auto mb-1 text-blue-500" />
+                            <h4 className="font-medium text-sm">AI 음성 생성</h4>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => setAudioMode('upload')}
+                          className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                            audioMode === 'upload' 
+                              ? 'border-green-500 bg-green-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <Upload className="w-6 h-6 mx-auto mb-1 text-green-500" />
+                            <h4 className="font-medium text-sm">음성 파일 업로드</h4>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Audio Upload Section */}
+                    {audioMode === 'upload' && (
+                      <div className="mb-6">
+                        {!uploadedAudioFile ? (
+                          <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center">
+                            <Mic className="w-8 h-8 mx-auto mb-2 text-green-400" />
+                            <p className="text-sm text-gray-600 mb-2">
+                              음성 파일을 선택하세요
+                            </p>
+                            <input
+                              type="file"
+                              accept="audio/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleAudioUpload(file);
+                              }}
+                              className="hidden"
+                              id="audio-upload"
+                            />
+                            <label
+                              htmlFor="audio-upload"
+                              className="inline-block px-3 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 cursor-pointer transition-colors"
+                            >
+                              파일 선택
+                            </label>
+                            <p className="text-xs text-gray-500 mt-1">
+                              MP3, WAV, M4A (최대 50MB)
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="bg-white p-3 rounded-lg border">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center">
+                                <Mic className="w-4 h-4 mr-2 text-green-500" />
+                                <span className="text-sm font-medium">{uploadedAudioFile.name}</span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setUploadedAudioFile(null);
+                                  setUploadedAudioUrl('');
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                            
+                            {uploadedAudioUrl && (
+                              <audio controls className="w-full mb-2">
+                                <source src={uploadedAudioUrl} />
+                              </audio>
+                            )}
+                            
+                            <div className="text-xs text-gray-500">
+                              크기: {(uploadedAudioFile.size / 1024 / 1024).toFixed(2)}MB
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TTS Voice Settings */}
+                    {audioMode === 'tts' && (
+                      <div>
+                        <h4 className="font-medium mb-3">TTS 설정</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -618,6 +895,8 @@ export default function ModernShortsCreator() {
                         </select>
                       </div>
                     </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
