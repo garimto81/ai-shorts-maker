@@ -300,17 +300,17 @@ const HomePage: NextPage = () => {
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">빠른 시작</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              <Link href="/sorting-demo">
+              <Link href="/create-video">
                 <div className="bg-purple-600/20 rounded-lg p-4 hover:bg-purple-600/30 transition-colors cursor-pointer">
-                  <h3 className="text-xl font-semibold text-white mb-2">🎨 이미지 정렬 데모</h3>
-                  <p className="text-gray-300">이미지를 업로드하고 순서를 정렬해보세요</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">🎥 비디오 생성</h3>
+                  <p className="text-gray-300">이미지와 음악으로 비디오를 만들어보세요</p>
                 </div>
               </Link>
               
-              <Link href="/video-audio-test">
+              <Link href="/sorting-demo">
                 <div className="bg-green-600/20 rounded-lg p-4 hover:bg-green-600/30 transition-colors cursor-pointer">
-                  <h3 className="text-xl font-semibold text-white mb-2">🎬 비디오 생성 데모</h3>
-                  <p className="text-gray-300">웹에서 바로 비디오를 생성해보세요</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">🎨 이미지 정렬 데모</h3>
+                  <p className="text-gray-300">이미지를 업로드하고 순서를 정렬해보세요</p>
                 </div>
               </Link>
               
