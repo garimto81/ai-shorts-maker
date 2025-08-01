@@ -93,8 +93,7 @@ md-backup/
 dist/
 build/
 
-# Package manager
-package-lock.json
+# Package manager (only ignore alternative lock files)
 yarn.lock
 pnpm-lock.yaml
 
