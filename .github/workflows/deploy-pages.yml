@@ -32,13 +32,30 @@ jobs:
         run: npm ci
         
       - name: 🏗️ Build Next.js site
-        run: npm run build
+        run: |
+          echo "Building Next.js site with static export..."
+          npm run build
+          echo "Build completed. Checking output directory..."
+          ls -la out/
         env:
           NODE_ENV: production
           
       - name: 📄 Setup Pages
         uses: actions/configure-pages@v4
         
+      - name: ✅ Verify output directory
+        run: |
+          echo "Verifying output directory exists and has content..."
+          if [ ! -d "out" ]; then
+            echo "ERROR: out directory does not exist!"
+            exit 1
+          fi
+          if [ ! -f "out/index.html" ]; then
+            echo "ERROR: index.html not found in out directory!"
+            exit 1
+          fi
+          echo "✅ Output verification successful"
+          
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
