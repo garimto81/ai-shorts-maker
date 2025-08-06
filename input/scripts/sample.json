@@ -1,0 +1,61 @@
+{
+  "scripts": [
+    {
+      "text": "안녕하세요! 오늘은 특별한 레시피를 소개합니다",
+      "duration": 3.0,
+      "position": "bottom",
+      "font_size": 48,
+      "color": "#FFFFFF",
+      "animation": "fade",
+      "animation_duration": 0.5
+    },
+    {
+      "text": "재료: 토마토, 양파, 마늘, 올리브오일",
+      "duration": 4.0,
+      "position": "center",
+      "font_size": 42,
+      "color": "#FFFF00",
+      "animation": "slide"
+    },
+    {
+      "text": "STEP 1: 야채를 잘게 썰어주세요",
+      "duration": 3.5,
+      "position": "bottom",
+      "font_size": 45,
+      "color": "#FFFFFF",
+      "animation": "fade"
+    },
+    {
+      "text": "STEP 2: 팬에 올리브오일을 두르고",
+      "duration": 3.0,
+      "position": "bottom",
+      "font_size": 45,
+      "color": "#FFFFFF",
+      "animation": "fade"
+    },
+    {
+      "text": "STEP 3: 중불에서 볶아주세요",
+      "duration": 3.5,
+      "position": "bottom",
+      "font_size": 45,
+      "color": "#FFFFFF",
+      "animation": "fade"
+    },
+    {
+      "text": "완성! 맛있게 드세요 😊",
+      "duration": 3.0,
+      "position": "center",
+      "font_size": 52,
+      "color": "#00FF00",
+      "animation": "fade"
+    },
+    {
+      "text": "구독과 좋아요 부탁드려요!",
+      "duration": 2.5,
+      "position": "center",
+      "font_size": 48,
+      "color": "#FF0000",
+      "animation": "fade"
+    }
+  ]
+}
