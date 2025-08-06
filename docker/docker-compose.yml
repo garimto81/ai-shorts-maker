@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  auto-shorts:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: auto-shorts-generator
+    volumes:
+      - ../input:/app/input
+      - ../output:/app/output
+      - ../assets:/app/assets
+      - ../config:/app/config
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    command: python src/main.py generate -i /app/input/images -s /app/input/scripts/sample.txt -o /app/output/generated.mp4
+    
+  auto-shorts-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: auto-shorts-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../input:/app/input
+      - ../output:/app/output
+      - ../assets:/app/assets
+      - ../config:/app/config
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    command: python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload

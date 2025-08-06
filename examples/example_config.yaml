@@ -1,0 +1,73 @@
+# Example configuration for Auto Shorts Generator
+
+# Video settings
+video:
+  width: 1080
+  height: 1920
+  fps: 30
+  codec: "libx264"
+  format: "mp4"
+  quality: "high"
+  bitrate: "5M"
+
+# Image processing
+image:
+  default_duration: 3.5
+  transition_duration: 0.7
+  resize_method: "smart"  # smart, center, blur_background
+  enhancement:
+    brightness: 1.15
+    contrast: 1.10
+    saturation: 1.25
+
+# Text settings
+text:
+  font_family: "NanumGothic"
+  font_size: 52
+  color: "#FFFFFF"
+  stroke_color: "#000000"
+  stroke_width: 3
+  position: "bottom"
+  margin: 120
+  animation: "fade"
+  animation_duration: 0.6
+  max_chars_per_line: 28
+
+# Audio settings
+audio:
+  tts:
+    enabled: true
+    voice: "ko-KR-SunHiNeural"
+    rate: 1.05
+    pitch: 1.0
+    volume: 0.85
+  background_music:
+    enabled: true
+    volume: 0.25
+    fade_in: 2.5
+    fade_out: 2.5
+  effects:
+    enabled: true
+    volume: 0.4
+
+# Output settings
+output:
+  directory: "output"
+  filename_pattern: "shorts_{timestamp}_{template}"
+  keep_temp_files: false
+  compress: true
+  max_file_size: 45  # MB
+
+# Processing settings
+processing:
+  max_workers: 6
+  batch_size: 15
+  cache_enabled: true
+  cache_directory: ".cache"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/app.log"
+  console: true

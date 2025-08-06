@@ -1,0 +1,130 @@
+# Recipe Shorts Script - 김치볶음밥 레시피
+
+title: "3분 김치볶음밥 레시피"
+template: product
+duration: 30
+
+scripts:
+  - text: "🍳 3분 김치볶음밥"
+    duration: 2.5
+    position: center
+    font_size: 60
+    color: "#FF4500"
+    animation: fade
+    animation_duration: 0.8
+
+  - text: "📝 재료 준비"
+    duration: 2.0
+    position: top
+    font_size: 48
+    color: "#FFFFFF"
+    stroke_color: "#000000"
+    animation: slide
+
+  - text: |
+      김치 1컵
+      밥 2공기
+      계란 2개
+      참기름 1큰술
+    duration: 4.0
+    position: center
+    font_size: 42
+    color: "#FFFFFF"
+    animation: fade
+
+  - text: "STEP 1"
+    duration: 2.0
+    position: top
+    font_size: 52
+    color: "#00FF00"
+    animation: slide
+
+  - text: "김치를 잘게 썰어주세요"
+    duration: 3.0
+    position: bottom
+    font_size: 44
+    color: "#FFFFFF"
+    animation: fade
+
+  - text: "STEP 2"
+    duration: 2.0
+    position: top
+    font_size: 52
+    color: "#00FF00"
+    animation: slide
+
+  - text: "팬에 기름을 두르고\n김치를 볶아주세요"
+    duration: 3.5
+    position: bottom
+    font_size: 44
+    color: "#FFFFFF"
+    animation: fade
+
+  - text: "STEP 3"
+    duration: 2.0
+    position: top
+    font_size: 52
+    color: "#00FF00"
+    animation: slide
+
+  - text: "밥을 넣고\n함께 볶아주세요"
+    duration: 3.5
+    position: bottom
+    font_size: 44
+    color: "#FFFFFF"
+    animation: fade
+
+  - text: "STEP 4"
+    duration: 2.0
+    position: top
+    font_size: 52
+    color: "#00FF00"
+    animation: slide
+
+  - text: "계란 프라이를\n올려주세요"
+    duration: 3.0
+    position: bottom
+    font_size: 44
+    color: "#FFFFFF"
+    animation: fade
+
+  - text: "✨ 완성!"
+    duration: 2.0
+    position: center
+    font_size: 64
+    color: "#FFD700"
+    animation: fade
+    animation_duration: 1.0
+
+  - text: "맛있게 드세요 😋"
+    duration: 2.5
+    position: center
+    font_size: 52
+    color: "#FF69B4"
+    animation: fade
+
+  - text: "더 많은 레시피는\n구독하고 확인하세요!"
+    duration: 3.0
+    position: center
+    font_size: 46
+    color: "#FF0000"
+    animation: fade
+
+audio:
+  tts:
+    enabled: true
+    voice: ko-KR-JiMinNeural
+    rate: 1.1
+    pitch: 1.05
+  background_music:
+    enabled: true
+    file: cooking_bgm.mp3
+    volume: 0.2
+
+effects:
+  transitions:
+    - type: fade
+      duration: 0.5
+  filters:
+    - type: warm
+      intensity: 0.3
