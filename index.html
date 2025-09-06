@@ -3,479 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쇼츠 제작 공장</title>
+    <title>AI 쇼츠 제작 공장 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 text-white min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    AI 쇼츠 제작 공장 2.0
+                </h1>
+            </div>
+            <p class="text-gray-300 text-lg">Gemini AI가 분석하고 만드는 진짜 AI 쇼츠</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Left Panel - Input -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+                    <span class="text-purple-400">📸</span> 상품 정보 입력
+                </h2>
+                
+                <!-- Image Upload -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">상품 이미지 (3장 이상)</label>
+                    <div class="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center hover:border-purple-500/50 transition-colors cursor-pointer" 
+                         onclick="document.getElementById('imageInput').click()">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-gray-300">클릭하여 이미지 업로드</p>
+                        <p class="text-sm text-gray-500 mt-1">JPG, PNG (최대 10MB)</p>
+                    </div>
+                    <input type="file" id="imageInput" class="hidden" multiple accept="image/*">
+                    
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="grid grid-cols-3 gap-2 mt-4"></div>
+                </div>
+
+                <!-- Product Name -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">상품명</label>
+                    <input type="text" id="productName" 
+                           class="w-full px-4 py-3 bg-gray-700/50 border border-purple-500/20 rounded-lg focus:outline-none focus:border-purple-500"
+                           placeholder="예: 2024 벤츠 E클래스">
+                </div>
+
+                <!-- Style Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">영상 스타일</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="style-btn active" data-style="dynamic">
+                            ⚡ 다이나믹
+                        </button>
+                        <button class="style-btn" data-style="professional">
+                            💼 프로페셔널
+                        </button>
+                        <button class="style-btn" data-style="luxury">
+                            💎 럭셔리
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Industry Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">업종 선택</label>
+                    <select id="industryType" class="w-full px-4 py-3 bg-gray-700/50 border border-purple-500/20 rounded-lg focus:outline-none focus:border-purple-500">
+                        <option value="auto">🚗 자동차</option>
+                        <option value="fashion">👕 패션</option>
+                        <option value="tech">📱 전자제품</option>
+                        <option value="food">🍔 식품</option>
+                        <option value="beauty">💄 뷰티</option>
+                        <option value="other">🏷️ 기타</option>
+                    </select>
+                </div>
+
+                <!-- Generate Button -->
+                <button id="generateBtn" 
+                        class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                    🎬 AI 쇼츠 생성하기
+                </button>
+            </div>
+
+            <!-- Right Panel - Status & Preview -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+                    <span class="text-purple-400">🤖</span> AI 분석 & 생성
+                </h2>
+                
+                <!-- Status Panel -->
+                <div id="statusPanel" class="space-y-4">
+                    <!-- Initial State -->
+                    <div class="text-center py-12">
+                        <svg class="w-24 h-24 mx-auto mb-4 text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-gray-400">이미지를 업로드하고 상품명을 입력하면<br>AI가 자동으로 쇼츠를 생성합니다</p>
+                    </div>
+                </div>
+
+                <!-- Progress Steps (Hidden by default) -->
+                <div id="progressSteps" class="hidden space-y-3">
+                    <div class="step-item" data-step="1">
+                        <div class="flex items-center gap-3">
+                            <div class="step-icon">1</div>
+                            <div class="flex-1">
+                                <p class="font-medium">이미지 분석 중</p>
+                                <p class="text-sm text-gray-400">Gemini Vision으로 상품 특징 추출</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                        <div class="flex items-center gap-3">
+                            <div class="step-icon">2</div>
+                            <div class="flex-1">
+                                <p class="font-medium">스크립트 생성 중</p>
+                                <p class="text-sm text-gray-400">AI가 마케팅 메시지 작성</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                        <div class="flex items-center gap-3">
+                            <div class="step-icon">3</div>
+                            <div class="flex-1">
+                                <p class="font-medium">비디오 렌더링 중</p>
+                                <p class="text-sm text-gray-400">효과 적용 및 최종 영상 생성</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Results (Hidden by default) -->
+                <div id="analysisResults" class="hidden mt-6 p-4 bg-gray-700/30 rounded-lg">
+                    <h3 class="font-semibold mb-3 text-purple-400">📊 AI 분석 결과</h3>
+                    <div id="analysisContent" class="space-y-2 text-sm">
+                        <!-- Analysis will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Video Preview (Hidden by default) -->
+                <div id="videoPreview" class="hidden mt-6">
+                    <div class="aspect-[9/16] bg-black rounded-lg overflow-hidden">
+                        <video id="previewVideo" class="w-full h-full" controls></video>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button class="flex-1 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
+                            💾 다운로드
+                        </button>
+                        <button class="flex-1 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
+                            🔄 다시 생성
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                <div class="text-3xl mb-2">🧠</div>
+                <h3 class="font-semibold">Gemini AI</h3>
+                <p class="text-sm text-gray-400">최신 AI 이미지 분석</p>
+            </div>
+            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                <div class="text-3xl mb-2">🎯</div>
+                <h3 class="font-semibold">타겟 마케팅</h3>
+                <p class="text-sm text-gray-400">고객층 맞춤 콘텐츠</p>
+            </div>
+            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                <div class="text-3xl mb-2">⚡</div>
+                <h3 class="font-semibold">실시간 생성</h3>
+                <p class="text-sm text-gray-400">3분 내 영상 완성</p>
+            </div>
+            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                <div class="text-3xl mb-2">📈</div>
+                <h3 class="font-semibold">트렌드 반영</h3>
+                <p class="text-sm text-gray-400">최신 쇼츠 트렌드 적용</p>
+            </div>
+        </div>
+    </div>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        .hidden {
-            display: none;
+        
+        .style-btn {
+            @apply px-4 py-2 bg-gray-700/50 border border-purple-500/20 rounded-lg hover:bg-gray-700 transition-colors;
         }
-        /* 커스텀 스크롤바 */
-        .thumbnail-container::-webkit-scrollbar {
-            height: 8px;
+        
+        .style-btn.active {
+            @apply bg-purple-600/30 border-purple-500;
         }
-        .thumbnail-container::-webkit-scrollbar-track {
-            background: #2d3748;
-            border-radius: 10px;
+        
+        .step-icon {
+            @apply w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-semibold;
         }
-        .thumbnail-container::-webkit-scrollbar-thumb {
-            background-color: #4a5568;
-            border-radius: 10px;
+        
+        .step-item.active .step-icon {
+            @apply bg-purple-600 animate-pulse;
         }
-        /* 로딩 스피너 */
-        .loader {
-            border: 5px solid #4a5568;
-            border-top: 5px solid #6366f1;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+        
+        .step-item.completed .step-icon {
+            @apply bg-green-600;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .image-thumb {
+            @apply relative aspect-square bg-gray-700 rounded-lg overflow-hidden;
+        }
+        
+        .image-thumb img {
+            @apply w-full h-full object-cover;
+        }
+        
+        .image-thumb button {
+            @apply absolute top-1 right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs hover:bg-red-700;
         }
     </style>
-</head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-    <div id="app" class="w-full max-w-md mx-auto min-h-[80vh] max-h-[95vh] bg-gray-800 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
-
-        <!-- Header -->
-        <header class="bg-gray-900/50 backdrop-blur-sm p-4 border-b border-gray-700 flex items-center justify-center relative">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
-            <h1 class="text-xl font-bold ml-2">쇼츠 제작 공장</h1>
-            <button id="home-btn" class="absolute left-4 hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-            </button>
-        </header>
-
-        <main class="flex-grow p-6 overflow-y-auto">
-            <!-- Screen 1: Upload Screen -->
-            <section id="upload-screen">
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-indigo-300">3초만에 쇼츠 만들기</h2>
-                    <p class="text-gray-400 mt-2">상품 사진과 이름만 알려주세요!</p>
-                </div>
-
-                <div class="mt-8">
-                    <label for="image-upload" class="cursor-pointer bg-gray-700 border-2 border-dashed border-gray-500 rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-gray-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 mb-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                        <span class="font-semibold">사진 업로드 (3장 이상)</span>
-                        <span class="text-sm text-gray-500 mt-1">클릭해서 파일을 선택하세요</span>
-                    </label>
-                    <input type="file" id="image-upload" class="hidden" multiple accept="image/*">
-                </div>
-
-                <div id="thumbnail-preview" class="mt-4 hidden">
-                    <p class="font-semibold mb-2 text-gray-300">선택된 사진</p>
-                    <div class="thumbnail-container flex gap-3 overflow-x-auto pb-2">
-                        <!-- Thumbnails will be injected here -->
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <label for="product-name" class="font-semibold text-gray-300">상품명</label>
-                    <input type="text" id="product-name" class="w-full bg-gray-700 border border-gray-600 rounded-lg mt-2 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="예: 벤츠 E클래스 아방가르드">
-                </div>
-
-                <button id="generate-btn" disabled class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-indigo-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.3.05-3.1S6.01 15.65 4.5 16.5z"/><path d="M17.5 2.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                    <span>AI로 쇼츠 생성하기</span>
-                </button>
-            </section>
-
-            <!-- Screen 2: Generating Screen -->
-            <section id="generating-screen" class="hidden flex flex-col items-center justify-center h-full text-center">
-                <div class="loader"></div>
-                <h2 class="text-2xl font-bold mt-6">AI가 영상을 만들고 있어요</h2>
-                <p id="generating-status" class="text-gray-400 mt-2">최적의 영상미를 찾는 중...</p>
-            </section>
-
-            <!-- Screen 3: Preview Screen -->
-            <section id="preview-screen" class="hidden flex flex-col h-full">
-                <div class="aspect-video w-full bg-black rounded-lg overflow-hidden relative">
-                    <canvas id="video-canvas" class="w-full h-full"></canvas>
-                    <div id="play-pause-overlay" class="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <h3 class="font-bold text-lg" id="preview-title"></h3>
-                    <p class="text-gray-400 text-sm">AI가 생성한 영상입니다.</p>
-                </div>
-                
-                <div class="mt-4 space-y-4">
-                     <div>
-                        <label class="font-semibold text-gray-300">나레이션</label>
-                         <div class="flex items-center justify-between bg-gray-700 p-3 rounded-lg mt-2">
-                             <span id="narration-status" class="text-sm">켜짐</span>
-                            <button id="narration-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-indigo-500">
-                                <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="music-select" class="font-semibold text-gray-300">배경 음악</label>
-                        <select id="music-select" class="w-full bg-gray-700 border border-gray-600 rounded-lg mt-2 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="upbeat">Upbeat-Pop</option>
-                            <option value="cinematic">Cinematic</option>
-                            <option value="chill">Chill-Lofi</option>
-                        </select>
-                    </div>
-                </div>
-                 <div class="mt-auto pt-6">
-                    <button id="download-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                        <span>영상 다운로드</span>
-                    </button>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <script>
-        // --- DOM Elements ---
-        const app = document.getElementById('app');
-        const screens = {
-            upload: document.getElementById('upload-screen'),
-            generating: document.getElementById('generating-screen'),
-            preview: document.getElementById('preview-screen'),
-        };
-        const imageUpload = document.getElementById('image-upload');
-        const thumbnailPreview = document.getElementById('thumbnail-preview');
-        const thumbnailContainer = thumbnailPreview.querySelector('.thumbnail-container');
-        const productNameInput = document.getElementById('product-name');
-        const generateBtn = document.getElementById('generate-btn');
-        const generatingStatus = document.getElementById('generating-status');
-        const canvas = document.getElementById('video-canvas');
-        const ctx = canvas.getContext('2d');
-        const playPauseOverlay = document.getElementById('play-pause-overlay');
-        const previewTitle = document.getElementById('preview-title');
-        const narrationToggle = document.getElementById('narration-toggle');
-        const narrationStatus = document.getElementById('narration-status');
-        const musicSelect = document.getElementById('music-select');
-        const downloadBtn = document.getElementById('download-btn');
-        const homeBtn = document.getElementById('home-btn');
-
-        // --- State ---
-        let userImages = [];
-        let productName = '';
-        let animationFrameId;
-        let isPlaying = false;
-        let synth, sequence;
-        let isNarrationEnabled = true;
-
-        // --- Constants ---
-        const VIDEO_DURATION_MS = 10000; // 10 seconds
-        const FADE_DURATION_MS = 500;
-        canvas.width = 1080;
-        canvas.height = 1920;
-
-        // --- Functions ---
-        const switchScreen = (screenName) => {
-            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-            screens[screenName].classList.remove('hidden');
-            homeBtn.classList.toggle('hidden', screenName === 'upload');
+    <script type="module">
+        // State management
+        const state = {
+            images: [],
+            productName: '',
+            style: 'dynamic',
+            industry: 'auto',
+            isGenerating: false
         };
 
-        const updateGenerateBtnState = () => {
-            const nameFilled = productNameInput.value.trim() !== '';
-            const imagesUploaded = userImages.length >= 3;
-            generateBtn.disabled = !(nameFilled && imagesUploaded);
-        };
-        
-        const resetToHome = () => {
-            // Stop all processes
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            if (sequence) {
-                sequence.stop();
-                sequence.dispose();
-            }
-            if (synth) synth.dispose();
-            speechSynthesis.cancel();
-            
-            // Reset state
-            userImages = [];
-            productName = '';
-            isPlaying = false;
-            isNarrationEnabled = true;
-
-            // Reset UI
-            imageUpload.value = '';
-            productNameInput.value = '';
-            thumbnailContainer.innerHTML = '';
-            thumbnailPreview.classList.add('hidden');
-            playPauseOverlay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-            narrationToggle.classList.add('bg-indigo-500');
-            narrationToggle.firstElementChild.classList.add('translate-x-6');
-            narrationStatus.textContent = "켜짐";
-            musicSelect.value = 'upbeat';
-
-            updateGenerateBtnState();
-            switchScreen('upload');
+        // DOM Elements
+        const elements = {
+            imageInput: document.getElementById('imageInput'),
+            imagePreview: document.getElementById('imagePreview'),
+            productName: document.getElementById('productName'),
+            industryType: document.getElementById('industryType'),
+            generateBtn: document.getElementById('generateBtn'),
+            statusPanel: document.getElementById('statusPanel'),
+            progressSteps: document.getElementById('progressSteps'),
+            analysisResults: document.getElementById('analysisResults'),
+            analysisContent: document.getElementById('analysisContent'),
+            videoPreview: document.getElementById('videoPreview'),
+            previewVideo: document.getElementById('previewVideo')
         };
 
-        const handleImageUpload = (event) => {
-            userImages = [];
-            thumbnailContainer.innerHTML = '';
-            if (event.target.files.length > 0) {
-                thumbnailPreview.classList.remove('hidden');
-                Array.from(event.target.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.src = e.target.result;
-                        userImages.push(img);
-                        
-                        const thumb = document.createElement('img');
-                        thumb.src = e.target.result;
-                        thumb.className = 'w-24 h-24 object-cover rounded-md border-2 border-gray-600';
-                        thumbnailContainer.appendChild(thumb);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            } else {
-                 thumbnailPreview.classList.add('hidden');
-            }
-            updateGenerateBtnState();
-        };
-
-        const generateVideo = () => {
-            productName = productNameInput.value.trim();
-            if (!productName || userImages.length < 3) return;
-
-            switchScreen('generating');
-
-            const statuses = ["사진 특징 분석 중...", "영상 시나리오 구성 중...", "AI 나레이션 생성 중...", "배경음악 선별 중...", "거의 다 됐어요!"];
-            let statusIndex = 0;
-            const statusInterval = setInterval(() => {
-                generatingStatus.textContent = statuses[statusIndex++];
-                if (statusIndex >= statuses.length) clearInterval(statusInterval);
-            }, 800);
-
-            setTimeout(() => {
-                clearInterval(statusInterval);
-                previewTitle.textContent = `"${productName}" 쇼츠 영상`;
-                switchScreen('preview');
-            }, 4500);
-        };
-
-        const startMusic = (style = 'upbeat') => {
-            if (sequence) sequence.stop();
-            if (synth) synth.dispose();
-            
-            Tone.Transport.stop();
-            Tone.Transport.cancel();
-            
-            synth = new Tone.PolySynth(Tone.Synth, {
-                oscillator: { type: "fatsawtooth" },
-                envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.1 }
-            }).toDestination();
-            
-            let notes;
-            switch(style) {
-                case 'cinematic':
-                    notes = [ "C3", ["E3", "G3"], "D3", ["F3", "A3"]];
-                    Tone.Transport.bpm.value = 100;
-                    break;
-                case 'chill':
-                    notes = [ ["C4", "E4", "G4"], null, "A3", null, ["F3", "A3", "C4"], null, "G3", null];
-                    Tone.Transport.bpm.value = 80;
-                    break;
-                case 'upbeat':
-                default:
-                    notes = ["C4", "E4", "G4", "C5", "G4", "E4", "C4", null];
-                    Tone.Transport.bpm.value = 120;
-                    break;
-            }
-
-            sequence = new Tone.Sequence((time, note) => {
-                if(note) synth.triggerAttackRelease(note, "8n", time);
-            }, notes, "8n").start(0);
-
-            Tone.Transport.start();
-        };
-
-        const startNarration = () => {
-             if (!isNarrationEnabled) return;
-            speechSynthesis.cancel();
-            const texts = [
-                `오늘 소개해드릴 제품, 바로 ${productName}입니다.`,
-                "세련된 디자인과 뛰어난 성능을 직접 확인해보세요.",
-                "지금 바로 만나보실 수 있습니다. 후회하지 않으실 거예요."
-            ];
-            const utterance = new SpeechSynthesisUtterance(texts.join(' '));
-            utterance.lang = 'ko-KR';
-            utterance.rate = 1.1;
-            speechSynthesis.speak(utterance);
-        };
-        
-        const captions = [
-            () => `✨ ${productName} ✨`,
-            () => `놓치면 후회!`,
-            () => `최고의 선택!`,
-            () => `압도적인 존재감`,
-            () => `지금 바로 문의주세요!`
-        ];
-        
-        const draw = (startTime) => {
-            const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > VIDEO_DURATION_MS) {
-                if (isPlaying) togglePlayPause(); // Stop at the end
-                return;
-            }
-            
-            const timePerImage = VIDEO_DURATION_MS / userImages.length;
-            const currentImageIndex = Math.floor(elapsedTime / timePerImage);
-            const nextImageIndex = (currentImageIndex + 1) % userImages.length;
-            
-            const timeIntoCurrentImage = elapsedTime % timePerImage;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw current and next image for cross-fade
-            let opacity = 1.0;
-            if (timeIntoCurrentImage > timePerImage - FADE_DURATION_MS) {
-                opacity = 1.0 - (timeIntoCurrentImage - (timePerImage - FADE_DURATION_MS)) / FADE_DURATION_MS;
-                
-                const nextImg = userImages[nextImageIndex];
-                ctx.globalAlpha = 1.0 - opacity;
-                drawImageScaled(nextImg, ctx);
-            }
-
-            const currentImg = userImages[currentImageIndex];
-            ctx.globalAlpha = opacity;
-            drawImageScaled(currentImg, ctx);
-
-            ctx.globalAlpha = 1.0;
-            
-            // Draw caption
-            const captionIndex = Math.floor(elapsedTime / (VIDEO_DURATION_MS / captions.length));
-            const captionText = captions[captionIndex]();
-            
-            ctx.font = "bold 80px 'Inter', sans-serif";
-            ctx.textAlign = 'center';
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillText(captionText, canvas.width / 2, canvas.height - 150 + 5);
-            ctx.fillStyle = 'white';
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.strokeText(captionText, canvas.width / 2, canvas.height - 150);
-            ctx.fillText(captionText, canvas.width / 2, canvas.height - 150);
-
-            animationFrameId = requestAnimationFrame(() => draw(startTime));
-        };
-
-        const drawImageScaled = (img, context) => {
-            const canvasAspect = context.canvas.width / context.canvas.height;
-            const imgAspect = img.width / img.height;
-            let sx, sy, sWidth, sHeight;
-        
-            if (imgAspect > canvasAspect) { // image wider than canvas
-                sHeight = img.height;
-                sWidth = sHeight * canvasAspect;
-                sx = (img.width - sWidth) / 2;
-                sy = 0;
-            } else { // image taller than canvas
-                sWidth = img.width;
-                sHeight = sWidth / canvasAspect;
-                sx = 0;
-                sy = (img.height - sHeight) / 2;
-            }
-            context.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, context.canvas.width, context.canvas.height);
-        };
-
-
-        const togglePlayPause = () => {
-            isPlaying = !isPlaying;
-            if (isPlaying) {
-                playPauseOverlay.classList.add('hidden');
-                Tone.start(); // Required by browser policy
-                startMusic(musicSelect.value);
-                startNarration();
-                draw(Date.now());
-            } else {
-                cancelAnimationFrame(animationFrameId);
-                playPauseOverlay.classList.remove('hidden');
-                playPauseOverlay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-                if(sequence) sequence.stop();
-                speechSynthesis.cancel();
-            }
-        };
-
-        const handleDownload = () => {
-            if (downloadBtn.disabled) return;
-            downloadBtn.disabled = true;
-            downloadBtn.textContent = '다운로드 준비 중...';
-
-            const stream = canvas.captureStream(30);
-            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
-            
-            const chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${productName.replace(/ /g, '_')}_shorts.webm`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                downloadBtn.disabled = false;
-                downloadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg><span>영상 다운로드</span>`;
-            };
-            
-            // Start recording
-            recorder.start();
-            
-            // Re-play the animation from the start for recording
-            Tone.start();
-            startMusic(musicSelect.value);
-            startNarration();
-            draw(Date.now());
-            
-            setTimeout(() => {
-                recorder.stop();
-                cancelAnimationFrame(animationFrameId);
-                if(sequence) sequence.stop();
-                speechSynthesis.cancel();
-                isPlaying = false;
-                 playPauseOverlay.classList.remove('hidden');
-            }, VIDEO_DURATION_MS);
-        };
-
-        // --- Event Listeners ---
-        imageUpload.addEventListener('change', handleImageUpload);
-        productNameInput.addEventListener('input', updateGenerateBtnState);
-        generateBtn.addEventListener('click', generateVideo);
-        playPauseOverlay.addEventListener('click', togglePlayPause);
-        
-        homeBtn.addEventListener('click', resetToHome);
-
-        narrationToggle.addEventListener('click', () => {
-            isNarrationEnabled = !isNarrationEnabled;
-            narrationToggle.classList.toggle('bg-gray-500', !isNarrationEnabled);
-            narrationToggle.classList.toggle('bg-indigo-500', isNarrationEnabled);
-            narrationToggle.firstElementChild.classList.toggle('translate-x-1', !isNarrationEnabled);
-            narrationToggle.firstElementChild.classList.toggle('translate-x-6', isNarrationEnabled);
-            narrationStatus.textContent = isNarrationEnabled ? "켜짐" : "꺼짐";
+        // Image handling
+        elements.imageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            state.images = files;
+            updateImagePreview();
+            updateGenerateButton();
         });
 
-        musicSelect.addEventListener('change', (e) => {
-            if (isPlaying) {
-                startMusic(e.target.value);
-            }
+        function updateImagePreview() {
+            elements.imagePreview.innerHTML = '';
+            state.images.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-thumb';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Image ${index + 1}">
+                        <button onclick="removeImage(${index})">×</button>
+                    `;
+                    elements.imagePreview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.removeImage = (index) => {
+            state.images.splice(index, 1);
+            updateImagePreview();
+            updateGenerateButton();
+        };
+
+        // Product name handling
+        elements.productName.addEventListener('input', (e) => {
+            state.productName = e.target.value;
+            updateGenerateButton();
         });
-        
-        downloadBtn.addEventListener('click', handleDownload);
+
+        // Style selection
+        document.querySelectorAll('.style-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.style = btn.dataset.style;
+            });
+        });
+
+        // Industry selection
+        elements.industryType.addEventListener('change', (e) => {
+            state.industry = e.target.value;
+        });
+
+        // Update generate button state
+        function updateGenerateButton() {
+            elements.generateBtn.disabled = state.images.length < 3 || !state.productName || state.isGenerating;
+        }
+
+        // Generate video
+        elements.generateBtn.addEventListener('click', async () => {
+            if (state.isGenerating) return;
+            
+            state.isGenerating = true;
+            updateGenerateButton();
+            
+            // Show progress
+            elements.statusPanel.classList.add('hidden');
+            elements.progressSteps.classList.remove('hidden');
+            
+            // Simulate processing steps
+            const steps = ['1', '2', '3'];
+            for (let i = 0; i < steps.length; i++) {
+                const step = document.querySelector(`[data-step="${steps[i]}"]`);
+                step.classList.add('active');
+                
+                // Simulate processing time
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                step.classList.remove('active');
+                step.classList.add('completed');
+                
+                // Show analysis after step 1
+                if (i === 0) {
+                    showAnalysis();
+                }
+            }
+            
+            // Show video preview
+            showVideoPreview();
+            
+            state.isGenerating = false;
+            updateGenerateButton();
+        });
+
+        function showAnalysis() {
+            elements.analysisResults.classList.remove('hidden');
+            elements.analysisContent.innerHTML = `
+                <div>🎯 <strong>타겟층:</strong> 30-40대 품질 중시 고객</div>
+                <div>💡 <strong>핵심 특징:</strong> 프리미엄 디자인, 실용성, 가성비</div>
+                <div>📝 <strong>추천 메시지:</strong> "당신의 일상을 특별하게"</div>
+                <div>🎵 <strong>음악 스타일:</strong> Upbeat & Modern</div>
+            `;
+        }
+
+        function showVideoPreview() {
+            elements.videoPreview.classList.remove('hidden');
+            // In real implementation, this would show the actual generated video
+            elements.previewVideo.src = '#';
+        }
+
+        // Initialize
+        updateGenerateButton();
     </script>
 </body>
 </html>

@@ -1,0 +1,60 @@
+name: Process Video with AI
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'Comma-separated list of image URLs'
+        required: true
+      product_name:
+        description: 'Product name for the video'
+        required: true
+      style:
+        description: 'Video style (dynamic, calm, professional)'
+        default: 'dynamic'
+        required: false
+
+jobs:
+  generate-shorts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Install dependencies
+      run: |
+        npm install
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+    
+    - name: Process images and generate video
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      run: |
+        node scripts/process-video.js \
+          --images "${{ github.event.inputs.images }}" \
+          --product "${{ github.event.inputs.product_name }}" \
+          --style "${{ github.event.inputs.style }}"
+    
+    - name: Upload generated video
+      uses: actions/upload-artifact@v3
+      with:
+        name: generated-shorts
+        path: output/*.mp4
+    
+    - name: Commit processed images
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add storage/images/
+        git diff --staged --quiet || git commit -m "Add processed images for ${{ github.event.inputs.product_name }}"
+        git push
