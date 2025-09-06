@@ -3,41 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 쇼츠 제작 공장 2.0</title>
+    <title>쇼츠 생성기</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 text-white min-h-screen">
-    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+<body class="bg-gray-900 text-white min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-6 max-w-6xl">
         <!-- Header -->
-        <header class="text-center mb-12">
-            <div class="flex items-center justify-center gap-3 mb-4">
-                <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    AI 쇼츠 제작 공장 2.0
-                </h1>
-            </div>
-            <p class="text-gray-300 text-lg">Gemini AI가 분석하고 만드는 진짜 AI 쇼츠</p>
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold">쇼츠 생성기</h1>
         </header>
 
         <!-- Main Content -->
         <div class="grid lg:grid-cols-2 gap-8">
             <!-- Left Panel - Input -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
-                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
-                    <span class="text-purple-400">📸</span> 상품 정보 입력
-                </h2>
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">입력</h2>
                 
                 <!-- Image Upload -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">상품 이미지 (3장 이상)</label>
-                    <div class="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center hover:border-purple-500/50 transition-colors cursor-pointer" 
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors cursor-pointer" 
                          onclick="document.getElementById('imageInput').click()">
-                        <svg class="w-12 h-12 mx-auto mb-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
                         <p class="text-gray-300">클릭하여 이미지 업로드</p>
                         <p class="text-sm text-gray-500 mt-1">JPG, PNG (최대 10MB)</p>
                     </div>
@@ -51,61 +38,50 @@
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">상품명</label>
                     <input type="text" id="productName" 
-                           class="w-full px-4 py-3 bg-gray-700/50 border border-purple-500/20 rounded-lg focus:outline-none focus:border-purple-500"
-                           placeholder="예: 2024 벤츠 E클래스">
+                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500"
+                           placeholder="상품명 입력">
                 </div>
 
                 <!-- Style Selection -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">영상 스타일</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button class="style-btn active" data-style="dynamic">
-                            ⚡ 다이나믹
-                        </button>
-                        <button class="style-btn" data-style="professional">
-                            💼 프로페셔널
-                        </button>
-                        <button class="style-btn" data-style="luxury">
-                            💎 럭셔리
-                        </button>
-                    </div>
+                    <select id="styleSelect" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500">
+                        <option value="dynamic">다이나믹</option>
+                        <option value="professional">프로페셔널</option>
+                        <option value="luxury">럭셔리</option>
+                    </select>
                 </div>
 
                 <!-- Industry Type -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">업종 선택</label>
-                    <select id="industryType" class="w-full px-4 py-3 bg-gray-700/50 border border-purple-500/20 rounded-lg focus:outline-none focus:border-purple-500">
-                        <option value="auto">🚗 자동차</option>
-                        <option value="fashion">👕 패션</option>
-                        <option value="tech">📱 전자제품</option>
-                        <option value="food">🍔 식품</option>
-                        <option value="beauty">💄 뷰티</option>
-                        <option value="other">🏷️ 기타</option>
+                    <label class="block text-sm font-medium mb-2">업종</label>
+                    <select id="industryType" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500">
+                        <option value="auto">자동차</option>
+                        <option value="fashion">패션</option>
+                        <option value="tech">전자제품</option>
+                        <option value="food">식품</option>
+                        <option value="beauty">뷰티</option>
+                        <option value="other">기타</option>
                     </select>
                 </div>
 
                 <!-- Generate Button -->
                 <button id="generateBtn" 
-                        class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full py-3 bg-blue-600 rounded font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled>
-                    🎬 AI 쇼츠 생성하기
+                    생성
                 </button>
             </div>
 
             <!-- Right Panel - Status & Preview -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
-                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
-                    <span class="text-purple-400">🤖</span> AI 분석 & 생성
-                </h2>
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">결과</h2>
                 
                 <!-- Status Panel -->
                 <div id="statusPanel" class="space-y-4">
                     <!-- Initial State -->
                     <div class="text-center py-12">
-                        <svg class="w-24 h-24 mx-auto mb-4 text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="text-gray-400">이미지를 업로드하고 상품명을 입력하면<br>AI가 자동으로 쇼츠를 생성합니다</p>
+                        <p class="text-gray-400">대기 중</p>
                     </div>
                 </div>
 
@@ -141,8 +117,8 @@
                 </div>
 
                 <!-- Analysis Results (Hidden by default) -->
-                <div id="analysisResults" class="hidden mt-6 p-4 bg-gray-700/30 rounded-lg">
-                    <h3 class="font-semibold mb-3 text-purple-400">📊 AI 분석 결과</h3>
+                <div id="analysisResults" class="hidden mt-6 p-4 bg-gray-700 rounded">
+                    <h3 class="font-semibold mb-3">분석 결과</h3>
                     <div id="analysisContent" class="space-y-2 text-sm">
                         <!-- Analysis will be inserted here -->
                     </div>
@@ -154,40 +130,17 @@
                         <video id="previewVideo" class="w-full h-full" controls></video>
                     </div>
                     <div class="mt-4 flex gap-2">
-                        <button class="flex-1 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
-                            💾 다운로드
+                        <button class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700 transition-colors">
+                            다운로드
                         </button>
-                        <button class="flex-1 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
-                            🔄 다시 생성
+                        <button class="flex-1 py-2 bg-gray-600 rounded hover:bg-gray-700 transition-colors">
+                            다시 생성
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Features Section -->
-        <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
-                <div class="text-3xl mb-2">🧠</div>
-                <h3 class="font-semibold">Gemini AI</h3>
-                <p class="text-sm text-gray-400">최신 AI 이미지 분석</p>
-            </div>
-            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
-                <div class="text-3xl mb-2">🎯</div>
-                <h3 class="font-semibold">타겟 마케팅</h3>
-                <p class="text-sm text-gray-400">고객층 맞춤 콘텐츠</p>
-            </div>
-            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
-                <div class="text-3xl mb-2">⚡</div>
-                <h3 class="font-semibold">실시간 생성</h3>
-                <p class="text-sm text-gray-400">3분 내 영상 완성</p>
-            </div>
-            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
-                <div class="text-3xl mb-2">📈</div>
-                <h3 class="font-semibold">트렌드 반영</h3>
-                <p class="text-sm text-gray-400">최신 쇼츠 트렌드 적용</p>
-            </div>
-        </div>
     </div>
 
     <style>
@@ -195,20 +148,12 @@
             font-family: 'Inter', sans-serif;
         }
         
-        .style-btn {
-            @apply px-4 py-2 bg-gray-700/50 border border-purple-500/20 rounded-lg hover:bg-gray-700 transition-colors;
-        }
-        
-        .style-btn.active {
-            @apply bg-purple-600/30 border-purple-500;
-        }
-        
         .step-icon {
             @apply w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-semibold;
         }
         
         .step-item.active .step-icon {
-            @apply bg-purple-600 animate-pulse;
+            @apply bg-blue-600 animate-pulse;
         }
         
         .step-item.completed .step-icon {
@@ -216,7 +161,7 @@
         }
         
         .image-thumb {
-            @apply relative aspect-square bg-gray-700 rounded-lg overflow-hidden;
+            @apply relative aspect-square bg-gray-700 rounded overflow-hidden;
         }
         
         .image-thumb img {
@@ -243,6 +188,7 @@
             imageInput: document.getElementById('imageInput'),
             imagePreview: document.getElementById('imagePreview'),
             productName: document.getElementById('productName'),
+            styleSelect: document.getElementById('styleSelect'),
             industryType: document.getElementById('industryType'),
             generateBtn: document.getElementById('generateBtn'),
             statusPanel: document.getElementById('statusPanel'),
@@ -291,12 +237,8 @@
         });
 
         // Style selection
-        document.querySelectorAll('.style-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.style = btn.dataset.style;
-            });
+        elements.styleSelect.addEventListener('change', (e) => {
+            state.style = e.target.value;
         });
 
         // Industry selection
@@ -348,10 +290,10 @@
         function showAnalysis() {
             elements.analysisResults.classList.remove('hidden');
             elements.analysisContent.innerHTML = `
-                <div>🎯 <strong>타겟층:</strong> 30-40대 품질 중시 고객</div>
-                <div>💡 <strong>핵심 특징:</strong> 프리미엄 디자인, 실용성, 가성비</div>
-                <div>📝 <strong>추천 메시지:</strong> "당신의 일상을 특별하게"</div>
-                <div>🎵 <strong>음악 스타일:</strong> Upbeat & Modern</div>
+                <div><strong>타겟층:</strong> 30-40대 품질 중시 고객</div>
+                <div><strong>핵심 특징:</strong> 프리미엄 디자인, 실용성, 가성비</div>
+                <div><strong>추천 메시지:</strong> "당신의 일상을 특별하게"</div>
+                <div><strong>음악 스타일:</strong> Upbeat & Modern</div>
             `;
         }
 
