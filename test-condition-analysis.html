@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 제품 상태 및 사용감 분석 테스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .condition-new {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            border-left: 5px solid #22c55e;
+        }
+        
+        .condition-light-wear {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05));
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .condition-moderate-wear {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+            border-left: 5px solid #f59e0b;
+        }
+        
+        .condition-heavy-wear {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+            border-left: 5px solid #ef4444;
+        }
+        
+        .condition-damaged {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.05));
+            border-left: 5px solid #9c27b0;
+        }
+        
+        .wear-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .wear-new { background: #22c55e; }
+        .wear-light { background: #3b82f6; }
+        .wear-moderate { background: #f59e0b; }
+        .wear-heavy { background: #ef4444; }
+        .wear-damaged { background: #9c27b0; }
+        
+        .loading-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                🔍 제품 상태 및 사용감 분석
+            </h1>
+            <p class="text-gray-300 text-lg">AI가 제품의 사용 흔적, 마모도, 상태를 전문가 수준으로 분석합니다</p>
+            <div class="mt-6 flex justify-center flex-wrap gap-3 text-sm">
+                <div class="flex items-center px-3 py-2 bg-green-600/20 rounded-full">
+                    <span class="wear-indicator wear-new"></span>새제품 (A급)
+                </div>
+                <div class="flex items-center px-3 py-2 bg-blue-600/20 rounded-full">
+                    <span class="wear-indicator wear-light"></span>경미한 사용감 (B급)
+                </div>
+                <div class="flex items-center px-3 py-2 bg-yellow-600/20 rounded-full">
+                    <span class="wear-indicator wear-moderate"></span>보통 사용감 (C급)
+                </div>
+                <div class="flex items-center px-3 py-2 bg-red-600/20 rounded-full">
+                    <span class="wear-indicator wear-heavy"></span>심한 사용감 (D급)
+                </div>
+                <div class="flex items-center px-3 py-2 bg-purple-600/20 rounded-full">
+                    <span class="wear-indicator wear-damaged"></span>파손/수리필요 (E급)
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Categories -->
+        <div class="grid lg:grid-cols-4 gap-6 mb-8">
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="testNewProducts()">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">✨</div>
+                    <h3 class="text-lg font-bold mb-2">새제품</h3>
+                    <p class="text-gray-400 text-sm">미사용 상태</p>
+                </div>
+            </div>
+            
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="testUsedProducts()">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">👟</div>
+                    <h3 class="text-lg font-bold mb-2">중고제품</h3>
+                    <p class="text-gray-400 text-sm">사용감 있는</p>
+                </div>
+            </div>
+            
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="testWornProducts()">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">👜</div>
+                    <h3 class="text-lg font-bold mb-2">많이 사용된</h3>
+                    <p class="text-gray-400 text-sm">마모 흔적</p>
+                </div>
+            </div>
+            
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="uploadCustomImages()">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">📸</div>
+                    <h3 class="text-lg font-bold mb-2">직접 업로드</h3>
+                    <p class="text-gray-400 text-sm">내 제품 분석</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Guide -->
+        <div class="analysis-card p-6 rounded-xl mb-8">
+            <h3 class="text-xl font-bold mb-4">🎯 상태 분석 항목</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <h4 class="font-semibold text-blue-400 mb-2">👟 신발</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• 밑창 마모도</li>
+                        <li>• 뒤꿈치 닳음</li>
+                        <li>• 어퍼 변형</li>
+                        <li>• 끈 상태</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-green-400 mb-2">📱 전자제품</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• 스크래치</li>
+                        <li>• 찌그러짐</li>
+                        <li>• 화면 상태</li>
+                        <li>• 버튼 마모</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-yellow-400 mb-2">👜 가죽제품</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• 주름, 갈라짐</li>
+                        <li>• 색 변화</li>
+                        <li>• 모서리 마모</li>
+                        <li>• 금속부품 변색</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-purple-400 mb-2">👕 의류</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• 보풀, 변색</li>
+                        <li>• 늘어남</li>
+                        <li>• 얼룩, 구멍</li>
+                        <li>• 지퍼/단추 상태</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="analysis-card p-6 rounded-xl mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">📊 상태 분석 결과</h2>
+                    <button id="exportResults" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-sm">
+                        결과 내보내기
+                    </button>
+                </div>
+                <div id="resultsList" class="space-y-4">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div id="statisticsSection" class="grid md:grid-cols-3 gap-6">
+                <div class="analysis-card p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3">📈 상태 분포</h3>
+                    <div id="conditionChart" class="space-y-2">
+                        <!-- Chart will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="analysis-card p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3">🎯 분석 정확도</h3>
+                    <div id="accuracyMetrics" class="space-y-3">
+                        <!-- Metrics will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="analysis-card p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3">💰 예상 가치</h3>
+                    <div id="valueEstimation" class="space-y-3">
+                        <!-- Value estimation will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div class="analysis-card p-8 rounded-xl text-center">
+                <div class="loading-pulse text-4xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2">AI 상태 분석 진행 중</h3>
+                <p class="text-gray-400" id="loadingText">이미지 처리 중...</p>
+                <div class="mt-4 w-64 bg-gray-700 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test datasets with different condition levels
+        const conditionTestData = {
+            new: [
+                {
+                    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+                    name: '새 나이키 운동화',
+                    expectedCondition: 'new',
+                    expectedKeywords: ['새것', '미사용', '깨끗한']
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800',
+                    name: '새 아이폰',
+                    expectedCondition: 'new',
+                    expectedKeywords: ['새것', '미사용', '깨끗한']
+                }
+            ],
+            used: [
+                {
+                    url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800',
+                    name: '중고 운동화',
+                    expectedCondition: 'light-wear',
+                    expectedKeywords: ['경미한', '사용감', '약간']
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800',
+                    name: '사용된 머그컵',
+                    expectedCondition: 'light-wear',
+                    expectedKeywords: ['사용', '흔적', '경미한']
+                }
+            ],
+            worn: [
+                {
+                    url: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=800',
+                    name: '많이 사용된 가방',
+                    expectedCondition: 'moderate-wear',
+                    expectedKeywords: ['마모', '사용감', '흔적']
+                }
+            ]
+        };
+
+        let analysisResults = [];
+        let currentProgress = 0;
+
+        // UI Elements
+        const elements = {
+            fileInput: document.getElementById('fileInput'),
+            resultsSection: document.getElementById('resultsSection'),
+            resultsList: document.getElementById('resultsList'),
+            statisticsSection: document.getElementById('statisticsSection'),
+            conditionChart: document.getElementById('conditionChart'),
+            accuracyMetrics: document.getElementById('accuracyMetrics'),
+            valueEstimation: document.getElementById('valueEstimation'),
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            loadingText: document.getElementById('loadingText'),
+            progressBar: document.getElementById('progressBar'),
+            exportResults: document.getElementById('exportResults')
+        };
+
+        // Show/Hide Loading
+        function showLoading(text = '이미지 분석 중...', progress = 0) {
+            elements.loadingOverlay.classList.remove('hidden');
+            elements.loadingText.textContent = text;
+            elements.progressBar.style.width = `${progress}%`;
+        }
+
+        function hideLoading() {
+            elements.loadingOverlay.classList.add('hidden');
+        }
+
+        // Analyze Image Condition
+        async function analyzeImageCondition(imageUrl, imageName, expectedCondition = '', expectedKeywords = []) {
+            try {
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                
+                const formData = new FormData();
+                formData.append('image', blob, `${imageName}.jpg`);
+                
+                const apiResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await apiResponse.json();
+                
+                if (result.success) {
+                    const analysis = result.analysis;
+                    const conditionLevel = determineConditionLevel(analysis);
+                    const qualityScore = calculateConditionAccuracy(analysis, expectedKeywords);
+                    const estimatedValue = estimateValue(conditionLevel, analysis);
+                    
+                    return {
+                        imageName,
+                        imageUrl,
+                        analysis,
+                        conditionLevel,
+                        expectedCondition,
+                        expectedKeywords,
+                        qualityScore,
+                        estimatedValue,
+                        timestamp: new Date().toLocaleTimeString(),
+                        success: true
+                    };
+                } else {
+                    throw new Error(result.error || '분석 실패');
+                }
+                
+            } catch (error) {
+                return {
+                    imageName,
+                    imageUrl,
+                    analysis: `오류: ${error.message}`,
+                    conditionLevel: 'unknown',
+                    expectedCondition,
+                    expectedKeywords,
+                    qualityScore: 0,
+                    estimatedValue: 0,
+                    timestamp: new Date().toLocaleTimeString(),
+                    success: false
+                };
+            }
+        }
+
+        // Determine Condition Level from Analysis
+        function determineConditionLevel(analysis) {
+            const text = analysis.toLowerCase();
+            
+            if (text.includes('새것') || text.includes('미사용') || text.includes('깨끗한')) {
+                return 'new';
+            } else if (text.includes('경미한') || text.includes('약간')) {
+                return 'light-wear';
+            } else if (text.includes('사용 흔적') || text.includes('일부 마모') || text.includes('보통')) {
+                return 'moderate-wear';
+            } else if (text.includes('많이 사용된') || text.includes('마모 심한') || text.includes('낡은')) {
+                return 'heavy-wear';
+            } else if (text.includes('손상된') || text.includes('찢어진') || text.includes('깨진')) {
+                return 'damaged';
+            } else {
+                return 'unknown';
+            }
+        }
+
+        // Calculate Condition Analysis Accuracy
+        function calculateConditionAccuracy(analysis, expectedKeywords) {
+            if (expectedKeywords.length === 0) return 50; // Default for no expected keywords
+            
+            const analysisLower = analysis.toLowerCase();
+            let matchCount = 0;
+            
+            expectedKeywords.forEach(keyword => {
+                if (analysisLower.includes(keyword.toLowerCase())) {
+                    matchCount++;
+                }
+            });
+            
+            // Base accuracy from keyword matching
+            let accuracy = (matchCount / expectedKeywords.length) * 60;
+            
+            // Bonus for detailed condition analysis
+            const detailIndicators = [
+                '스크래치', '마모', '흔적', '변색', '갈라짐', '찌그러짐',
+                '밑창', '뒤꿈치', '모서리', '주름', '보풀', '얼룩'
+            ];
+            
+            const detailCount = detailIndicators.filter(indicator => 
+                analysisLower.includes(indicator)).length;
+            
+            accuracy += Math.min(detailCount * 8, 40); // Max 40 bonus points
+            
+            return Math.min(Math.round(accuracy), 100);
+        }
+
+        // Estimate Value based on Condition
+        function estimateValue(conditionLevel, analysis) {
+            const baseValues = {
+                'new': 100,
+                'light-wear': 80,
+                'moderate-wear': 60,
+                'heavy-wear': 40,
+                'damaged': 20,
+                'unknown': 50
+            };
+            
+            let value = baseValues[conditionLevel] || 50;
+            
+            // Brand premium
+            const premiumBrands = ['아이폰', '맥북', '나이키', '아디다스', '루이비통', '구찌'];
+            if (premiumBrands.some(brand => analysis.includes(brand))) {
+                value += 10;
+            }
+            
+            return Math.min(value, 100);
+        }
+
+        // Display Results
+        function displayResults(results) {
+            elements.resultsSection.classList.remove('hidden');
+            elements.resultsList.innerHTML = '';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                const conditionClass = `condition-${result.conditionLevel}`;
+                
+                const conditionLabels = {
+                    'new': '새제품 (A급)',
+                    'light-wear': '경미한 사용감 (B급)',
+                    'moderate-wear': '보통 사용감 (C급)',
+                    'heavy-wear': '심한 사용감 (D급)',
+                    'damaged': '파손/수리필요 (E급)',
+                    'unknown': '분석 불가'
+                };
+                
+                const conditionIcons = {
+                    'new': '✨',
+                    'light-wear': '👍',
+                    'moderate-wear': '⚠️',
+                    'heavy-wear': '👎',
+                    'damaged': '💥',
+                    'unknown': '❓'
+                };
+                
+                div.className = `${conditionClass} p-6 rounded-xl`;
+                
+                div.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <img src="${result.imageUrl}" alt="${result.imageName}" 
+                             class="w-28 h-28 object-cover rounded-xl border-2 border-white/10">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-xl font-bold">${result.imageName}</h3>
+                                <div class="text-right">
+                                    <div class="text-2xl mb-1">${conditionIcons[result.conditionLevel]}</div>
+                                    <div class="text-sm font-semibold">${conditionLabels[result.conditionLevel]}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <p class="text-lg font-medium text-yellow-300 mb-2">"${result.analysis}"</p>
+                                <div class="flex items-center gap-4 text-sm">
+                                    <span class="px-3 py-1 bg-blue-600/30 rounded-full">
+                                        정확도: ${result.qualityScore}점
+                                    </span>
+                                    <span class="px-3 py-1 bg-green-600/30 rounded-full">
+                                        예상 가치: ${result.estimatedValue}%
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-400">상태 등급:</span>
+                                    <div class="font-semibold">${conditionLabels[result.conditionLevel]}</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">분석 시간:</span>
+                                    <div class="font-semibold">${result.timestamp}</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">기대 키워드:</span>
+                                    <div class="font-semibold">${result.expectedKeywords.join(', ') || '없음'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                elements.resultsList.appendChild(div);
+            });
+            
+            updateStatistics(results);
+        }
+
+        // Update Statistics
+        function updateStatistics(results) {
+            updateConditionChart(results);
+            updateAccuracyMetrics(results);
+            updateValueEstimation(results);
+        }
+
+        function updateConditionChart(results) {
+            const conditions = {};
+            results.forEach(result => {
+                conditions[result.conditionLevel] = (conditions[result.conditionLevel] || 0) + 1;
+            });
+            
+            const labels = {
+                'new': '새제품',
+                'light-wear': '경미한 사용감',
+                'moderate-wear': '보통 사용감',
+                'heavy-wear': '심한 사용감',
+                'damaged': '파손',
+                'unknown': '분석 불가'
+            };
+            
+            const colors = {
+                'new': 'bg-green-500',
+                'light-wear': 'bg-blue-500',
+                'moderate-wear': 'bg-yellow-500',
+                'heavy-wear': 'bg-red-500',
+                'damaged': 'bg-purple-500',
+                'unknown': 'bg-gray-500'
+            };
+            
+            elements.conditionChart.innerHTML = Object.entries(conditions)
+                .map(([condition, count]) => `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full ${colors[condition]}"></div>
+                            <span class="text-sm">${labels[condition]}</span>
+                        </div>
+                        <span class="font-semibold">${count}개</span>
+                    </div>
+                `).join('');
+        }
+
+        function updateAccuracyMetrics(results) {
+            const avgAccuracy = results.reduce((sum, r) => sum + r.qualityScore, 0) / results.length;
+            const successRate = results.filter(r => r.success).length / results.length * 100;
+            const detailedAnalysis = results.filter(r => r.analysis.length > 20).length;
+            
+            elements.accuracyMetrics.innerHTML = `
+                <div class="flex justify-between">
+                    <span>평균 정확도:</span>
+                    <span class="font-bold">${Math.round(avgAccuracy)}점</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>성공률:</span>
+                    <span class="font-bold">${Math.round(successRate)}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>상세 분석:</span>
+                    <span class="font-bold">${detailedAnalysis}/${results.length}</span>
+                </div>
+            `;
+        }
+
+        function updateValueEstimation(results) {
+            const avgValue = results.reduce((sum, r) => sum + r.estimatedValue, 0) / results.length;
+            const highValue = results.filter(r => r.estimatedValue >= 80).length;
+            const lowValue = results.filter(r => r.estimatedValue < 40).length;
+            
+            elements.valueEstimation.innerHTML = `
+                <div class="flex justify-between">
+                    <span>평균 가치:</span>
+                    <span class="font-bold">${Math.round(avgValue)}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>고가치 (80%+):</span>
+                    <span class="font-bold">${highValue}개</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>저가치 (<40%):</span>
+                    <span class="font-bold">${lowValue}개</span>
+                </div>
+            `;
+        }
+
+        // Test Functions
+        async function testNewProducts() {
+            await runConditionTest(conditionTestData.new, '새제품');
+        }
+
+        async function testUsedProducts() {
+            await runConditionTest(conditionTestData.used, '중고제품');
+        }
+
+        async function testWornProducts() {
+            await runConditionTest(conditionTestData.worn, '많이 사용된 제품');
+        }
+
+        async function runConditionTest(testData, categoryName) {
+            console.log(`${categoryName} 상태 분석 테스트 시작...`);
+            
+            const results = [];
+            const totalItems = testData.length;
+            
+            for (let i = 0; i < totalItems; i++) {
+                const item = testData[i];
+                const progress = ((i + 1) / totalItems) * 100;
+                
+                showLoading(`${categoryName} 분석 중... (${i + 1}/${totalItems})`, progress);
+                
+                const result = await analyzeImageCondition(
+                    item.url, 
+                    item.name, 
+                    item.expectedCondition, 
+                    item.expectedKeywords
+                );
+                
+                results.push(result);
+                displayResults(results);
+                
+                if (i < totalItems - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+            
+            hideLoading();
+            analysisResults = results;
+        }
+
+        function uploadCustomImages() {
+            elements.fileInput.click();
+        }
+
+        // Event Listeners
+        elements.fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            
+            const results = [];
+            const totalFiles = files.length;
+            
+            for (let i = 0; i < totalFiles; i++) {
+                const file = files[i];
+                const progress = ((i + 1) / totalFiles) * 100;
+                
+                showLoading(`"${file.name}" 분석 중... (${i + 1}/${totalFiles})`, progress);
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    
+                    const response = await fetch('/api/analyze-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const conditionLevel = determineConditionLevel(result.analysis);
+                        const qualityScore = calculateConditionAccuracy(result.analysis, []);
+                        const estimatedValue = estimateValue(conditionLevel, result.analysis);
+                        
+                        results.push({
+                            imageName: file.name,
+                            imageUrl: URL.createObjectURL(file),
+                            analysis: result.analysis,
+                            conditionLevel,
+                            expectedCondition: '',
+                            expectedKeywords: [],
+                            qualityScore,
+                            estimatedValue,
+                            timestamp: new Date().toLocaleTimeString(),
+                            success: true
+                        });
+                    }
+                } catch (error) {
+                    console.error('분석 실패:', error);
+                }
+                
+                displayResults(results);
+                
+                if (i < totalFiles - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+            }
+            
+            hideLoading();
+            analysisResults = results;
+        });
+
+        elements.exportResults.addEventListener('click', () => {
+            if (analysisResults.length === 0) {
+                alert('분석 결과가 없습니다.');
+                return;
+            }
+            
+            const csvContent = "이미지명,분석결과,상태등급,정확도,예상가치,분석시간\n" + 
+                analysisResults.map(r => 
+                    `"${r.imageName}","${r.analysis}","${r.conditionLevel}",${r.qualityScore},${r.estimatedValue},"${r.timestamp}"`
+                ).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `condition_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Global functions
+        window.testNewProducts = testNewProducts;
+        window.testUsedProducts = testUsedProducts;
+        window.testWornProducts = testWornProducts;
+        window.uploadCustomImages = uploadCustomImages;
+
+        console.log('🔍 제품 상태 및 사용감 분석 테스트 도구 준비 완료');
+    </script>
+</body>
+</html>

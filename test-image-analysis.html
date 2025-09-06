@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 이미지 분석 테스트 도구</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+        
+        .drop-zone {
+            border: 2px dashed #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .image-preview {
+            max-width: 300px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .result-item {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+        }
+        
+        .error-item {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white p-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2">🔍 AI 이미지 분석 테스트</h1>
+            <p class="text-gray-400">Gemini Vision API를 사용해 이미지를 분석합니다</p>
+        </div>
+
+        <!-- Status Check -->
+        <div class="analysis-card p-4 rounded-lg mb-6">
+            <h2 class="text-lg font-semibold mb-3">📊 시스템 상태</h2>
+            <div id="systemStatus" class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full loading-spinner"></div>
+                    <span>상태 확인 중...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="analysis-card p-6 rounded-lg mb-6">
+            <h2 class="text-lg font-semibold mb-4">📤 이미지 업로드</h2>
+            
+            <!-- Drop Zone -->
+            <div id="dropZone" class="drop-zone p-8 rounded-lg text-center mb-4 cursor-pointer">
+                <div class="space-y-2">
+                    <div class="text-4xl">📸</div>
+                    <p class="text-lg">클릭하거나 이미지를 여기로 드래그하세요</p>
+                    <p class="text-sm text-gray-400">JPG, PNG 파일 (최대 10MB)</p>
+                </div>
+            </div>
+            
+            <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+            
+            <!-- Upload Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <button id="testUrlBtn" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition-colors">
+                    🌐 테스트 URL 이미지
+                </button>
+                <button id="clearAllBtn" class="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition-colors">
+                    🗑️ 모두 지우기
+                </button>
+                <button id="analyzeAllBtn" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700 transition-colors" disabled>
+                    🔍 전체 분석
+                </button>
+            </div>
+        </div>
+
+        <!-- Images Section -->
+        <div id="imagesSection" class="hidden">
+            <div class="analysis-card p-6 rounded-lg mb-6">
+                <h2 class="text-lg font-semibold mb-4">🖼️ 업로드된 이미지</h2>
+                <div id="imageGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Images will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="analysis-card p-6 rounded-lg">
+                <h2 class="text-lg font-semibold mb-4">📊 분석 결과</h2>
+                <div id="resultsList" class="space-y-4">
+                    <!-- Results will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let uploadedImages = [];
+        let analysisResults = [];
+
+        // DOM 요소
+        const elements = {
+            systemStatus: document.getElementById('systemStatus'),
+            dropZone: document.getElementById('dropZone'),
+            fileInput: document.getElementById('fileInput'),
+            testUrlBtn: document.getElementById('testUrlBtn'),
+            clearAllBtn: document.getElementById('clearAllBtn'),
+            analyzeAllBtn: document.getElementById('analyzeAllBtn'),
+            imagesSection: document.getElementById('imagesSection'),
+            imageGrid: document.getElementById('imageGrid'),
+            resultsSection: document.getElementById('resultsSection'),
+            resultsList: document.getElementById('resultsList')
+        };
+
+        // 시스템 상태 확인
+        async function checkSystemStatus() {
+            try {
+                console.log('🔍 시스템 상태 확인 중...');
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                elements.systemStatus.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 ${data.status === 'ok' ? 'bg-green-500' : 'bg-red-500'} rounded-full"></div>
+                        <span>서버: ${data.status === 'ok' ? '정상' : '오류'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 ${data.geminiApiKey ? 'bg-green-500' : 'bg-red-500'} rounded-full"></div>
+                        <span>Gemini API: ${data.geminiApiKey ? '설정됨' : '미설정'}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">
+                        마지막 확인: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+                
+                console.log('✅ 시스템 상태:', data);
+                return data.status === 'ok' && data.geminiApiKey;
+                
+            } catch (error) {
+                console.error('❌ 상태 확인 실패:', error);
+                elements.systemStatus.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span>연결 실패: ${error.message}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                        서버가 실행 중인지 확인하세요 (npm run server)
+                    </div>
+                `;
+                return false;
+            }
+        }
+
+        // 파일 업로드 처리
+        function handleFiles(files) {
+            console.log(`📁 ${files.length}개 파일 처리 중...`);
+            
+            Array.from(files).forEach((file, index) => {
+                if (!file.type.startsWith('image/')) {
+                    alert('이미지 파일만 업로드 가능합니다.');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('파일 크기는 10MB 이하여야 합니다.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageData = {
+                        id: Date.now() + index,
+                        file: file,
+                        src: e.target.result,
+                        name: file.name,
+                        size: file.size,
+                        analyzed: false,
+                        result: null
+                    };
+                    
+                    uploadedImages.push(imageData);
+                    console.log(`✅ 이미지 추가: ${file.name} (${(file.size/1024).toFixed(2)}KB)`);
+                    updateImageGrid();
+                    updateAnalyzeButton();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 이미지 그리드 업데이트
+        function updateImageGrid() {
+            if (uploadedImages.length === 0) {
+                elements.imagesSection.classList.add('hidden');
+                return;
+            }
+            
+            elements.imagesSection.classList.remove('hidden');
+            elements.imageGrid.innerHTML = '';
+            
+            uploadedImages.forEach(image => {
+                const div = document.createElement('div');
+                div.className = 'relative bg-gray-700 rounded-lg p-3';
+                div.innerHTML = `
+                    <img src="${image.src}" alt="${image.name}" class="image-preview w-full mb-2">
+                    <div class="text-sm">
+                        <div class="font-medium truncate">${image.name}</div>
+                        <div class="text-gray-400 text-xs">${(image.size/1024).toFixed(2)}KB</div>
+                    </div>
+                    <div class="analysis-status mt-2">
+                        ${image.analyzed ? 
+                            `<div class="text-green-400 text-xs">✅ 분석 완료</div>` : 
+                            `<button onclick="analyzeImage(${image.id})" class="text-blue-400 text-xs hover:text-blue-300">🔍 개별 분석</button>`
+                        }
+                    </div>
+                    <button onclick="removeImage(${image.id})" class="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full text-xs hover:bg-red-700">
+                        ×
+                    </button>
+                `;
+                elements.imageGrid.appendChild(div);
+            });
+        }
+
+        // 개별 이미지 분석
+        async function analyzeImage(imageId) {
+            const image = uploadedImages.find(img => img.id === imageId);
+            if (!image) return;
+            
+            console.log(`🔍 이미지 분석 시작: ${image.name}`);
+            
+            try {
+                // UI 업데이트
+                updateImageAnalysisStatus(imageId, 'analyzing');
+                
+                const formData = new FormData();
+                formData.append('image', image.file);
+                
+                const response = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    image.analyzed = true;
+                    image.result = result.analysis;
+                    console.log(`✅ 분석 완료: ${image.name} -> "${result.analysis}"`);
+                    
+                    // 결과 추가
+                    analysisResults.push({
+                        imageName: image.name,
+                        analysis: result.analysis,
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+                    
+                    updateImageGrid();
+                    updateResultsSection();
+                } else {
+                    throw new Error(result.error || '분석 실패');
+                }
+                
+            } catch (error) {
+                console.error(`❌ 분석 실패: ${image.name}`, error);
+                updateImageAnalysisStatus(imageId, 'error', error.message);
+            }
+        }
+
+        // 분석 상태 업데이트
+        function updateImageAnalysisStatus(imageId, status, message = '') {
+            const image = uploadedImages.find(img => img.id === imageId);
+            if (!image) return;
+            
+            // UI에서 해당 이미지 찾아서 상태 업데이트
+            updateImageGrid();
+        }
+
+        // 전체 분석
+        async function analyzeAll() {
+            console.log('🚀 전체 이미지 분석 시작...');
+            
+            const unanalyzedImages = uploadedImages.filter(img => !img.analyzed);
+            if (unanalyzedImages.length === 0) {
+                alert('분석할 이미지가 없습니다.');
+                return;
+            }
+            
+            elements.analyzeAllBtn.disabled = true;
+            elements.analyzeAllBtn.textContent = '🔄 분석 중...';
+            
+            for (const image of unanalyzedImages) {
+                await analyzeImage(image.id);
+                // API 호출 간격 조절
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            elements.analyzeAllBtn.disabled = false;
+            elements.analyzeAllBtn.textContent = '🔍 전체 분석';
+            
+            console.log('✅ 전체 분석 완료!');
+        }
+
+        // 결과 섹션 업데이트
+        function updateResultsSection() {
+            if (analysisResults.length === 0) {
+                elements.resultsSection.classList.add('hidden');
+                return;
+            }
+            
+            elements.resultsSection.classList.remove('hidden');
+            elements.resultsList.innerHTML = '';
+            
+            analysisResults.forEach((result, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item p-4 rounded-lg';
+                div.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">🖼️</div>
+                        <div class="flex-1">
+                            <div class="font-medium">${result.imageName}</div>
+                            <div class="text-green-400 text-lg mt-1">"${result.analysis}"</div>
+                            <div class="text-xs text-gray-400 mt-2">분석 완료: ${result.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+                elements.resultsList.appendChild(div);
+            });
+        }
+
+        // 이미지 제거
+        function removeImage(imageId) {
+            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+            analysisResults = analysisResults.filter(result => {
+                const image = uploadedImages.find(img => img.name === result.imageName);
+                return image !== undefined;
+            });
+            
+            updateImageGrid();
+            updateResultsSection();
+            updateAnalyzeButton();
+            
+            console.log(`🗑️ 이미지 제거됨: ID ${imageId}`);
+        }
+
+        // 모두 지우기
+        function clearAll() {
+            if (uploadedImages.length === 0) return;
+            
+            if (confirm('모든 이미지와 분석 결과를 삭제하시겠습니까?')) {
+                uploadedImages = [];
+                analysisResults = [];
+                updateImageGrid();
+                updateResultsSection();
+                updateAnalyzeButton();
+                console.log('🗑️ 모든 데이터 삭제됨');
+            }
+        }
+
+        // 테스트 URL 이미지 추가
+        async function addTestUrlImages() {
+            const testUrls = [
+                'https://picsum.photos/800/600?random=1',
+                'https://picsum.photos/800/600?random=2',
+                'https://picsum.photos/800/600?random=3'
+            ];
+            
+            console.log('🌐 테스트 이미지 다운로드 중...');
+            
+            for (let i = 0; i < testUrls.length; i++) {
+                try {
+                    const response = await fetch(testUrls[i]);
+                    const blob = await response.blob();
+                    const file = new File([blob], `test-image-${i+1}.jpg`, { type: 'image/jpeg' });
+                    
+                    handleFiles([file]);
+                    console.log(`✅ 테스트 이미지 ${i+1} 추가됨`);
+                } catch (error) {
+                    console.error(`❌ 테스트 이미지 ${i+1} 다운로드 실패:`, error);
+                }
+            }
+        }
+
+        // 분석 버튼 상태 업데이트
+        function updateAnalyzeButton() {
+            const unanalyzedCount = uploadedImages.filter(img => !img.analyzed).length;
+            elements.analyzeAllBtn.disabled = unanalyzedCount === 0;
+            elements.analyzeAllBtn.textContent = unanalyzedCount > 0 ? 
+                `🔍 전체 분석 (${unanalyzedCount}개)` : 
+                '✅ 분석 완료';
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 드래그 앤 드롭
+            elements.dropZone.addEventListener('click', () => elements.fileInput.click());
+            elements.dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elements.dropZone.classList.add('dragover');
+            });
+            elements.dropZone.addEventListener('dragleave', () => {
+                elements.dropZone.classList.remove('dragover');
+            });
+            elements.dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elements.dropZone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // 파일 선택
+            elements.fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+            
+            // 버튼들
+            elements.testUrlBtn.addEventListener('click', addTestUrlImages);
+            elements.clearAllBtn.addEventListener('click', clearAll);
+            elements.analyzeAllBtn.addEventListener('click', analyzeAll);
+        }
+
+        // 전역 함수들
+        window.analyzeImage = analyzeImage;
+        window.removeImage = removeImage;
+
+        // 초기화
+        async function init() {
+            console.log('🚀 이미지 분석 테스트 도구 시작...');
+            setupEventListeners();
+            await checkSystemStatus();
+            console.log('✅ 초기화 완료');
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

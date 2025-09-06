@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 실제 제품 이미지 분석 테스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-good {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+        }
+        
+        .result-bad {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white p-6">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2">🎯 실제 제품 이미지 AI 분석 테스트</h1>
+            <p class="text-gray-400">개선된 프롬프트로 더 정확한 분석 결과를 확인하세요</p>
+        </div>
+
+        <!-- Test Categories -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <button id="testGoodImages" class="analysis-card p-6 rounded-lg hover:bg-white/10 transition-colors">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">✅</div>
+                    <h3 class="text-lg font-semibold mb-2">좋은 테스트 이미지</h3>
+                    <p class="text-sm text-gray-400">명확한 제품 이미지들</p>
+                </div>
+            </button>
+            
+            <button id="testBadImages" class="analysis-card p-6 rounded-lg hover:bg-white/10 transition-colors">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">❌</div>
+                    <h3 class="text-lg font-semibold mb-2">문제가 있는 이미지</h3>
+                    <p class="text-sm text-gray-400">복잡하거나 흐린 이미지들</p>
+                </div>
+            </button>
+            
+            <button id="uploadCustom" class="analysis-card p-6 rounded-lg hover:bg-white/10 transition-colors">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">📸</div>
+                    <h3 class="text-lg font-semibold mb-2">직접 업로드</h3>
+                    <p class="text-sm text-gray-400">내 이미지로 테스트</p>
+                </div>
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden analysis-card p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">📊 분석 결과 비교</h2>
+            <div id="resultsList" class="space-y-4">
+                <!-- Results will be added here -->
+            </div>
+            
+            <div class="mt-6 p-4 bg-blue-900/20 rounded-lg">
+                <h3 class="font-semibold mb-2">💡 개선된 점</h3>
+                <ul class="text-sm text-gray-300 space-y-1">
+                    <li>• 구체적인 객체 설명 (색상 + 재질 + 형태)</li>
+                    <li>• 주관적 형용사 제거 ("멋진", "좋은" 등)</li>
+                    <li>• 에러별 구체적인 메시지</li>
+                    <li>• 더 정확한 프롬프트 엔지니어링</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upload Input (Hidden) -->
+        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+    </div>
+
+    <script>
+        // 테스트 이미지 URL들
+        const testImages = {
+            good: [
+                {
+                    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+                    name: '나이키 운동화',
+                    expected: '흰색 나이키 운동화'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800',
+                    name: '아이폰',
+                    expected: '검은 아이폰'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800',
+                    name: '커피컵',
+                    expected: '흰색 커피컵'
+                }
+            ],
+            bad: [
+                {
+                    url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
+                    name: '복잡한 상점',
+                    expected: '다양한 상품들'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800',
+                    name: '흐린 배경',
+                    expected: '패션 아이템들'
+                }
+            ]
+        };
+
+        let analysisResults = [];
+
+        // 이미지 분석 함수
+        async function analyzeImage(imageUrl, imageName, expectedResult) {
+            console.log(`🔍 분석 시작: ${imageName}`);
+            
+            try {
+                // 이미지를 Blob으로 변환
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                
+                const formData = new FormData();
+                formData.append('image', blob, `${imageName}.jpg`);
+                
+                const apiResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await apiResponse.json();
+                
+                if (result.success) {
+                    const analysis = result.analysis;
+                    const isGood = !analysis.includes('멋진') && 
+                                  !analysis.includes('좋은') && 
+                                  !analysis.includes('훌륭한') &&
+                                  analysis.length > 5;
+                    
+                    console.log(`✅ 분석 완료: ${imageName} -> "${analysis}"`);
+                    
+                    return {
+                        imageName,
+                        imageUrl,
+                        analysis,
+                        expected: expectedResult,
+                        isGood,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                } else {
+                    throw new Error(result.error || '분석 실패');
+                }
+                
+            } catch (error) {
+                console.error(`❌ 분석 실패: ${imageName}`, error);
+                return {
+                    imageName,
+                    imageUrl,
+                    analysis: `오류: ${error.message}`,
+                    expected: expectedResult,
+                    isGood: false,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+            }
+        }
+
+        // 결과 표시
+        function displayResults(results) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsSection.classList.remove('hidden');
+            resultsList.innerHTML = '';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-lg ${result.isGood ? 'result-good' : 'result-bad'}`;
+                
+                const statusIcon = result.isGood ? '✅' : '❌';
+                const statusText = result.isGood ? '좋은 결과' : '개선 필요';
+                
+                div.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <img src="${result.imageUrl}" alt="${result.imageName}" 
+                             class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-semibold">${result.imageName}</h3>
+                                <span class="text-sm px-2 py-1 rounded-full ${result.isGood ? 'bg-green-600' : 'bg-red-600'}">
+                                    ${statusIcon} ${statusText}
+                                </span>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div>
+                                    <span class="text-gray-400">AI 분석:</span> 
+                                    <span class="${result.isGood ? 'text-green-400' : 'text-red-400'}">"${result.analysis}"</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">기대 결과:</span> 
+                                    <span class="text-blue-400">"${result.expected}"</span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    분석 시간: ${result.timestamp}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultsList.appendChild(div);
+            });
+            
+            // 통계 표시
+            const goodCount = results.filter(r => r.isGood).length;
+            const totalCount = results.length;
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'mt-4 p-4 bg-gray-800 rounded-lg text-center';
+            statsDiv.innerHTML = `
+                <h3 class="font-semibold mb-2">📈 분석 품질 통계</h3>
+                <div class="text-2xl mb-1">${goodCount}/${totalCount}</div>
+                <div class="text-sm text-gray-400">
+                    ${Math.round((goodCount/totalCount)*100)}% 품질 개선 성공
+                </div>
+            `;
+            
+            resultsList.appendChild(statsDiv);
+        }
+
+        // 테스트 실행
+        async function runTest(category) {
+            const images = testImages[category];
+            const results = [];
+            
+            console.log(`🚀 ${category} 이미지 테스트 시작...`);
+            
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                console.log(`📸 처리 중: ${i+1}/${images.length} - ${image.name}`);
+                
+                const result = await analyzeImage(image.url, image.name, image.expected);
+                results.push(result);
+                
+                // 중간 결과 표시
+                displayResults(results);
+                
+                // API 호출 간격 조절
+                if (i < images.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+            
+            console.log('✅ 테스트 완료!');
+            analysisResults = results;
+        }
+
+        // 이벤트 리스너
+        document.getElementById('testGoodImages').addEventListener('click', () => {
+            runTest('good');
+        });
+
+        document.getElementById('testBadImages').addEventListener('click', () => {
+            runTest('bad');
+        });
+
+        document.getElementById('uploadCustom').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            
+            console.log(`📁 ${files.length}개 파일 업로드됨`);
+            
+            const results = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const dataUrl = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                try {
+                    const response = await fetch('/api/analyze-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const analysis = result.analysis;
+                        const isGood = !analysis.includes('멋진') && 
+                                      !analysis.includes('좋은') && 
+                                      !analysis.includes('훌륭한') &&
+                                      analysis.length > 5;
+                        
+                        results.push({
+                            imageName: file.name,
+                            imageUrl: dataUrl,
+                            analysis,
+                            expected: '사용자 업로드',
+                            isGood,
+                            timestamp: new Date().toLocaleTimeString()
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        imageName: file.name,
+                        imageUrl: dataUrl,
+                        analysis: `오류: ${error.message}`,
+                        expected: '사용자 업로드',
+                        isGood: false,
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+                }
+                
+                displayResults(results);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+        });
+
+        // 초기화
+        console.log('🎯 실제 제품 이미지 분석 테스트 도구 준비됨');
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ 고속 배치 이미지 분석 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .drop-zone {
+            border: 3px dashed #64748b;
+            transition: all 0.3s ease;
+            min-height: 200px;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dasharray 0.3s ease;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .image-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-analyzing { color: #fbbf24; }
+        .status-success { color: #10b981; }
+        .status-error { color: #ef4444; }
+        .status-waiting { color: #6b7280; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .analyzing { animation: pulse 2s infinite; }
+        
+        .sort-button.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent mb-4">
+                ⚡ 고속 배치 이미지 분석
+            </h1>
+            <p class="text-xl text-slate-300">AI 파일명 정렬 + 병렬 처리로 5-10장 동시 분석</p>
+            
+            <!-- 성능 통계 -->
+            <div class="flex justify-center gap-6 mt-8">
+                <div class="analysis-card rounded-xl px-6 py-4">
+                    <div class="text-sm text-slate-400">처리 속도</div>
+                    <div class="text-2xl font-bold text-blue-400" id="speedStat">0장/분</div>
+                </div>
+                <div class="analysis-card rounded-xl px-6 py-4">
+                    <div class="text-sm text-slate-400">총 처리량</div>
+                    <div class="text-2xl font-bold text-green-400" id="totalStat">0장</div>
+                </div>
+                <div class="analysis-card rounded-xl px-6 py-4">
+                    <div class="text-sm text-slate-400">정확도</div>
+                    <div class="text-2xl font-bold text-purple-400" id="accuracyStat">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 파일 업로드 섹션 -->
+        <div class="analysis-card rounded-2xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                📁 이미지 업로드 (최대 10장)
+            </h2>
+            
+            <div class="drop-zone rounded-xl p-8 text-center cursor-pointer" id="dropZone">
+                <div class="text-4xl mb-4">🎯</div>
+                <div class="text-xl font-semibold mb-2">이미지를 드래그하거나 클릭하여 선택</div>
+                <div class="text-slate-400">5-10장의 이미지를 동시에 업로드하세요</div>
+                <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+            </div>
+
+            <!-- 선택된 파일 표시 -->
+            <div id="selectedFiles" class="mt-6 hidden">
+                <h3 class="text-lg font-semibold mb-4">선택된 파일 (<span id="fileCount">0</span>장)</h3>
+                <div id="fileList" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- AI 정렬 방식 선택 -->
+        <div class="analysis-card rounded-2xl p-8 mb-8" id="sortSection" style="display: none;">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                🤖 AI 파일명 분석 & 정렬 방식
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <button class="sort-button p-4 rounded-xl border border-slate-600 hover:border-blue-400 transition-all" 
+                        data-method="ai">
+                    <div class="text-lg font-semibold">🧠 AI 스마트 정렬</div>
+                    <div class="text-sm text-slate-400 mt-2">파일명 패턴을 AI가 분석하여 최적 순서 결정</div>
+                </button>
+                
+                <button class="sort-button p-4 rounded-xl border border-slate-600 hover:border-green-400 transition-all" 
+                        data-method="time">
+                    <div class="text-lg font-semibold">⏰ 시간순 정렬</div>
+                    <div class="text-sm text-slate-400 mt-2">파일명에서 날짜/시간 정보를 추출하여 정렬</div>
+                </button>
+                
+                <button class="sort-button p-4 rounded-xl border border-slate-600 hover:border-purple-400 transition-all" 
+                        data-method="number">
+                    <div class="text-lg font-semibold">🔢 숫자순 정렬</div>
+                    <div class="text-sm text-slate-400 mt-2">파일명의 숫자를 기준으로 순차 정렬</div>
+                </button>
+            </div>
+
+            <!-- AI 분석 결과 -->
+            <div id="sortResult" class="hidden mt-6 p-4 bg-slate-800 rounded-xl">
+                <h4 class="font-semibold mb-2">🔍 AI 분석 결과</h4>
+                <div id="sortAnalysis" class="text-slate-300"></div>
+            </div>
+        </div>
+
+        <!-- 분석 시작 버튼 -->
+        <div class="text-center mb-8" id="analyzeSection" style="display: none;">
+            <button id="analyzeBtn" 
+                    class="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                🚀 배치 분석 시작
+            </button>
+        </div>
+
+        <!-- 진행 상태 -->
+        <div id="progressSection" class="analysis-card rounded-2xl p-8 mb-8" style="display: none;">
+            <h2 class="text-2xl font-bold mb-6">📊 분석 진행 상황</h2>
+            
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-lg" id="statusText">준비 중...</div>
+                <div class="text-lg font-semibold" id="progressText">0/0</div>
+            </div>
+            
+            <div class="w-full bg-slate-700 rounded-full h-3 mb-4">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            
+            <!-- 실시간 성능 메트릭 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                    <div class="text-sm text-slate-400">경과 시간</div>
+                    <div class="text-xl font-bold text-blue-400" id="elapsedTime">0초</div>
+                </div>
+                <div>
+                    <div class="text-sm text-slate-400">완료/총합</div>
+                    <div class="text-xl font-bold text-green-400" id="completedCount">0/0</div>
+                </div>
+                <div>
+                    <div class="text-sm text-slate-400">성공률</div>
+                    <div class="text-xl font-bold text-purple-400" id="successRate">0%</div>
+                </div>
+                <div>
+                    <div class="text-sm text-slate-400">평균 속도</div>
+                    <div class="text-xl font-bold text-yellow-400" id="avgSpeed">0s/장</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 분석 결과 -->
+        <div id="resultSection" class="analysis-card rounded-2xl p-8" style="display: none;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📋 분석 결과</h2>
+                <div class="flex gap-3">
+                    <button id="exportCsv" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
+                        📊 CSV 내보내기
+                    </button>
+                    <button id="exportJson" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        📄 JSON 내보내기
+                    </button>
+                </div>
+            </div>
+            
+            <div id="results" class="image-grid"></div>
+            
+            <!-- 요약 통계 -->
+            <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="p-4 bg-slate-800 rounded-xl">
+                    <div class="text-sm text-slate-400">총 처리 시간</div>
+                    <div class="text-xl font-bold text-blue-400" id="totalTime">-</div>
+                </div>
+                <div class="p-4 bg-slate-800 rounded-xl">
+                    <div class="text-sm text-slate-400">평균 처리 시간</div>
+                    <div class="text-xl font-bold text-green-400" id="avgTime">-</div>
+                </div>
+                <div class="p-4 bg-slate-800 rounded-xl">
+                    <div class="text-sm text-slate-400">성공한 분석</div>
+                    <div class="text-xl font-bold text-purple-400" id="successCount">-</div>
+                </div>
+                <div class="p-4 bg-slate-800 rounded-xl">
+                    <div class="text-sm text-slate-400">실패한 분석</div>
+                    <div class="text-xl font-bold text-red-400" id="failCount">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let currentSortMethod = 'ai';
+        let analysisResults = [];
+        let startTime = 0;
+
+        // DOM 요소들
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const fileList = document.getElementById('fileList');
+        const fileCount = document.getElementById('fileCount');
+        const sortSection = document.getElementById('sortSection');
+        const analyzeSection = document.getElementById('analyzeSection');
+        const progressSection = document.getElementById('progressSection');
+        const resultSection = document.getElementById('resultSection');
+
+        // 파일 드래그 앤 드롭 처리
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            handleFileSelection(files);
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFileSelection(files);
+        });
+
+        // 파일 선택 처리
+        function handleFileSelection(files) {
+            if (files.length > 10) {
+                alert('최대 10장의 이미지만 선택할 수 있습니다.');
+                return;
+            }
+
+            selectedFiles = files.slice(0, 10);
+            displaySelectedFiles();
+            
+            if (selectedFiles.length >= 5) {
+                sortSection.style.display = 'block';
+                analyzeSection.style.display = 'block';
+            }
+        }
+
+        // 선택된 파일 표시
+        function displaySelectedFiles() {
+            if (selectedFiles.length === 0) {
+                selectedFilesDiv.classList.add('hidden');
+                return;
+            }
+
+            selectedFilesDiv.classList.remove('hidden');
+            fileCount.textContent = selectedFiles.length;
+
+            fileList.innerHTML = selectedFiles.map((file, index) => `
+                <div class="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                            ${index + 1}
+                        </span>
+                        <span class="text-sm">${file.name}</span>
+                    </div>
+                    <div class="text-sm text-slate-400">
+                        ${(file.size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 정렬 방식 선택
+        document.querySelectorAll('.sort-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // 이전 선택 제거
+                document.querySelectorAll('.sort-button').forEach(b => b.classList.remove('active'));
+                
+                // 새 선택 활성화
+                button.classList.add('active');
+                currentSortMethod = button.dataset.method;
+
+                // AI 정렬인 경우 즉시 분석 실행
+                if (currentSortMethod === 'ai') {
+                    performFilenameAnalysis();
+                } else {
+                    // 다른 정렬 방식의 경우 설명만 표시
+                    const sortResult = document.getElementById('sortResult');
+                    const sortAnalysis = document.getElementById('sortAnalysis');
+                    
+                    let description = '';
+                    if (currentSortMethod === 'time') {
+                        description = '파일명에서 날짜/시간 정보를 추출하여 시간순으로 정렬합니다.';
+                    } else if (currentSortMethod === 'number') {
+                        description = '파일명에 포함된 숫자를 기준으로 순차적으로 정렬합니다.';
+                    }
+                    
+                    sortAnalysis.innerHTML = `<div class="text-blue-400">📋 ${description}</div>`;
+                    sortResult.classList.remove('hidden');
+                }
+            });
+        });
+
+        // AI 파일명 분석 실행
+        async function performFilenameAnalysis() {
+            const filenames = selectedFiles.map(file => file.name);
+            const sortResult = document.getElementById('sortResult');
+            const sortAnalysis = document.getElementById('sortAnalysis');
+            
+            sortAnalysis.innerHTML = '<div class="text-yellow-400 analyzing">🤖 AI가 파일명 패턴을 분석하는 중...</div>';
+            sortResult.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/sort-filenames', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filenames })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || '파일명 분석 실패');
+                }
+                
+                const analysis = result.data;
+                
+                sortAnalysis.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="text-green-400">✅ <strong>분석 완료:</strong> ${analysis.analysis}</div>
+                        <div class="text-blue-400">🔍 <strong>패턴:</strong> ${analysis.pattern}</div>
+                        <div class="text-purple-400">💡 <strong>정렬 근거:</strong> ${analysis.reasoning}</div>
+                        <div class="text-slate-300">
+                            <strong>정렬 순서:</strong> 
+                            ${analysis.sortedOrder.map((idx, pos) => `${pos + 1}. ${filenames[idx]}`).join(', ')}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('파일명 분석 오류:', error);
+                sortAnalysis.innerHTML = `<div class="text-red-400">❌ 분석 실패: ${error.message}</div>`;
+            }
+        }
+
+        // 분석 시작
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            if (selectedFiles.length < 5) {
+                alert('최소 5장의 이미지가 필요합니다.');
+                return;
+            }
+
+            startAnalysis();
+        });
+
+        // 분석 시작
+        async function startAnalysis() {
+            startTime = Date.now();
+            analysisResults = [];
+            
+            progressSection.style.display = 'block';
+            resultSection.style.display = 'none';
+            
+            updateProgress(0, selectedFiles.length, '분석 시작...');
+            
+            try {
+                // FormData 생성
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('images', file);
+                });
+                formData.append('sortMethod', currentSortMethod);
+                
+                // 배치 분석 API 호출
+                const response = await fetch('/api/analyze-batch', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || '배치 분석 실패');
+                }
+                
+                analysisResults = result.results;
+                
+                // 결과 표시
+                displayResults();
+                updateProgress(selectedFiles.length, selectedFiles.length, '분석 완료!');
+                
+                // 통계 업데이트
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('배치 분석 오류:', error);
+                updateProgress(0, selectedFiles.length, `분석 실패: ${error.message}`);
+            }
+        }
+
+        // 진행 상황 업데이트
+        function updateProgress(current, total, status) {
+            const percentage = total > 0 ? (current / total) * 100 : 0;
+            
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            document.getElementById('statusText').textContent = status;
+            document.getElementById('progressText').textContent = `${current}/${total}`;
+            document.getElementById('completedCount').textContent = `${current}/${total}`;
+            
+            if (total > 0) {
+                const successCount = analysisResults.filter(r => r.success).length;
+                const successRate = current > 0 ? (successCount / current) * 100 : 0;
+                document.getElementById('successRate').textContent = `${successRate.toFixed(1)}%`;
+            }
+            
+            // 경과 시간 업데이트
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('elapsedTime').textContent = `${elapsed}초`;
+            
+            // 평균 속도 계산
+            if (current > 0 && elapsed > 0) {
+                const avgSpeed = elapsed / current;
+                document.getElementById('avgSpeed').textContent = `${avgSpeed.toFixed(1)}s/장`;
+            }
+        }
+
+        // 결과 표시
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = analysisResults.map((result, index) => `
+                <div class="image-item">
+                    <div class="p-4">
+                        <div class="font-semibold text-lg mb-2">${result.filename}</div>
+                        
+                        ${result.success ? `
+                            <div class="text-green-400 mb-2">✅ 분석 성공</div>
+                            <div class="text-slate-300 text-sm leading-relaxed">
+                                ${result.analysis}
+                            </div>
+                        ` : `
+                            <div class="text-red-400 mb-2">❌ 분석 실패</div>
+                            <div class="text-slate-400 text-sm">
+                                ${result.error}
+                            </div>
+                        `}
+                        
+                        <div class="text-xs text-slate-500 mt-2">
+                            원본 순서: ${result.originalIndex + 1}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultSection.style.display = 'block';
+            
+            // 요약 통계 업데이트
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            const successCount = analysisResults.filter(r => r.success).length;
+            const failCount = analysisResults.length - successCount;
+            const avgTime = totalTime / analysisResults.length;
+            
+            document.getElementById('totalTime').textContent = `${totalTime}초`;
+            document.getElementById('avgTime').textContent = `${avgTime.toFixed(1)}초`;
+            document.getElementById('successCount').textContent = `${successCount}장`;
+            document.getElementById('failCount').textContent = `${failCount}장`;
+        }
+
+        // 통계 업데이트
+        function updateStatistics() {
+            const totalProcessed = analysisResults.length;
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            const speed = totalTime > 0 ? (totalProcessed * 60 / totalTime).toFixed(1) : 0;
+            const successCount = analysisResults.filter(r => r.success).length;
+            const accuracy = totalProcessed > 0 ? (successCount / totalProcessed * 100).toFixed(1) : 0;
+            
+            document.getElementById('speedStat').textContent = `${speed}장/분`;
+            document.getElementById('totalStat').textContent = `${totalProcessed}장`;
+            document.getElementById('accuracyStat').textContent = `${accuracy}%`;
+        }
+
+        // CSV 내보내기
+        document.getElementById('exportCsv').addEventListener('click', () => {
+            const csvData = [
+                ['파일명', '원본순서', '분석결과', '성공여부'],
+                ...analysisResults.map(result => [
+                    result.filename,
+                    result.originalIndex + 1,
+                    result.success ? result.analysis : result.error,
+                    result.success ? '성공' : '실패'
+                ])
+            ];
+            
+            const csv = csvData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            downloadFile(`batch-analysis-${new Date().toISOString().slice(0, 19)}.csv`, csv, 'text/csv');
+        });
+
+        // JSON 내보내기
+        document.getElementById('exportJson').addEventListener('click', () => {
+            const jsonData = {
+                timestamp: new Date().toISOString(),
+                sortMethod: currentSortMethod,
+                totalFiles: selectedFiles.length,
+                results: analysisResults,
+                statistics: {
+                    totalTime: Math.floor((Date.now() - startTime) / 1000),
+                    successCount: analysisResults.filter(r => r.success).length,
+                    failCount: analysisResults.filter(r => !r.success).length
+                }
+            };
+            
+            const json = JSON.stringify(jsonData, null, 2);
+            downloadFile(`batch-analysis-${new Date().toISOString().slice(0, 19)}.json`, json, 'application/json');
+        });
+
+        // 파일 다운로드 헬퍼
+        function downloadFile(filename, content, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 초기화 시 기본 정렬 방식 선택
+        document.querySelector('[data-method="ai"]').click();
+    </script>
+</body>
+</html>

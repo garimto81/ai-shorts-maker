@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 정밀 이미지 분석 테스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0a09 0%, #1c1917 50%, #292524 100%);
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .precision-excellent {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+            border-left: 4px solid #22c55e;
+        }
+        
+        .precision-good {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .precision-poor {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+            border-left: 4px solid #ef4444;
+        }
+        
+        .loading-dot {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .brand-tag {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .category-tag {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .color-tag {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-3 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
+                🔬 정밀 이미지 분석 테스트
+            </h1>
+            <p class="text-gray-400 text-lg">브랜드명, 모델명까지 포함한 전문가 수준 AI 분석</p>
+            <div class="mt-4 flex justify-center space-x-4 text-sm">
+                <span class="px-3 py-1 bg-green-600 rounded-full">✓ 브랜드 인식</span>
+                <span class="px-3 py-1 bg-blue-600 rounded-full">✓ 모델명 추출</span>
+                <span class="px-3 py-1 bg-purple-600 rounded-full">✓ 재질 분석</span>
+                <span class="px-3 py-1 bg-pink-600 rounded-full">✓ 색상 정밀도</span>
+            </div>
+        </div>
+
+        <!-- Test Categories Grid -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-10">
+            <!-- Luxury Brands -->
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="runLuxuryTest()">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">💎</div>
+                    <h3 class="text-xl font-bold mb-2">럭셔리 브랜드</h3>
+                    <p class="text-gray-400 text-sm mb-4">루이비통, 구찌, 에르메스, 샤넬</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="text-yellow-400">• 브랜드 로고 인식</div>
+                        <div class="text-blue-400">• 모델/컬렉션명</div>
+                        <div class="text-green-400">• 프리미엄 재질</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tech Products -->
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="runTechTest()">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h3 class="text-xl font-bold mb-2">테크 제품</h3>
+                    <p class="text-gray-400 text-sm mb-4">아이폰, 갤럭시, 맥북, 에어�팟</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="text-yellow-400">• 정확한 모델명</div>
+                        <div class="text-blue-400">• 용량/색상 옵션</div>
+                        <div class="text-green-400">• 세대별 구분</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fashion Items -->
+            <div class="analysis-card p-6 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer" onclick="runFashionTest()">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">👕</div>
+                    <h3 class="text-xl font-bold mb-2">패션 아이템</h3>
+                    <p class="text-gray-400 text-sm mb-4">나이키, 아디다스, 자라, 유니클로</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="text-yellow-400">• 브랜드 식별</div>
+                        <div class="text-blue-400">• 소재/패브릭</div>
+                        <div class="text-green-400">• 디자인 특징</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Upload -->
+        <div class="analysis-card p-6 rounded-xl mb-10">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">📷 직접 업로드 테스트</h3>
+                <button id="uploadBtn" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all">
+                    이미지 선택
+                </button>
+            </div>
+            <p class="text-gray-400 text-sm">본인의 제품 이미지를 업로드해서 정밀 분석을 체험해보세요</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="analysis-card p-6 rounded-xl mb-6">
+                <h2 class="text-2xl font-bold mb-4">📊 정밀 분석 결과</h2>
+                <div id="resultsList" class="space-y-4">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Analysis Quality Metrics -->
+            <div id="qualityMetrics" class="analysis-card p-6 rounded-xl">
+                <h3 class="text-xl font-semibold mb-4">🎯 분석 품질 평가</h3>
+                <div class="grid md:grid-cols-4 gap-4" id="metricsGrid">
+                    <!-- Metrics will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="analysis-card p-8 rounded-xl text-center">
+                <div class="flex justify-center space-x-2 mb-4">
+                    <div class="loading-dot w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div class="loading-dot w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div class="loading-dot w-3 h-3 bg-blue-500 rounded-full"></div>
+                </div>
+                <p class="text-lg font-semibold">AI 분석 진행 중...</p>
+                <p class="text-sm text-gray-400 mt-2" id="loadingStatus">이미지 처리 중</p>
+            </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+    </div>
+
+    <script>
+        // Test image datasets
+        const testDatasets = {
+            luxury: [
+                {
+                    url: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=800',
+                    name: '루이비통 가방',
+                    expectedKeywords: ['루이비통', 'LV', '가방', '토트백', '모노그램'],
+                    precision: 95
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=800',
+                    name: '구찌 벨트',
+                    expectedKeywords: ['구찌', 'Gucci', '벨트', '가죽'],
+                    precision: 90
+                }
+            ],
+            tech: [
+                {
+                    url: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800',
+                    name: '아이폰',
+                    expectedKeywords: ['아이폰', 'iPhone', '애플', 'Apple'],
+                    precision: 95
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+                    name: '맥북',
+                    expectedKeywords: ['맥북', 'MacBook', '애플', 'Apple', '노트북'],
+                    precision: 92
+                }
+            ],
+            fashion: [
+                {
+                    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+                    name: '나이키 운동화',
+                    expectedKeywords: ['나이키', 'Nike', '운동화', '스니커즈'],
+                    precision: 88
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=800',
+                    name: '아디다스 신발',
+                    expectedKeywords: ['아디다스', 'Adidas', '운동화', '스니커즈'],
+                    precision: 85
+                }
+            ]
+        };
+
+        let analysisResults = [];
+
+        // UI Elements
+        const elements = {
+            uploadBtn: document.getElementById('uploadBtn'),
+            fileInput: document.getElementById('fileInput'),
+            resultsSection: document.getElementById('resultsSection'),
+            resultsList: document.getElementById('resultsList'),
+            qualityMetrics: document.getElementById('qualityMetrics'),
+            metricsGrid: document.getElementById('metricsGrid'),
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            loadingStatus: document.getElementById('loadingStatus')
+        };
+
+        // Show/Hide Loading
+        function showLoading(status = '이미지 처리 중') {
+            elements.loadingIndicator.classList.remove('hidden');
+            elements.loadingStatus.textContent = status;
+        }
+
+        function hideLoading() {
+            elements.loadingIndicator.classList.add('hidden');
+        }
+
+        // Analyze Image
+        async function analyzeImage(imageUrl, imageName, expectedKeywords = [], precision = 0) {
+            showLoading(`"${imageName}" 분석 중...`);
+            
+            try {
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                
+                const formData = new FormData();
+                formData.append('image', blob, `${imageName}.jpg`);
+                
+                const apiResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await apiResponse.json();
+                
+                if (result.success) {
+                    const analysis = result.analysis;
+                    const qualityScore = calculatePrecisionScore(analysis, expectedKeywords);
+                    
+                    return {
+                        imageName,
+                        imageUrl,
+                        analysis,
+                        expectedKeywords,
+                        qualityScore,
+                        expectedPrecision: precision,
+                        timestamp: new Date().toLocaleTimeString(),
+                        success: true
+                    };
+                } else {
+                    throw new Error(result.error || '분석 실패');
+                }
+                
+            } catch (error) {
+                console.error(`분석 실패: ${imageName}`, error);
+                return {
+                    imageName,
+                    imageUrl,
+                    analysis: `오류: ${error.message}`,
+                    expectedKeywords,
+                    qualityScore: 0,
+                    expectedPrecision: precision,
+                    timestamp: new Date().toLocaleTimeString(),
+                    success: false
+                };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Calculate Precision Score
+        function calculatePrecisionScore(analysis, expectedKeywords) {
+            if (!analysis || expectedKeywords.length === 0) return 0;
+            
+            const analysisLower = analysis.toLowerCase();
+            let matchCount = 0;
+            
+            // Brand/keyword matching
+            expectedKeywords.forEach(keyword => {
+                if (analysisLower.includes(keyword.toLowerCase())) {
+                    matchCount++;
+                }
+            });
+            
+            // Quality indicators
+            const qualityIndicators = {
+                hasBrand: /\b(나이키|아디다스|애플|삼성|구찌|루이비통|샤넬|에르메스|Nike|Adidas|Apple|Samsung|Gucci|LV|Chanel|Hermès)\b/i.test(analysis),
+                hasSpecificColor: /\b(매트|글로시|메탈릭|펄|새틴|스페이스|로즈|골드|실버|블랙|화이트|그레이|네이비|베이지|브라운)\b/i.test(analysis),
+                hasSpecificCategory: /\b(아이폰|갤럭시|맥북|에어팟|운동화|스니커즈|가방|지갑|시계|반지|목걸이|셔츠|재킷|코트|바지|스커트|드레스)\b/i.test(analysis),
+                noGenericTerms: !/\b(제품|상품|아이템|물건|멋진|좋은|훌륭한|아름다운)\b/i.test(analysis),
+                hasDetailedDescription: analysis.length >= 15
+            };
+            
+            const qualityScore = Object.values(qualityIndicators).filter(Boolean).length * 15;
+            const keywordScore = (matchCount / expectedKeywords.length) * 40;
+            
+            return Math.min(100, Math.round(qualityScore + keywordScore));
+        }
+
+        // Display Results
+        function displayResults(results) {
+            elements.resultsSection.classList.remove('hidden');
+            elements.resultsList.innerHTML = '';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                let precisionClass = 'precision-poor';
+                let precisionIcon = '❌';
+                let precisionText = '개선 필요';
+                
+                if (result.qualityScore >= 80) {
+                    precisionClass = 'precision-excellent';
+                    precisionIcon = '🎯';
+                    precisionText = '매우 정확';
+                } else if (result.qualityScore >= 60) {
+                    precisionClass = 'precision-good';
+                    precisionIcon = '✅';
+                    precisionText = '양호';
+                }
+                
+                div.className = `${precisionClass} p-6 rounded-xl`;
+                
+                // Extract tags from analysis
+                const tags = extractAnalysisTags(result.analysis);
+                
+                div.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <img src="${result.imageUrl}" alt="${result.imageName}" 
+                             class="w-24 h-24 object-cover rounded-lg border-2 border-white/10">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <h3 class="text-lg font-bold">${result.imageName}</h3>
+                                <span class="px-3 py-1 text-xs rounded-full font-semibold ${
+                                    result.qualityScore >= 80 ? 'bg-green-600' : 
+                                    result.qualityScore >= 60 ? 'bg-blue-600' : 'bg-red-600'
+                                }">
+                                    ${precisionIcon} ${precisionText} (${result.qualityScore}점)
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <p class="text-lg font-medium text-yellow-400 mb-2">"${result.analysis}"</p>
+                                ${tags.length > 0 ? `
+                                <div class="flex flex-wrap gap-2">
+                                    ${tags.map(tag => `<span class="${tag.class} px-2 py-1 text-xs rounded-full">${tag.text}</span>`).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="text-sm text-gray-400">
+                                <div>기대 키워드: ${result.expectedKeywords.join(', ')}</div>
+                                <div>분석 시간: ${result.timestamp}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                elements.resultsList.appendChild(div);
+            });
+            
+            updateQualityMetrics(results);
+        }
+
+        // Extract Analysis Tags
+        function extractAnalysisTags(analysis) {
+            const tags = [];
+            
+            // Brand detection
+            const brands = ['나이키', '아디다스', '애플', '삼성', '구찌', '루이비통', 'Nike', 'Adidas', 'Apple', 'Samsung', 'Gucci', 'LV'];
+            brands.forEach(brand => {
+                if (analysis.includes(brand)) {
+                    tags.push({ text: brand, class: 'brand-tag' });
+                }
+            });
+            
+            // Category detection
+            const categories = ['아이폰', '갤럭시', '맥북', '운동화', '가방', '시계', '셔츠', '재킷'];
+            categories.forEach(category => {
+                if (analysis.includes(category)) {
+                    tags.push({ text: category, class: 'category-tag' });
+                }
+            });
+            
+            // Color detection
+            const colors = ['블랙', '화이트', '그레이', '네이비', '베이지', '브라운', '실버', '골드'];
+            colors.forEach(color => {
+                if (analysis.includes(color)) {
+                    tags.push({ text: color, class: 'color-tag' });
+                }
+            });
+            
+            return tags;
+        }
+
+        // Update Quality Metrics
+        function updateQualityMetrics(results) {
+            const totalResults = results.length;
+            const avgScore = results.reduce((sum, r) => sum + r.qualityScore, 0) / totalResults;
+            const excellentCount = results.filter(r => r.qualityScore >= 80).length;
+            const successRate = results.filter(r => r.success).length / totalResults * 100;
+            
+            elements.metricsGrid.innerHTML = `
+                <div class="text-center p-4 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg">
+                    <div class="text-3xl font-bold">${Math.round(avgScore)}점</div>
+                    <div class="text-sm text-gray-300">평균 정확도</div>
+                </div>
+                <div class="text-center p-4 bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-lg">
+                    <div class="text-3xl font-bold">${excellentCount}/${totalResults}</div>
+                    <div class="text-sm text-gray-300">우수 등급</div>
+                </div>
+                <div class="text-center p-4 bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-lg">
+                    <div class="text-3xl font-bold">${Math.round(successRate)}%</div>
+                    <div class="text-sm text-gray-300">성공률</div>
+                </div>
+                <div class="text-center p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-lg">
+                    <div class="text-3xl font-bold">${totalResults}</div>
+                    <div class="text-sm text-gray-300">총 분석 수</div>
+                </div>
+            `;
+        }
+
+        // Test Functions
+        async function runLuxuryTest() {
+            console.log('럭셔리 브랜드 테스트 시작...');
+            const results = [];
+            
+            for (const testCase of testDatasets.luxury) {
+                const result = await analyzeImage(testCase.url, testCase.name, testCase.expectedKeywords, testCase.precision);
+                results.push(result);
+                displayResults(results);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            analysisResults = results;
+        }
+
+        async function runTechTest() {
+            console.log('테크 제품 테스트 시작...');
+            const results = [];
+            
+            for (const testCase of testDatasets.tech) {
+                const result = await analyzeImage(testCase.url, testCase.name, testCase.expectedKeywords, testCase.precision);
+                results.push(result);
+                displayResults(results);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            analysisResults = results;
+        }
+
+        async function runFashionTest() {
+            console.log('패션 아이템 테스트 시작...');
+            const results = [];
+            
+            for (const testCase of testDatasets.fashion) {
+                const result = await analyzeImage(testCase.url, testCase.name, testCase.expectedKeywords, testCase.precision);
+                results.push(result);
+                displayResults(results);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            analysisResults = results;
+        }
+
+        // Event Listeners
+        elements.uploadBtn.addEventListener('click', () => {
+            elements.fileInput.click();
+        });
+
+        elements.fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            
+            const results = [];
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                showLoading(`${file.name} 분석 중... (${i+1}/${files.length})`);
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    
+                    const response = await fetch('/api/analyze-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const qualityScore = calculatePrecisionScore(result.analysis, []);
+                        
+                        results.push({
+                            imageName: file.name,
+                            imageUrl: URL.createObjectURL(file),
+                            analysis: result.analysis,
+                            expectedKeywords: [],
+                            qualityScore,
+                            expectedPrecision: 0,
+                            timestamp: new Date().toLocaleTimeString(),
+                            success: true
+                        });
+                    }
+                } catch (error) {
+                    console.error('분석 실패:', error);
+                }
+                
+                displayResults(results);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            hideLoading();
+            analysisResults = results;
+        });
+
+        // Global functions
+        window.runLuxuryTest = runLuxuryTest;
+        window.runTechTest = runTechTest;
+        window.runFashionTest = runFashionTest;
+
+        console.log('🔬 정밀 이미지 분석 테스트 도구 준비 완료');
+    </script>
+</body>
+</html>

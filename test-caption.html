@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 캡션 테스트</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #222; 
+            color: white;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            background: #333;
+            border-radius: 5px;
+            border: 1px solid #555;
+        }
+        .status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .loading { color: #ff9800; }
+        pre {
+            background: #111;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        img {
+            max-width: 200px;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>이미지 캡션 기능 테스트</h1>
+        
+        <h2>1. 테스트 이미지 생성</h2>
+        <button onclick="createTestImage('product')">상품 이미지 생성</button>
+        <button onclick="createTestImage('car')">자동차 이미지 생성</button>
+        <button onclick="createTestImage('fashion')">패션 이미지 생성</button>
+        
+        <div id="imagePreview"></div>
+        
+        <h2>2. API 테스트</h2>
+        <button onclick="testAnalyzeAPI()">캡션 생성 테스트</button>
+        
+        <div id="testResult"></div>
+    </div>
+
+    <script>
+        let currentImageData = null;
+
+        // 테스트 이미지 생성
+        function createTestImage(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            
+            // 배경
+            if (type === 'product') {
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, 400, 400);
+                
+                // 상품 박스
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(100, 100, 200, 200);
+                
+                // 텍스트
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('PRODUCT', 200, 210);
+            } else if (type === 'car') {
+                ctx.fillStyle = '#87CEEB';
+                ctx.fillRect(0, 0, 400, 400);
+                
+                // 자동차 모양
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(50, 150, 300, 100);
+                ctx.fillRect(100, 100, 200, 50);
+                
+                // 바퀴
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(100, 270, 30, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(300, 270, 30, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 텍스트
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('CAR', 200, 200);
+            } else if (type === 'fashion') {
+                ctx.fillStyle = '#FFE4E1';
+                ctx.fillRect(0, 0, 400, 400);
+                
+                // 옷 모양
+                ctx.fillStyle = '#FF69B4';
+                ctx.fillRect(100, 50, 200, 250);
+                ctx.fillRect(50, 100, 300, 50);
+                
+                // 텍스트
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('FASHION', 200, 200);
+            }
+            
+            currentImageData = canvas.toDataURL('image/jpeg');
+            
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <h3>${type === 'product' ? '상품' : type === 'car' ? '자동차' : '패션'} 테스트 이미지</h3>
+                <img src="${currentImageData}" alt="테스트 이미지">
+            `;
+        }
+        
+        // API 테스트
+        async function testAnalyzeAPI() {
+            if (!currentImageData) {
+                alert('먼저 테스트 이미지를 생성해주세요!');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="result"><div class="status loading">캡션 생성 중...</div></div>';
+            
+            try {
+                // dataURL을 blob으로 변환
+                const response = await fetch(currentImageData);
+                const blob = await response.blob();
+                
+                // FormData 생성
+                const formData = new FormData();
+                formData.append('image', blob, 'test.jpg');
+                
+                // API 호출
+                const apiResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await apiResponse.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <div class="status success">✅ 캡션 생성 성공!</div>
+                            <h3>생성된 캡션:</h3>
+                            <p style="font-size: 20px; color: #4CAF50;">"${result.analysis}"</p>
+                            <h4>응답 전체:</h4>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(result.error || '캡션 생성 실패');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <div class="status error">❌ 오류 발생</div>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        // 페이지 로드 시 자동으로 상품 이미지 생성
+        window.onload = () => {
+            createTestImage('product');
+        };
+    </script>
+</body>
+</html>

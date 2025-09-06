@@ -81,6 +81,29 @@
             color: white;
             font-size: 18px;
             line-height: 1;
+            z-index: 10;
+        }
+        
+        .image-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 10px;
+            padding: 4px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .loading-caption {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
         
         /* 탭 스타일 */
@@ -253,6 +276,7 @@
         // 앱 상태
         const state = {
             images: [],
+            imageAnalysis: {}, // 이미지별 한줄평
             productName: '',
             style: 'dynamic',
             industry: 'auto',
@@ -311,15 +335,56 @@
                     div.innerHTML = `
                         <img src="${e.target.result}" alt="Image ${index + 1}">
                         <button class="remove-btn touch-feedback" onclick="removeImage(${index})">×</button>
+                        <div class="image-caption loading-caption" id="caption-${index}">
+                            분석 중...
+                        </div>
                     `;
                     grid.appendChild(div);
+                    
+                    // 이미지 분석 요청
+                    analyzeImage(file, index);
                 };
                 reader.readAsDataURL(file);
             });
         }
         
+        // 개별 이미지 분석
+        async function analyzeImage(file, index) {
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                const response = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 한줄평 저장 및 표시
+                    state.imageAnalysis[index] = result.analysis;
+                    const captionEl = $(`caption-${index}`);
+                    if (captionEl) {
+                        captionEl.textContent = result.analysis;
+                        captionEl.classList.remove('loading-caption');
+                    }
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('이미지 분석 실패:', error);
+                const captionEl = $(`caption-${index}`);
+                if (captionEl) {
+                    captionEl.textContent = '분석 실패';
+                    captionEl.classList.remove('loading-caption');
+                }
+            }
+        }
+        
         window.removeImage = (index) => {
             state.images.splice(index, 1);
+            delete state.imageAnalysis[index]; // 한줄평도 삭제
             updateImageGrid();
             updateGenerateButton();
         };
