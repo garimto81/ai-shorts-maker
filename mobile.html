@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>쇼츠 생성기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Galaxy S24 최적화: 390x844px viewport */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overscroll-behavior: none;
+        }
+        
+        /* 안전 영역 고려 (노치, 상태바) */
+        .safe-top {
+            padding-top: env(safe-area-inset-top, 20px);
+        }
+        
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        /* 모바일 스크롤 최적화 */
+        .scroll-container {
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* 터치 피드백 */
+        .touch-feedback:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        
+        /* 파일 업로드 버튼 모바일 최적화 */
+        input[type="file"] {
+            font-size: 16px;
+        }
+        
+        /* 키보드 표시시 레이아웃 조정 */
+        input:focus, select:focus, textarea:focus {
+            font-size: 16px;
+        }
+        
+        /* 이미지 썸네일 */
+        .image-thumb {
+            position: relative;
+            aspect-ratio: 1;
+            background: #374151;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(239, 68, 68, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            line-height: 1;
+        }
+        
+        /* 탭 스타일 */
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        
+        /* 로딩 스피너 */
+        .spinner {
+            border: 3px solid #374151;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- 상태바 영역 -->
+    <div class="safe-top bg-gray-900"></div>
+    
+    <!-- 헤더 (고정) -->
+    <header class="bg-gray-800 px-4 py-3 sticky top-0 z-50 border-b border-gray-700">
+        <h1 class="text-lg font-semibold text-center">쇼츠 생성기</h1>
+    </header>
+    
+    <!-- 메인 컨테이너 -->
+    <div id="app" class="min-h-screen bg-gray-900">
+        
+        <!-- 탭 네비게이션 -->
+        <div class="bg-gray-800 px-4 py-2 flex border-b border-gray-700">
+            <button id="tab-input" class="flex-1 py-2 text-sm font-medium tab-active transition-colors">
+                입력
+            </button>
+            <button id="tab-result" class="flex-1 py-2 text-sm font-medium text-gray-400 transition-colors">
+                결과
+            </button>
+        </div>
+        
+        <!-- 컨텐츠 영역 -->
+        <div class="scroll-container" style="height: calc(100vh - 120px);">
+            
+            <!-- 입력 탭 -->
+            <div id="input-panel" class="p-4 pb-20">
+                
+                <!-- 이미지 업로드 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-3">사진 (3장 이상)</label>
+                    <button onclick="document.getElementById('imageInput').click()" 
+                            class="w-full p-8 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg touch-feedback transition-all">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <p class="text-sm text-gray-400">사진 추가</p>
+                    </button>
+                    <input type="file" id="imageInput" class="hidden" multiple accept="image/*" capture="environment">
+                    
+                    <!-- 이미지 미리보기 그리드 -->
+                    <div id="imageGrid" class="grid grid-cols-3 gap-2 mt-3"></div>
+                </div>
+                
+                <!-- 상품명 입력 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">상품명</label>
+                    <input type="text" 
+                           id="productName"
+                           class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-base"
+                           placeholder="상품명 입력"
+                           autocomplete="off">
+                </div>
+                
+                <!-- 스타일 선택 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">스타일</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="style-btn py-3 px-2 bg-gray-800 border border-gray-600 rounded-lg text-sm touch-feedback active"
+                                data-style="dynamic">
+                            다이나믹
+                        </button>
+                        <button class="style-btn py-3 px-2 bg-gray-800 border border-gray-600 rounded-lg text-sm touch-feedback"
+                                data-style="professional">
+                            프로페셔널
+                        </button>
+                        <button class="style-btn py-3 px-2 bg-gray-800 border border-gray-600 rounded-lg text-sm touch-feedback"
+                                data-style="luxury">
+                            럭셔리
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 업종 선택 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">업종</label>
+                    <select id="industryType" 
+                            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-base">
+                        <option value="auto">자동차</option>
+                        <option value="fashion">패션</option>
+                        <option value="tech">전자제품</option>
+                        <option value="food">식품</option>
+                        <option value="beauty">뷰티</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+                
+                <!-- 생성 버튼 (하단 고정) -->
+                <div class="fixed bottom-0 left-0 right-0 p-4 bg-gray-900 border-t border-gray-700 safe-bottom">
+                    <button id="generateBtn" 
+                            class="w-full py-4 bg-blue-600 rounded-lg font-semibold text-base touch-feedback disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            disabled>
+                        생성하기
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 결과 탭 -->
+            <div id="result-panel" class="p-4 hidden">
+                
+                <!-- 상태 표시 -->
+                <div id="statusSection" class="mb-6">
+                    <div class="bg-gray-800 rounded-lg p-6 text-center">
+                        <p class="text-gray-400">대기 중</p>
+                    </div>
+                </div>
+                
+                <!-- 처리 중 -->
+                <div id="processingSection" class="hidden">
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-center text-sm" id="processingStatus">이미지 분석 중...</p>
+                    </div>
+                </div>
+                
+                <!-- 분석 결과 -->
+                <div id="analysisSection" class="hidden mb-6">
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">분석 결과</h3>
+                        <div id="analysisContent" class="space-y-2 text-sm text-gray-300"></div>
+                    </div>
+                </div>
+                
+                <!-- 비디오 미리보기 -->
+                <div id="videoSection" class="hidden">
+                    <div class="bg-black rounded-lg overflow-hidden aspect-[9/16] mb-4">
+                        <video id="videoPlayer" class="w-full h-full" controls playsinline></video>
+                    </div>
+                    
+                    <!-- 액션 버튼 -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="py-3 bg-green-600 rounded-lg font-medium touch-feedback">
+                            다운로드
+                        </button>
+                        <button class="py-3 bg-gray-600 rounded-lg font-medium touch-feedback">
+                            다시 생성
+                        </button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 앱 상태
+        const state = {
+            images: [],
+            productName: '',
+            style: 'dynamic',
+            industry: 'auto',
+            currentTab: 'input',
+            isGenerating: false
+        };
+        
+        // DOM 요소
+        const $ = (id) => document.getElementById(id);
+        const $$ = (selector) => document.querySelectorAll(selector);
+        
+        // 탭 전환
+        $('tab-input').addEventListener('click', () => switchTab('input'));
+        $('tab-result').addEventListener('click', () => switchTab('result'));
+        
+        function switchTab(tab) {
+            state.currentTab = tab;
+            
+            // 탭 버튼 스타일
+            if (tab === 'input') {
+                $('tab-input').classList.add('tab-active', 'text-blue-500');
+                $('tab-input').classList.remove('text-gray-400');
+                $('tab-result').classList.remove('tab-active', 'text-blue-500');
+                $('tab-result').classList.add('text-gray-400');
+                
+                $('input-panel').classList.remove('hidden');
+                $('result-panel').classList.add('hidden');
+            } else {
+                $('tab-result').classList.add('tab-active', 'text-blue-500');
+                $('tab-result').classList.remove('text-gray-400');
+                $('tab-input').classList.remove('tab-active', 'text-blue-500');
+                $('tab-input').classList.add('text-gray-400');
+                
+                $('result-panel').classList.remove('hidden');
+                $('input-panel').classList.add('hidden');
+            }
+        }
+        
+        // 이미지 업로드 처리
+        $('imageInput').addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            state.images = files;
+            updateImageGrid();
+            updateGenerateButton();
+        });
+        
+        function updateImageGrid() {
+            const grid = $('imageGrid');
+            grid.innerHTML = '';
+            
+            state.images.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-thumb';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Image ${index + 1}">
+                        <button class="remove-btn touch-feedback" onclick="removeImage(${index})">×</button>
+                    `;
+                    grid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        window.removeImage = (index) => {
+            state.images.splice(index, 1);
+            updateImageGrid();
+            updateGenerateButton();
+        };
+        
+        // 상품명 입력
+        $('productName').addEventListener('input', (e) => {
+            state.productName = e.target.value;
+            updateGenerateButton();
+        });
+        
+        // 스타일 선택
+        $$('.style-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                $$('.style-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'border-blue-600');
+                    b.classList.add('bg-gray-800', 'border-gray-600');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'border-blue-600');
+                btn.classList.remove('bg-gray-800', 'border-gray-600');
+                state.style = btn.dataset.style;
+            });
+        });
+        
+        // 업종 선택
+        $('industryType').addEventListener('change', (e) => {
+            state.industry = e.target.value;
+        });
+        
+        // 생성 버튼 업데이트
+        function updateGenerateButton() {
+            const btn = $('generateBtn');
+            const canGenerate = state.images.length >= 3 && state.productName.trim() !== '';
+            btn.disabled = !canGenerate || state.isGenerating;
+        }
+        
+        // 생성 시작
+        $('generateBtn').addEventListener('click', async () => {
+            if (state.isGenerating) return;
+            
+            state.isGenerating = true;
+            updateGenerateButton();
+            
+            // 결과 탭으로 전환
+            switchTab('result');
+            
+            // 처리 상태 표시
+            $('statusSection').classList.add('hidden');
+            $('processingSection').classList.remove('hidden');
+            
+            // 처리 시뮬레이션
+            const steps = [
+                '이미지 분석 중...',
+                '스크립트 생성 중...',
+                '비디오 렌더링 중...',
+                '최종 처리 중...'
+            ];
+            
+            for (let i = 0; i < steps.length; i++) {
+                $('processingStatus').textContent = steps[i];
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            // 분석 결과 표시
+            $('processingSection').classList.add('hidden');
+            $('analysisSection').classList.remove('hidden');
+            $('analysisContent').innerHTML = `
+                <div><strong>타겟층:</strong> 30-40대 품질 중시 고객</div>
+                <div><strong>핵심 특징:</strong> 프리미엄 디자인, 실용성</div>
+                <div><strong>추천 메시지:</strong> 최고의 선택</div>
+            `;
+            
+            // 비디오 섹션 표시
+            setTimeout(() => {
+                $('videoSection').classList.remove('hidden');
+            }, 1000);
+            
+            state.isGenerating = false;
+            updateGenerateButton();
+        });
+        
+        // 초기화
+        updateGenerateButton();
+        
+        // 뷰포트 높이 조정 (iOS Safari 대응)
+        function setViewportHeight() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', setViewportHeight);
+    </script>
+</body>
+</html>
