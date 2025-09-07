@@ -1,6 +1,6 @@
 {
   "name": "ai-shorts-maker",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Wheel restoration specialized AI shorts video generator",
   "type": "module",
   "scripts": {

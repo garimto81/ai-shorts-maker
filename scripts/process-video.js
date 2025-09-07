@@ -364,55 +364,79 @@ class ShortsGenerator {
     return match ? parseInt(match[1]) : 0;
   }
 
-  // 휠 복원 스토리텔링 나레이션 생성 (이미지당 5초)
+  // 휠 복원 스토리텔링 나레이션 생성 (말하는 속도 고려한 타이밍)
   async generateNarration(analysisResults, industry = 'auto') {
     try {
       console.log(`🎙️ ${industry} 업종 나레이션 생성 시작...`);
       
       const successfulResults = analysisResults.filter(result => result.success);
       const totalImages = successfulResults.length;
-      const totalDuration = totalImages * 5; // 이미지당 5초
+      
+      // 한국어 평균 말하기 속도: 분당 약 150-200자, 초당 약 2.5-3.5자
+      // 영상의 임팩트를 위해 조금 더 빠르게: 초당 4자로 설정
+      const charactersPerSecond = 4;
       
       // 휠 복원 전용 스토리텔링 나레이션
       if (industry === 'wheel-restoration') {
-        return await this.generateWheelRestorationNarration(successfulResults, totalDuration);
+        return await this.generateWheelRestorationNarration(successfulResults, charactersPerSecond);
       }
       
       // 기존 업종들은 기본 나레이션으로 처리
+      const totalDuration = totalImages * 5; // 기존 방식 유지
       return await this.generateGeneralNarration(successfulResults, industry, totalDuration);
       
     } catch (error) {
       console.error('❌ 나레이션 생성 오류:', error);
+      const totalImages = analysisResults.filter(r => r.success).length;
       return this.generateBasicNarration(analysisResults, totalImages * 5);
     }
   }
 
-  // 휠 복원 전용 스토리텔링 나레이션 생성
-  async generateWheelRestorationNarration(successfulResults, totalDuration) {
+  // 휠 복원 전용 스토리텔링 나레이션 생성 (1:1 이미지 매핑)
+  async generateWheelRestorationNarration(successfulResults, charactersPerSecond) {
     try {
       // 이미지 분석을 통한 스토리 단계 분류
       const storyPhases = this.classifyWheelRestorationPhases(successfulResults);
+      
+      // 각 이미지별 예상 스크립트 길이 계산 (15-25자 정도, 약 4-6초)
+      const averageScriptLength = 20; // 평균 20자
+      const segmentDuration = Math.ceil(averageScriptLength / charactersPerSecond); // 약 5초
+      const totalDuration = successfulResults.length * segmentDuration;
+      
+      console.log(`📊 타이밍 계산: ${successfulResults.length}개 이미지, 각 ${segmentDuration}초, 총 ${totalDuration}초`);
       
       const prompt = `
         휠 복원 전문가가 제작하는 전문적인 쇼츠 영상 나레이션을 작성하세요.
         시청자가 즉시 연락하고 싶게 만드는 임팩트 있는 스토리텔링이 필요합니다.
         
+        **중요: 반드시 ${successfulResults.length}개의 이미지 각각에 대해 개별 스크립트를 생성해야 합니다.**
+        
+        **타이밍 기준**: 
+        - 한국어 말하기 속도: 초당 ${charactersPerSecond}자
+        - 각 세그먼트: 약 ${segmentDuration}초 (15-25자 분량)
+        - 전체 duration: ${totalDuration}초
+        
         **스토리 흐름 분석**: ${storyPhases.story}
         
-        **이미지별 분석 결과**:
-        ${successfulResults.map((result, index) => `
-        ${index + 1}번째 (${index * 5}-${(index + 1) * 5}초): 
+        **각 이미지별 분석 결과 (반드시 1:1 매핑 필요)**:
+        ${successfulResults.map((result, index) => {
+          const startTime = index * segmentDuration;
+          const endTime = (index + 1) * segmentDuration;
+          return `
+        이미지 ${index + 1} (${startTime}-${endTime}초):
+        - 파일명: ${result.filename}
         - 분석: ${result.analysis}
         - 단계: ${storyPhases.phases[index] || '기타'}
         - 역할: ${this.getImageRole(storyPhases.phases[index])}
-        `).join('')}
+        - 필요한 스크립트: ${segmentDuration}초 분량 (15-25자)`;
+        }).join('')}
         
         **스토리텔링 원칙**:
-        1. **충격적인 오프닝** (0-5초): 손상된 휠의 심각성을 드라마틱하게 표현
-        2. **전문성 어필** (중간): 20년 경력, 독일 CNC 장비, 장인정신 강조
-        3. **변화의 드라마** (과정): Before/After의 극적 대비 연출
-        4. **감정적 몰입** (완성): 신차보다 완벽한 복원 결과에 대한 감탄
-        5. **강력한 클로징** (마지막 5초): 즉시 행동을 유도하는 메시지
+        1. **충격적인 오프닝** (첫 번째 이미지): 손상된 휠의 심각성을 드라마틱하게 표현
+        2. **전문성 어필** (중간 이미지들): 20년 경력, 독일 CNC 장비, 장인정신 강조
+        3. **변화의 드라마** (과정 이미지들): Before/After의 극적 대비 연출
+        4. **감정적 몰입** (결과 이미지들): 신차보다 완벽한 복원 결과에 대한 감탄
+        5. **강력한 클로징** (마지막 이미지): 즉시 행동을 유도하는 메시지
         
         **필수 전문 표현 (실제 업계 언어)**:
         - "20년 장인의 손길로 되살려낸", "독일 최첨단 CNC 장비의 정밀함"
@@ -428,29 +452,41 @@ class ShortsGenerator {
         
         **목표**: 시청자가 "와! 여기가 진짜 전문가구나! 당장 연락해야겠다!"라고 생각하게 만들기
         
-        **출력 형식** (JSON):
+        **필수 출력 형식** (JSON - 반드시 ${successfulResults.length}개 세그먼트 생성):
         {
           "totalDuration": ${totalDuration},
           "segments": [
-            {
-              "startTime": 0,
-              "endTime": 5,
-              "imageIndex": 0,
-              "script": "충격적이고 드라마틱한 오프닝 나레이션",
-              "emotion": "충격/호기심",
-              "purpose": "시선집중",
-              "technique": "Before 상태 강조"
-            }
+            ${successfulResults.map((_, index) => {
+              const startTime = index * segmentDuration;
+              const endTime = (index + 1) * segmentDuration;
+              return `{
+              "startTime": ${startTime},
+              "endTime": ${endTime},
+              "imageIndex": ${index},
+              "imageName": "이미지 ${index + 1}",
+              "script": "이 이미지에 맞는 ${segmentDuration}초 분량 나레이션 (15-25자)",
+              "emotion": "이미지에 맞는 감정",
+              "purpose": "이 세그먼트의 목적",
+              "technique": "사용된 기법",
+              "scriptLength": "실제_글자수",
+              "estimatedDuration": ${segmentDuration}
+            }`;
+            }).join(',\n            ')}
           ],
-          "fullScript": "전체 스토리 나레이션 (${totalDuration}초)",
+          "fullScript": "모든 세그먼트를 연결한 전체 스토리 나레이션",
           "keywords": ["20년장인", "독일CNC", "OEM수준", "즉시상담", "완벽보증"],
           "callToAction": "강력한 행동 유도 메시지",
           "storyArc": "손상→복원→완성→감탄의 스토리 구조",
-          "targetEmotion": "신뢰감 + 즉시 행동 욕구"
+          "targetEmotion": "신뢰감 + 즉시 행동 욕구",
+          "timingInfo": {
+            "charactersPerSecond": ${charactersPerSecond},
+            "segmentDuration": ${segmentDuration},
+            "totalImages": ${successfulResults.length},
+            "calculatedDuration": ${totalDuration}
+          }
         }
         
-        **나레이션 샘플 (참고용)**:
-        "가슴 아팠던 BMW 휠 기스... 하지만 20년 장인의 손길로 이렇게 되살아날 줄 누가 알았을까요? 독일 최첨단 CNC 장비로 미세한 스크래치까지 완벽하게... 이것이 진짜 허브휠 복원입니다. OEM 수준을 뛰어넘는 완성도, 당신의 소중한 휠도 신차보다 완벽하게 되돌려 드립니다."
+        **중요**: segments 배열에는 반드시 ${successfulResults.length}개의 객체가 있어야 하며, 각각은 하나의 이미지에 대응됩니다.
         
         JSON 형식으로만 응답하세요.
       `;

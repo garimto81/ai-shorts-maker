@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 3006;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('.'));
 
 // Multer configuration for file uploads
@@ -121,9 +122,18 @@ app.post('/api/sort-filenames', upload.none(), async (req, res) => {
 // 나레이션 생성 엔드포인트
 app.post('/api/generate-narration', async (req, res) => {
   try {
-    const { analysisResults, industry = 'auto' } = req.body;
+    console.log('🔍 요청 헤더:', req.headers);
+    console.log('🔍 Content-Type:', req.headers['content-type']);
+    console.log('🔍 Raw Body:', req.body);
+    console.log('📋 나레이션 생성 요청 데이터:', JSON.stringify(req.body, null, 2));
+    const { analysisResults, industry = 'wheel-restoration' } = req.body;
     
     if (!analysisResults || !Array.isArray(analysisResults) || analysisResults.length === 0) {
+      console.log('❌ analysisResults 검증 실패:', { 
+        exists: !!analysisResults, 
+        isArray: Array.isArray(analysisResults), 
+        length: analysisResults?.length 
+      });
       return res.status(400).json({
         error: '분석 결과가 필요합니다.'
       });
@@ -246,7 +256,7 @@ app.post('/api/complete-workflow', upload.array('images', 10), async (req, res) 
       });
     }
     
-    const { sortMethod = 'ai', industry = 'auto' } = req.body;
+    const { sortMethod = 'ai', industry = 'wheel-restoration' } = req.body;
     
     console.log(`🚀 통합 워크플로우 시작: ${req.files.length}장, 정렬: ${sortMethod}, 업종: ${industry}`);
     
@@ -383,7 +393,7 @@ app.post('/api/generate-video', upload.array('images', 10), async (req, res) => 
   try {
     const { 
       productName, 
-      industry = 'auto', 
+      industry = 'wheel-restoration', 
       style = 'dynamic',
       analysisResults,
       finalStory,
@@ -458,7 +468,8 @@ app.post('/api/generate-video', upload.array('images', 10), async (req, res) => 
       success: true,
       message: '✅ 쇼츠 비디오 생성 완료!',
       filename: result.filename,
-      outputPath: result.outputPath,
+      outputPath: `/output/${result.filename}`,  // 웹 경로로 변경
+      videoUrl: `/output/${result.filename}`,    // 다운로드 링크
       duration: result.duration,
       metadata: result.metadata
     });
@@ -475,7 +486,7 @@ app.post('/api/generate-video', upload.array('images', 10), async (req, res) => 
 // Legacy endpoint for backwards compatibility
 app.post('/api/generate', upload.array('images', 10), async (req, res) => {
   try {
-    const { productName, style = 'dynamic', industry = 'auto' } = req.body;
+    const { productName, style = 'dynamic', industry = 'wheel-restoration' } = req.body;
     
     if (!req.files || req.files.length < 3) {
       return res.status(400).json({ 

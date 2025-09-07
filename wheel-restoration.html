@@ -87,21 +87,12 @@
 
         <div id="sortedSection" class="hidden bg-gray-800 rounded-lg p-4">
             <div class="text-sm font-medium mb-3 text-green-400">✅ AI가 분석한 최적 순서</div>
-            <div id="sortingReasoning" class="text-xs text-gray-400 mb-3 p-2 bg-gray-700 rounded"></div>
             <div id="sortedImages" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div id="analysisSection" class="hidden bg-gray-800 rounded-lg p-4">
-            <div class="flex justify-between items-center mb-3 cursor-pointer" onclick="toggleAnalysisDetails()">
-                <div class="text-sm font-medium text-blue-400">🔍 이미지 분석 결과</div>
-                <div id="analysisToggle" class="text-xs text-gray-400">▼ 펼치기</div>
-            </div>
-            <div id="analysisResults" class="space-y-2 hidden"></div>
-        </div>
-
-        <div id="narrationSection" class="hidden bg-gray-800 rounded-lg p-4">
-            <div class="text-sm font-medium mb-3 text-purple-400">📝 나레이션 생성 결과</div>
-            <div id="narrationContent" class="text-xs text-gray-300 p-3 bg-gray-700 rounded whitespace-pre-wrap"></div>
+            <div class="text-sm font-medium mb-3 text-blue-400">🔍 이미지 분석 결과</div>
+            <div id="analysisResults" class="space-y-2"></div>
         </div>
 
         <button 
@@ -138,26 +129,11 @@
             progressText: document.getElementById('progressText'),
             sortedSection: document.getElementById('sortedSection'),
             sortedImages: document.getElementById('sortedImages'),
-            sortingReasoning: document.getElementById('sortingReasoning'),
             analysisSection: document.getElementById('analysisSection'),
             analysisResults: document.getElementById('analysisResults'),
-            analysisToggle: document.getElementById('analysisToggle'),
-            narrationSection: document.getElementById('narrationSection'),
-            narrationContent: document.getElementById('narrationContent'),
             downloadSection: document.getElementById('downloadSection'),
             downloadLink: document.getElementById('downloadLink')
         };
-
-        function toggleAnalysisDetails() {
-            const isHidden = elements.analysisResults.classList.contains('hidden');
-            if (isHidden) {
-                elements.analysisResults.classList.remove('hidden');
-                elements.analysisToggle.textContent = '▲ 접기';
-            } else {
-                elements.analysisResults.classList.add('hidden');
-                elements.analysisToggle.textContent = '▼ 펼치기';
-            }
-        }
 
         elements.wheelInfo.addEventListener('input', checkInputs);
         elements.imageInput.addEventListener('change', handleImageUpload);
@@ -239,14 +215,8 @@
             const result = await response.json();
             if (result.error) throw new Error(result.error);
 
-            const sortResult = result.data || result;
-            const order = sortResult.sortedOrder;
+            const order = result.data?.sortedOrder || result.order;
             sortedImages = order ? order.map(i => uploadedImages[i]) : uploadedImages;
-
-            // 정렬 근거 표시
-            if (sortResult.reasoning) {
-                elements.sortingReasoning.textContent = `📋 정렬 근거: ${sortResult.reasoning}`;
-            }
 
             elements.sortedImages.innerHTML = '';
             sortedImages.forEach((img, i) => {
@@ -273,16 +243,13 @@
                 const result = await response.json();
                 if (result.error) throw new Error(result.error);
 
-                const analysis = result.data || result;
-                analysisResults.push({ image: sortedImages[i], analysis });
+                analysisResults.push({ image: sortedImages[i], analysis: result.data || result });
                 
                 const div = document.createElement('div');
                 div.className = 'bg-gray-700 rounded p-3 text-sm';
                 div.innerHTML = `
                     <div class="font-semibold text-blue-300 mb-1">${i + 1}. ${sortedImages[i].name}</div>
-                    <div class="text-gray-300 text-xs">
-                        ${typeof analysis === 'string' ? analysis : JSON.stringify(analysis, null, 2)}
-                    </div>
+                    <div class="text-gray-300">${result.data?.description || result.description || '분석 완료'}</div>
                 `;
                 elements.analysisResults.appendChild(div);
             }
@@ -306,11 +273,6 @@
             });
             const result = await response.json();
             if (result.error) throw new Error(result.error);
-
-            // 나레이션 결과 표시
-            const narration = result.data || result;
-            elements.narrationContent.textContent = typeof narration === 'string' ? narration : JSON.stringify(narration, null, 2);
-            elements.narrationSection.classList.remove('hidden');
         }
 
         async function generateVideo() {
@@ -319,29 +281,7 @@
                 showStatus('🎬 쇼츠 비디오 생성 중...');
 
                 const formData = new FormData();
-                formData.append('productName', elements.wheelInfo.value);
                 formData.append('wheelInfo', elements.wheelInfo.value);
-                formData.append('industry', 'wheel-restoration');
-                
-                // 이미지 분석 결과 전달 (나레이션 생성에 필요)
-                if (analysisResults && analysisResults.length > 0) {
-                    formData.append('analysisResults', JSON.stringify(analysisResults));
-                }
-                
-                // 나레이션 데이터가 있으면 전달
-                const narrationElement = document.querySelector('#narrationContent');
-                if (narrationElement && narrationElement.textContent) {
-                    let narrationData = narrationElement.textContent;
-                    try {
-                        // JSON 파싱 시도
-                        const parsedNarration = JSON.parse(narrationData);
-                        formData.append('finalStory', JSON.stringify(parsedNarration));
-                    } catch {
-                        // JSON이 아니면 문자열로 전달
-                        formData.append('finalStory', narrationData);
-                    }
-                }
-                
                 sortedImages.forEach((img, i) => {
                     formData.append('images', dataURLtoBlob(img.dataUrl), `image_${i}.jpg`);
                 });
@@ -350,25 +290,15 @@
                 const result = await response.json();
                 if (result.error) throw new Error(result.error);
 
-                // 다운로드 링크 설정
-                if (result.videoUrl || result.outputPath) {
-                    const videoUrl = result.videoUrl || result.outputPath;
-                    elements.downloadLink.href = videoUrl;
-                    elements.downloadLink.download = result.filename || 'wheel-restoration-shorts.mp4';
-                    elements.downloadSection.classList.remove('hidden');
-                    showStatus('🎉 휠 복원 쇼츠가 완성되었습니다!');
-                    
-                    console.log('✅ 다운로드 링크 설정:', videoUrl);
-                } else {
-                    showStatus('⚠️ 비디오 생성은 완료되었으나 다운로드 링크를 생성할 수 없습니다.');
-                    console.error('❌ 비디오 URL 없음:', result);
-                }
+                elements.downloadLink.href = result.videoUrl;
+                elements.downloadLink.download = result.filename || 'wheel-restoration-shorts.mp4';
+                elements.downloadSection.classList.remove('hidden');
+                showStatus('🎉 휠 복원 쇼츠가 완성되었습니다!');
             } catch (error) {
                 showStatus('❌ 비디오 생성 오류: ' + error.message);
                 elements.videoBtn.disabled = false;
             }
         }
-
 
         function dataURLtoBlob(dataURL) {
             const arr = dataURL.split(',');
