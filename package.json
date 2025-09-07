@@ -1,7 +1,7 @@
 {
   "name": "ai-shorts-maker",
-  "version": "2.0.0",
-  "description": "AI-powered shorts video generator using Gemini API",
+  "version": "2.5.0",
+  "description": "Wheel restoration specialized AI shorts video generator",
   "type": "module",
   "scripts": {
     "dev": "vite",

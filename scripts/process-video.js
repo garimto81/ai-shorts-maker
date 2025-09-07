@@ -544,7 +544,8 @@ class ShortsGenerator {
     
     const industryPrompt = industryPrompts[industry] || industryPrompts['other'];
     
-    const prompt = `
+    try {
+      const prompt = `
       다음 ${successfulResults.length}장의 이미지 분석 결과를 바탕으로 ${totalDuration}초 동안 재생되는 쇼츠 영상용 나레이션을 작성해주세요.
       
       **이미지 분석 결과**:
@@ -595,38 +596,127 @@ class ShortsGenerator {
     }
   }
 
-
-  // 기본 나레이션 생성 (AI 실패 시 fallback)
+  // 2단계 나레이션 생성 (전체 맥락 → 이미지별 분할)
   async generateBasicNarration(analysisResults, totalDuration) {
-    const segments = [];
     const successfulResults = analysisResults.filter(result => result.success);
     
-    successfulResults.forEach((result, index) => {
-      const startTime = index * 5;
-      const endTime = startTime + 5;
-      
-      segments.push({
-        startTime,
-        endTime,
-        imageIndex: index,
-        script: `${result.analysis}에 대한 상세한 설명입니다.`
-      });
-    });
+    // 1단계: 전체 맥락에 맞는 완전한 스토리 설계
+    const fullStoryData = await this.generateFullStory(successfulResults, totalDuration);
     
-    const fullScript = segments.map(seg => seg.script).join(' ');
+    // 2단계: 완성된 스토리를 이미지별 시간대에 분할
+    const segments = this.splitStoryIntoSegments(fullStoryData.fullScript, successfulResults, totalDuration);
     
     // 업종별 기본 키워드 설정
     let defaultKeywords = ['중고제품', '고품질', '합리적가격'];
-    if (analysisResults.some(r => r.analysis && r.analysis.includes('휠'))) {
+    if (successfulResults.some(r => r.analysis && r.analysis.includes('휠'))) {
       defaultKeywords = ['신차급퍼포먼스', 'CNC가공', '분체클리어', '발란스체크', '전문복원'];
     }
     
     return {
       totalDuration,
+      fullStoryData: fullStoryData, // 전체 스토리 정보 추가
       segments,
-      fullScript,
+      fullScript: fullStoryData.fullScript,
       keywords: defaultKeywords
     };
+  }
+  
+  // 1단계: 전체 맥락 완전한 스토리 생성
+  async generateFullStory(analysisResults, totalDuration) {
+    try {
+      // 모든 이미지 분석 결과를 종합하여 전체적인 맥락 파악
+      const allAnalysis = analysisResults.map(r => r.analysis).join(', ');
+      
+      const prompt = `
+        다음 이미지들의 분석 결과를 바탕으로 전체적으로 일관성 있는 완전한 마케팅 스토리를 작성하세요.
+        총 ${totalDuration}초 분량의 영상용 나레이션입니다.
+
+        이미지 분석 결과들:
+        ${analysisResults.map((r, i) => `${i+1}. ${r.analysis}`).join('\n')}
+
+        요구사항:
+        1. 전체적으로 일관된 스토리텔링
+        2. 시작-중간-끝의 완성된 구조
+        3. ${totalDuration}초에 맞는 자연스러운 호흡
+        4. 각 이미지가 전체 스토리에서 담당할 역할 고려
+        5. 감정적 몰입과 구매 유도가 가능한 구성
+
+        JSON 형식으로 응답:
+        {
+          "fullScript": "완전한 나레이션 전체 텍스트",
+          "storyStructure": "스토리 구조 설명",
+          "keyMessage": "핵심 메시지",
+          "emotionalTone": "감정적 톤"
+        }
+      `;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
+
+      // JSON 파싱 시도
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const storyData = JSON.parse(jsonMatch[0]);
+          console.log('✅ 전체 스토리 생성 완료');
+          return storyData;
+        }
+      } catch (parseError) {
+        console.log('⚠️ 전체 스토리 JSON 파싱 실패, 기본값 사용');
+      }
+      
+      // 기본값 반환
+      return {
+        fullScript: allAnalysis + "에 대한 완성된 스토리입니다.",
+        storyStructure: "이미지 순서에 따른 기본 구조",
+        keyMessage: "고품질 제품 소개",
+        emotionalTone: "신뢰감과 전문성"
+      };
+      
+    } catch (error) {
+      console.error('❌ 전체 스토리 생성 오류:', error);
+      
+      // 오류 시 기본값
+      const allAnalysis = analysisResults.map(r => r.analysis).join(', ');
+      return {
+        fullScript: allAnalysis + "에 대한 전문적인 소개입니다.",
+        storyStructure: "순차적 제품 소개",
+        keyMessage: "품질과 가치 제안",
+        emotionalTone: "전문성과 신뢰감"
+      };
+    }
+  }
+  
+  // 2단계: 완성된 스토리를 이미지별 세그먼트로 분할
+  splitStoryIntoSegments(fullScript, analysisResults, totalDuration) {
+    const segments = [];
+    const segmentCount = analysisResults.length;
+    const segmentDuration = Math.floor(totalDuration / segmentCount);
+    
+    // 전체 스크립트를 자연스럽게 분할
+    const sentences = fullScript.split(/[.!?]/).filter(s => s.trim().length > 0);
+    const segmentsPerScript = Math.ceil(sentences.length / segmentCount);
+    
+    for (let i = 0; i < segmentCount; i++) {
+      const startTime = i * segmentDuration;
+      const endTime = startTime + segmentDuration;
+      
+      // 해당 세그먼트에 할당할 문장들
+      const startSentenceIndex = i * segmentsPerScript;
+      const endSentenceIndex = Math.min(startSentenceIndex + segmentsPerScript, sentences.length);
+      const segmentSentences = sentences.slice(startSentenceIndex, endSentenceIndex);
+      
+      segments.push({
+        startTime,
+        endTime,
+        imageIndex: i,
+        script: segmentSentences.join('. ').trim() + '.',
+        relatedAnalysis: analysisResults[i].analysis // 참고용 이미지 분석
+      });
+    }
+    
+    return segments;
   }
 
   // Gemini로 이미지 분석
@@ -815,6 +905,887 @@ class ShortsGenerator {
         .run();
     });
   }
+
+  // ===========================================
+  // 향상된 비디오 생성 메서드 (2단계 나레이션 지원)
+  // ===========================================
+  
+  async generateEnhancedVideo(options) {
+    const {
+      images,
+      productName,
+      industry,
+      style = 'dynamic',
+      analysisResults,
+      storyData,
+      duration = 30
+    } = options;
+    
+    console.log('🎬 향상된 비디오 생성 시작:', {
+      productName,
+      industry,
+      imageCount: images.length,
+      duration,
+      hasStoryData: !!storyData
+    });
+    
+    try {
+      await this.init();
+      
+      // 1단계: 이미지 처리 및 저장
+      const processedImages = await this.processImagesForVideo(images, analysisResults);
+      
+      // 2단계: 2단계 나레이션 데이터를 비디오 세그먼트로 변환
+      const videoSegments = await this.createVideoSegments(processedImages, storyData, duration);
+      
+      // 3단계: FFmpeg를 사용한 비디오 생성
+      const videoResult = await this.generateVideoWithFFmpeg({
+        segments: videoSegments,
+        productName,
+        industry,
+        style,
+        duration,
+        fullStoryData: storyData.fullStoryData
+      });
+      
+      console.log('✅ 향상된 비디오 생성 완료:', videoResult.filename);
+      
+      return {
+        filename: videoResult.filename,
+        outputPath: videoResult.outputPath,
+        duration: videoResult.duration,
+        metadata: {
+          productName,
+          industry,
+          style,
+          segmentCount: videoSegments.length,
+          totalImages: processedImages.length,
+          storyTitle: storyData.fullStoryData?.title,
+          processingTime: Date.now() - videoResult.startTime
+        }
+      };
+      
+    } catch (error) {
+      console.error('❌ 향상된 비디오 생성 오류:', error);
+      throw error;
+    }
+  }
+  
+  // 이미지 처리 및 최적화
+  async processImagesForVideo(images, analysisResults) {
+    const sharp = (await import('sharp')).default;
+    const processedImages = [];
+    
+    for (let i = 0; i < images.length; i++) {
+      try {
+        const imageDataUrl = images[i];
+        const base64Data = imageDataUrl.replace(/^data:image\/[^;]+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // 9:16 비율로 최적화 (쇼츠 형태)
+        const optimizedBuffer = await sharp(imageBuffer)
+          .resize(1080, 1920, {
+            fit: 'cover',
+            position: 'center'
+          })
+          .jpeg({ quality: 85 })
+          .toBuffer();
+        
+        const imagePath = path.join(this.tempDir, `processed_image_${i}.jpg`);
+        await fsPromises.writeFile(imagePath, optimizedBuffer);
+        
+        processedImages.push({
+          path: imagePath,
+          index: i,
+          analysis: analysisResults && analysisResults[i] ? analysisResults[i].analysis : null,
+          filename: analysisResults && analysisResults[i] ? analysisResults[i].filename : `image_${i}.jpg`
+        });
+        
+        console.log(`📷 이미지 ${i + 1}/${images.length} 처리 완료`);
+        
+      } catch (error) {
+        console.error(`❌ 이미지 ${i} 처리 오류:`, error);
+        throw new Error(`이미지 ${i + 1} 처리 실패: ${error.message}`);
+      }
+    }
+    
+    return processedImages;
+  }
+  
+  // 비디오 세그먼트 생성
+  async createVideoSegments(processedImages, storyData, totalDuration) {
+    const segments = [];
+    const { fullStoryData, segments: storySegments } = storyData;
+    
+    console.log('🎭 비디오 세그먼트 생성:', {
+      imageCount: processedImages.length,
+      storySegmentCount: storySegments ? storySegments.length : 0,
+      totalDuration
+    });
+    
+    // 이미지당 균등 시간 배분
+    const segmentDuration = Math.floor(totalDuration / processedImages.length * 100) / 100;
+    
+    for (let i = 0; i < processedImages.length; i++) {
+      const image = processedImages[i];
+      const storySegment = storySegments && storySegments[i] ? storySegments[i] : null;
+      
+      const segment = {
+        index: i,
+        imagePath: image.path,
+        duration: segmentDuration,
+        startTime: i * segmentDuration,
+        endTime: (i + 1) * segmentDuration,
+        
+        // 나레이션 데이터
+        narration: storySegment ? {
+          text: storySegment.narration || '',
+          emotion: storySegment.emotion || 'neutral',
+          timing: storySegment.timing || 'medium',
+          imageDescription: image.analysis || ''
+        } : {
+          text: `${image.filename}에 대한 설명`,
+          emotion: 'neutral',
+          timing: 'medium',
+          imageDescription: image.analysis || ''
+        },
+        
+        // 이미지 메타데이터
+        imageMetadata: {
+          filename: image.filename,
+          analysis: image.analysis,
+          originalIndex: image.index
+        }
+      };
+      
+      segments.push(segment);
+    }
+    
+    console.log(`✅ ${segments.length}개 비디오 세그먼트 생성 완료`);
+    return segments;
+  }
+  
+  // FFmpeg를 사용한 실제 비디오 생성
+  async generateVideoWithFFmpeg(options) {
+    const ffmpeg = (await import('fluent-ffmpeg')).default;
+    const { segments, productName, industry, style, duration, fullStoryData } = options;
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+    const filename = `${productName.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_${timestamp}_${Date.now()}.mp4`;
+    const outputPath = path.join(this.outputDir, filename);
+    
+    console.log('🎬 FFmpeg 비디오 생성 시작:', {
+      segmentCount: segments.length,
+      filename,
+      duration
+    });
+    
+    const startTime = Date.now();
+    
+    try {
+      // 임시 비디오 세그먼트들 생성
+      const segmentPaths = [];
+      
+      for (let i = 0; i < segments.length; i++) {
+        const segment = segments[i];
+        const segmentPath = path.join(this.tempDir, `segment_${i}.mp4`);
+        
+        await new Promise((resolve, reject) => {
+          ffmpeg(segment.imagePath)
+            .inputOptions([
+              '-loop 1',
+              `-t ${segment.duration}`,
+              '-r 30'
+            ])
+            .outputOptions([
+              '-c:v libx264',
+              '-pix_fmt yuv420p',
+              '-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black',
+              '-preset fast'
+            ])
+            .output(segmentPath)
+            .on('end', () => {
+              console.log(`✅ 세그먼트 ${i + 1}/${segments.length} 생성 완료`);
+              resolve();
+            })
+            .on('error', (err) => {
+              console.error(`❌ 세그먼트 ${i + 1} 생성 오류:`, err);
+              reject(err);
+            })
+            .run();
+        });
+        
+        segmentPaths.push(segmentPath);
+      }
+      
+      // 세그먼트들을 하나의 비디오로 합치기
+      const concatListPath = path.join(this.tempDir, 'concat_list.txt');
+      const concatList = segmentPaths.map(p => `file '${p}'`).join('\n');
+      await fsPromises.writeFile(concatListPath, concatList);
+      
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(concatListPath)
+          .inputOptions(['-f concat', '-safe 0'])
+          .outputOptions([
+            '-c:v libx264',
+            '-pix_fmt yuv420p',
+            '-preset fast',
+            '-crf 23'
+          ])
+          .output(outputPath)
+          .on('progress', (progress) => {
+            if (progress.percent) {
+              console.log(`🎬 비디오 처리 중: ${Math.round(progress.percent)}%`);
+            }
+          })
+          .on('end', () => {
+            console.log('✅ 최종 비디오 생성 완료');
+            resolve();
+          })
+          .on('error', (err) => {
+            console.error('❌ 최종 비디오 생성 오류:', err);
+            reject(err);
+          })
+          .run();
+      });
+      
+      // 임시 파일 정리
+      await this.cleanupTempFiles([concatListPath, ...segmentPaths]);
+      
+      const processingTime = Date.now() - startTime;
+      console.log(`🎉 비디오 생성 완료: ${filename} (${Math.round(processingTime/1000)}초 소요)`);
+      
+      return {
+        filename,
+        outputPath,
+        duration,
+        startTime,
+        processingTime
+      };
+      
+    } catch (error) {
+      console.error('❌ FFmpeg 비디오 생성 실패:', error);
+      throw new Error(`비디오 생성 실패: ${error.message}`);
+    }
+  }
+  
+  // 임시 파일 정리
+  async cleanupTempFiles(filePaths) {
+    for (const filePath of filePaths) {
+      try {
+        await fsPromises.unlink(filePath);
+        console.log(`🧹 임시 파일 정리: ${path.basename(filePath)}`);
+      } catch (error) {
+        console.log(`⚠️ 임시 파일 정리 실패: ${path.basename(filePath)} - ${error.message}`);
+      }
+    }
+  }
+  
+  // ===========================================
+  // FFmpeg 전환 효과 테스트 메서드들
+  // ===========================================
+  
+  // 기본 전환 효과 테스트
+  async testTransitionEffect(options) {
+    const { images, transitionType, duration, transitionDuration } = options;
+    const startTime = Date.now();
+    
+    console.log(`🎬 ${transitionType} 전환 효과 테스트 시작`);
+    
+    try {
+      await this.init();
+      
+      // 이미지를 임시 파일로 저장
+      const imagePaths = await this.saveUploadedImages(images);
+      
+      // 전환 효과별 FFmpeg 명령어 생성
+      const ffmpegCommand = this.buildTransitionCommand({
+        imagePaths,
+        transitionType,
+        duration,
+        transitionDuration
+      });
+      
+      // 출력 파일명 생성
+      const filename = `transition_${transitionType}_${Date.now()}.mp4`;
+      const outputPath = path.join(this.outputDir, filename);
+      
+      // FFmpeg 실행
+      await this.executeFFmpegCommand(ffmpegCommand, outputPath);
+      
+      // 임시 파일 정리
+      await this.cleanupTempFiles(imagePaths);
+      
+      const processingTime = Date.now() - startTime;
+      console.log(`✅ ${transitionType} 전환 효과 완료: ${Math.round(processingTime/1000)}초`);
+      
+      return {
+        filename,
+        duration: (duration * images.length) + (transitionDuration * (images.length - 1)),
+        processingTime
+      };
+      
+    } catch (error) {
+      console.error(`❌ ${transitionType} 전환 효과 생성 실패:`, error);
+      throw error;
+    }
+  }
+  
+  // 업로드된 이미지를 임시 파일로 저장
+  async saveUploadedImages(images) {
+    const sharp = (await import('sharp')).default;
+    const imagePaths = [];
+    
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      const imagePath = path.join(this.tempDir, `temp_image_${i}_${Date.now()}.jpg`);
+      
+      // 이미지를 9:16 비율로 최적화
+      const optimizedBuffer = await sharp(image.buffer)
+        .resize(1080, 1920, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+      
+      await fsPromises.writeFile(imagePath, optimizedBuffer);
+      imagePaths.push(imagePath);
+    }
+    
+    return imagePaths;
+  }
+  
+  // 전환 효과별 FFmpeg 명령어 생성
+  buildTransitionCommand(options) {
+    const { imagePaths, transitionType, duration, transitionDuration } = options;
+    
+    console.log('🎨 전환 명령어 생성:', {
+      transitionType,
+      imageCount: imagePaths.length,
+      duration,
+      transitionDuration
+    });
+    
+    // 기본 전환 효과 매핑
+    const transitionMappings = {
+      // 기본 전환 효과
+      crossfade: 'fade',
+      slideleft: 'slideleft',
+      slideright: 'slideright',
+      slideup: 'slideup',
+      slidedown: 'slidedown',
+      wipeleft: 'wipeleft',
+      wiperight: 'wiperight',
+      circleopen: 'circleopen',
+      circleclose: 'circleclose',
+      diagtl: 'diagtl',
+      diagtr: 'diagtr',
+      diagbl: 'diagbl',
+      diagbr: 'diagbr',
+      dissolve: 'dissolve',
+      rotate: 'rotate',
+      
+      // 커스텀 효과
+      zoomfade: 'custom_zoomfade',
+      kenburns: 'custom_kenburns',
+      pixelize: 'custom_pixelize',
+      blur: 'custom_blur',
+      glitch: 'custom_glitch',
+      colorshift: 'custom_colorshift'
+    };
+    
+    const effect = transitionMappings[transitionType] || 'fade';
+    console.log('선택된 효과:', effect);
+    
+    if (effect.startsWith('custom_')) {
+      return this.buildCustomTransition(imagePaths, effect, duration, transitionDuration);
+    } else {
+      return this.buildStandardTransition(imagePaths, effect, duration, transitionDuration);
+    }
+  }
+  
+  // 표준 xfade 전환 효과
+  buildStandardTransition(imagePaths, effect, duration, transitionDuration) {
+    let filterComplex = '';
+    let inputs = '';
+    
+    console.log(`🔧 표준 전환 효과 생성: ${effect}`);
+    
+    // 각 이미지를 비디오 스트림으로 변환
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      console.log(`입력 ${i}: ${imagePaths[i]} (${imageDuration}초)`);
+    }
+    
+    // xfade 필터 체인 생성
+    let currentLabel = '0:v';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      if (i === 1) {
+        filterComplex += `[${currentLabel}][${i}:v]xfade=transition=${effect}:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      } else {
+        filterComplex += `[v${i-1}][${i}:v]xfade=transition=${effect}:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      }
+      currentLabel = `v${i}`;
+    }
+    
+    const result = {
+      imagePaths: imagePaths, // 이미지 경로 직접 전달
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1), // 마지막 ; 제거
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+    
+    console.log('생성된 명령어:', {
+      imageCount: imagePaths.length,
+      filterComplexLength: result.filterComplex.length,
+      outputLabel: result.outputLabel
+    });
+    
+    return result;
+  }
+  
+  // 커스텀 전환 효과
+  buildCustomTransition(imagePaths, effect, duration, transitionDuration) {
+    switch (effect) {
+      case 'custom_zoomfade':
+        return this.buildZoomFadeTransition(imagePaths, duration, transitionDuration);
+      case 'custom_kenburns':
+        return this.buildKenBurnsTransition(imagePaths, duration, transitionDuration);
+      case 'custom_pixelize':
+        return this.buildPixelizeTransition(imagePaths, duration, transitionDuration);
+      case 'custom_blur':
+        return this.buildBlurTransition(imagePaths, duration, transitionDuration);
+      case 'custom_glitch':
+        return this.buildGlitchTransition(imagePaths, duration, transitionDuration);
+      case 'custom_colorshift':
+        return this.buildColorShiftTransition(imagePaths, duration, transitionDuration);
+      default:
+        return this.buildStandardTransition(imagePaths, 'fade', duration, transitionDuration);
+    }
+  }
+  
+  // 줌 + 페이드 효과
+  buildZoomFadeTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('🔍 줌 페이드 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // 줌 효과 적용
+      filterComplex += `[${i}:v]scale=1080:1920,zoompan=z='if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=25*${duration}[z${i}];`;
+    }
+    
+    // xfade로 연결
+    let currentLabel = 'z0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][z${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // Ken Burns 효과
+  buildKenBurnsTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('🎬 Ken Burns 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // Ken Burns 효과 (확대 + 팬)
+      const zoomStart = 1.0 + (i % 2) * 0.3; // 교대로 확대 시작점 변경
+      const panX = i % 2 === 0 ? 'iw/2-(iw/zoom/2)' : '(iw-iw/zoom)-(iw/zoom/2)';
+      const panY = i % 3 === 0 ? 'ih/2-(ih/zoom/2)' : '(ih-ih/zoom)-(ih/zoom/2)';
+      
+      filterComplex += `[${i}:v]scale=1080:1920,zoompan=z='${zoomStart}+0.002*on':x='${panX}':y='${panY}':d=25*${duration}[kb${i}];`;
+    }
+    
+    // 크로스페이드로 연결
+    let currentLabel = 'kb0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][kb${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // 픽셀화 효과
+  buildPixelizeTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('🔲 픽셀화 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // 점진적 픽셀화 효과
+      filterComplex += `[${i}:v]scale=1080:1920,scale=54:96:flags=neighbor,scale=1080:1920:flags=neighbor[px${i}];`;
+    }
+    
+    // xfade로 연결
+    let currentLabel = 'px0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][px${i}]xfade=transition=dissolve:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // 블러 전환 효과
+  buildBlurTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('🌫️ 블러 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // 블러 효과
+      filterComplex += `[${i}:v]scale=1080:1920,boxblur=5:1[bl${i}];`;
+    }
+    
+    // 블러와 함께 페이드
+    let currentLabel = 'bl0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][bl${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // 글리치 효과
+  buildGlitchTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('⚡ 글리치 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // 글리치 효과 (노이즈 + 컬러 시프트)
+      filterComplex += `[${i}:v]scale=1080:1920,noise=alls=20:allf=t+u,colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131:0:0:0:0:1[gl${i}];`;
+    }
+    
+    // 디졸브 전환
+    let currentLabel = 'gl0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][gl${i}]xfade=transition=dissolve:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // 컬러 시프트 효과
+  buildColorShiftTransition(imagePaths, duration, transitionDuration) {
+    let inputs = '';
+    let filterComplex = '';
+    
+    console.log('🌈 컬러 시프트 전환 효과 생성');
+    
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imageDuration = duration + (i < imagePaths.length - 1 ? transitionDuration : 0);
+      inputs += `-loop 1 -t ${imageDuration} -i "${imagePaths[i]}" `;
+      
+      // 컬러 시프트 효과
+      const hueShift = (i * 60) % 360; // 각 이미지마다 다른 색조
+      filterComplex += `[${i}:v]scale=1080:1920,hue=h=${hueShift}[cs${i}];`;
+    }
+    
+    // 페이드 전환
+    let currentLabel = 'cs0';
+    for (let i = 1; i < imagePaths.length; i++) {
+      const offset = (duration * i) - (transitionDuration * (i - 1));
+      filterComplex += `[${currentLabel}][cs${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[v${i}];`;
+      currentLabel = `v${i}`;
+    }
+    
+    return {
+      imagePaths: imagePaths,
+      inputs: inputs.trim(),
+      filterComplex: filterComplex.slice(0, -1),
+      outputLabel: `[v${imagePaths.length - 1}]`
+    };
+  }
+  
+  // FFmpeg 명령어 실행
+  async executeFFmpegCommand(command, outputPath) {
+    const ffmpeg = (await import('fluent-ffmpeg')).default;
+    
+    return new Promise((resolve, reject) => {
+      try {
+        console.log('🎬 FFmpeg 명령어 실행 시작');
+        console.log('명령어 정보:', {
+          hasInputs: !!command.inputs,
+          hasFilterComplex: !!command.filterComplex,
+          hasOutputLabel: !!command.outputLabel,
+          imagePaths: command.imagePaths || 'not provided'
+        });
+        
+        const ffmpegProcess = ffmpeg();
+        
+        // 이미지 경로가 직접 제공된 경우 사용
+        if (command.imagePaths && Array.isArray(command.imagePaths)) {
+          command.imagePaths.forEach((imagePath, index) => {
+            console.log(`입력 이미지 ${index + 1}: ${imagePath}`);
+            ffmpegProcess.input(imagePath).inputOptions([
+              '-loop 1',
+              '-t 3', // 기본 3초
+              '-r 30'
+            ]);
+          });
+        } else {
+          // 기존 inputs 문자열 파싱 방식 (fallback)
+          console.log('Inputs 문자열 파싱:', command.inputs);
+          const inputPattern = /-loop 1 -t ([\d.]+) -i "?([^"]+)"?/g;
+          let match;
+          let inputIndex = 0;
+          
+          while ((match = inputPattern.exec(command.inputs)) !== null) {
+            const duration = parseFloat(match[1]);
+            const imagePath = match[2].trim();
+            console.log(`입력 ${inputIndex}: ${imagePath} (${duration}초)`);
+            
+            ffmpegProcess.input(imagePath).inputOptions([
+              '-loop 1',
+              `-t ${duration}`,
+              '-r 30'
+            ]);
+            inputIndex++;
+          }
+          
+          if (inputIndex === 0) {
+            throw new Error('유효한 입력 이미지를 찾을 수 없습니다.');
+          }
+        }
+        
+        // 필터 복합 적용
+        if (command.filterComplex) {
+          console.log('필터 복합 적용:', command.filterComplex);
+          ffmpegProcess.complexFilter(command.filterComplex);
+        }
+        
+        // 출력 옵션
+        const outputOptions = [
+          '-c:v libx264',
+          '-pix_fmt yuv420p', 
+          '-preset fast',
+          '-crf 23',
+          '-r 30'
+        ];
+        
+        // 출력 레이블이 있는 경우 매핑 추가
+        if (command.outputLabel) {
+          const mapLabel = command.outputLabel.replace(/[\[\]]/g, '');
+          outputOptions.unshift('-map', mapLabel);
+          console.log('출력 매핑:', mapLabel);
+        }
+        
+        ffmpegProcess
+          .outputOptions(outputOptions)
+          .output(outputPath)
+          .on('start', (commandLine) => {
+            console.log('FFmpeg 실행 명령어:', commandLine);
+          })
+          .on('progress', (progress) => {
+            if (progress.percent) {
+              console.log(`🎬 처리 중: ${Math.round(progress.percent)}%`);
+            }
+          })
+          .on('end', () => {
+            console.log('✅ FFmpeg 처리 완료:', outputPath);
+            resolve();
+          })
+          .on('error', (err) => {
+            console.error('❌ FFmpeg 상세 오류:', {
+              message: err.message,
+              stack: err.stack,
+              command: command,
+              outputPath: outputPath
+            });
+            reject(new Error(`FFmpeg 실행 실패: ${err.message}`));
+          })
+          .run();
+          
+      } catch (error) {
+        console.error('❌ executeFFmpegCommand 초기화 오류:', error);
+        reject(error);
+      }
+    });
+  }
+  
+  // 복합 전환 효과 테스트
+  async testComplexTransitions(options) {
+    const { images, styleType, duration, transitionDuration } = options;
+    const startTime = Date.now();
+    
+    console.log(`🎪 ${styleType} 복합 전환 효과 테스트 시작`);
+    
+    try {
+      await this.init();
+      
+      const imagePaths = await this.saveUploadedImages(images);
+      
+      // 스타일별 효과 조합
+      const styleEffects = {
+        cinematic: ['kenburns', 'crossfade', 'zoomfade'],
+        dynamic: ['slideright', 'circleopen', 'rotate'],
+        elegant: ['dissolve', 'blur', 'crossfade'],
+        energetic: ['glitch', 'colorshift', 'pixelize']
+      };
+      
+      const effects = styleEffects[styleType] || ['crossfade'];
+      const filename = `complex_${styleType}_${Date.now()}.mp4`;
+      const outputPath = path.join(this.outputDir, filename);
+      
+      // 복합 효과를 순차적으로 적용
+      await this.applyComplexEffects(imagePaths, effects, duration, transitionDuration, outputPath);
+      
+      await this.cleanupTempFiles(imagePaths);
+      
+      const processingTime = Date.now() - startTime;
+      console.log(`✅ ${styleType} 복합 효과 완료: ${Math.round(processingTime/1000)}초`);
+      
+      return {
+        filename,
+        duration: (duration * images.length) + (transitionDuration * (images.length - 1)),
+        processingTime,
+        effects
+      };
+      
+    } catch (error) {
+      console.error(`❌ ${styleType} 복합 효과 생성 실패:`, error);
+      throw error;
+    }
+  }
+  
+  // 복합 효과 적용
+  async applyComplexEffects(imagePaths, effects, duration, transitionDuration, outputPath) {
+    // 첫 번째 효과로 기본 비디오 생성
+    const firstEffect = effects[0];
+    const command = this.buildTransitionCommand({
+      imagePaths,
+      transitionType: firstEffect,
+      duration,
+      transitionDuration
+    });
+    
+    await this.executeFFmpegCommand(command, outputPath);
+    
+    // 추가 효과들을 순차적으로 적용 (여기서는 첫 번째 효과만 적용)
+    console.log(`🎨 적용된 효과: ${effects.join(', ')}`);
+  }
+  
+  // 전환 효과 비교 테스트
+  async compareTransitionEffects(options) {
+    const { images, effects, duration, transitionDuration } = options;
+    const startTime = Date.now();
+    const results = [];
+    
+    console.log(`⚖️ ${effects.length}개 전환 효과 비교 시작`);
+    
+    try {
+      await this.init();
+      
+      const imagePaths = await this.saveUploadedImages(images);
+      
+      // 각 효과별로 비디오 생성
+      for (const effect of effects) {
+        const effectStartTime = Date.now();
+        
+        const filename = `compare_${effect}_${Date.now()}.mp4`;
+        const outputPath = path.join(this.outputDir, filename);
+        
+        const command = this.buildTransitionCommand({
+          imagePaths,
+          transitionType: effect,
+          duration,
+          transitionDuration
+        });
+        
+        await this.executeFFmpegCommand(command, outputPath);
+        
+        const effectProcessingTime = Date.now() - effectStartTime;
+        
+        results.push({
+          effect,
+          filename,
+          processingTime: effectProcessingTime
+        });
+        
+        console.log(`✅ ${effect} 효과 완료: ${Math.round(effectProcessingTime/1000)}초`);
+      }
+      
+      await this.cleanupTempFiles(imagePaths);
+      
+      const totalProcessingTime = Date.now() - startTime;
+      console.log(`🎉 모든 효과 비교 완료: ${Math.round(totalProcessingTime/1000)}초`);
+      
+      return {
+        results,
+        totalProcessingTime
+      };
+      
+    } catch (error) {
+      console.error('❌ 전환 효과 비교 실패:', error);
+      throw error;
+    }
+  }
+  
+  // ===========================================
+  // 기존 비디오 생성 메서드 (하위 호환성 유지)
+  // ===========================================
 
   async generate(imageUrls, productName, style = 'dynamic') {
     await this.init();

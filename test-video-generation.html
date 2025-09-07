@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비디오 생성 시스템 테스트</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 8px; 
+            background: rgba(255,255,255,0.05);
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 8px; 
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { 
+            background: rgba(76, 175, 80, 0.2); 
+            color: #a5d6a7; 
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .error { 
+            background: rgba(244, 67, 54, 0.2); 
+            color: #ef9a9a; 
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        .loading {
+            background: rgba(255, 193, 7, 0.2);
+            color: #fff3c4;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .api-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .api-ok { background: rgba(76, 175, 80, 0.3); color: #a5d6a7; }
+        .api-error { background: rgba(244, 67, 54, 0.3); color: #ef9a9a; }
+        .test-data {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 AI 쇼츠 메이커 v2.3.0 테스트</h1>
+        <p>향상된 영상 생성 시스템의 모든 단계를 테스트합니다.</p>
+        
+        <!-- API 상태 체크 -->
+        <div class="test-section">
+            <h3>1. API 서버 상태 체크</h3>
+            <button onclick="checkAPIStatus()">🔍 API 상태 확인</button>
+            <div id="apiResult" class="result"></div>
+        </div>
+
+        <!-- 파일명 정렬 테스트 -->
+        <div class="test-section">
+            <h3>2. AI 파일명 분석 및 정렬</h3>
+            <div class="test-data">
+                테스트 파일명: ["damaged_wheel_01.jpg", "process_step2.jpg", "final_result.jpg", "before_damage.jpg"]
+            </div>
+            <button onclick="testFilenameSort()">📋 파일명 정렬 테스트</button>
+            <div id="sortResult" class="result"></div>
+        </div>
+
+        <!-- 이미지 분석 테스트 -->
+        <div class="test-section">
+            <h3>3. 배치 이미지 분석</h3>
+            <p>실제 이미지 파일을 업로드하여 분석 테스트를 진행합니다.</p>
+            <input type="file" id="testImages" multiple accept="image/*" style="margin-bottom: 10px;">
+            <br>
+            <button onclick="testBatchAnalysis()">🔍 배치 분석 테스트</button>
+            <div id="analysisResult" class="result"></div>
+        </div>
+
+        <!-- 나레이션 생성 테스트 -->
+        <div class="test-section">
+            <h3>4. 2단계 나레이션 생성</h3>
+            <button onclick="testNarrationGeneration()" id="narrationBtn">🎙️ 나레이션 생성 테스트</button>
+            <div id="narrationResult" class="result"></div>
+        </div>
+
+        <!-- 통합 워크플로우 테스트 -->
+        <div class="test-section">
+            <h3>5. 전체 3단계 워크플로우</h3>
+            <button onclick="testCompleteWorkflow()" id="workflowBtn">🚀 전체 워크플로우 테스트</button>
+            <div id="workflowResult" class="result"></div>
+        </div>
+
+        <!-- 비디오 생성 테스트 -->
+        <div class="test-section">
+            <h3>6. 향상된 비디오 생성</h3>
+            <button onclick="testVideoGeneration()" id="videoBtn" disabled>🎬 비디오 생성 테스트</button>
+            <div id="videoResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let analysisResults = null;
+        let finalStoryData = null;
+        let testImages = [];
+
+        // API 상태 확인
+        async function checkAPIStatus() {
+            const result = document.getElementById('apiResult');
+            result.className = 'result loading';
+            result.innerHTML = '🔄 API 서버 상태 확인 중...';
+
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                result.className = 'result success';
+                result.innerHTML = `
+                    <strong>✅ API 서버 정상 동작</strong><br>
+                    <span class="api-status api-ok">상태: ${data.status}</span><br>
+                    <span class="api-status ${data.geminiApiKey ? 'api-ok' : 'api-error'}">
+                        Gemini API: ${data.geminiApiKey ? '설정됨' : '미설정'}
+                    </span><br>
+                    <span>타임스탬프: ${data.timestamp}</span>
+                `;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ API 서버 연결 실패: ${error.message}`;
+            }
+        }
+
+        // 파일명 정렬 테스트
+        async function testFilenameSort() {
+            const result = document.getElementById('sortResult');
+            result.className = 'result loading';
+            result.textContent = '🔄 AI 파일명 분석 중...';
+
+            try {
+                const testFilenames = ["damaged_wheel_01.jpg", "process_step2.jpg", "final_result.jpg", "before_damage.jpg"];
+                
+                const formData = new FormData();
+                formData.append('filenames', JSON.stringify(testFilenames));
+                formData.append('industry', 'wheel');
+
+                const response = await fetch('/api/sort-filenames', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ 파일명 정렬 성공!</strong><br>
+                        <strong>원본 순서:</strong> ${testFilenames.join(', ')}<br>
+                        <strong>AI 정렬 순서:</strong> ${data.data.sortedOrder.map(i => testFilenames[i]).join(', ')}<br>
+                        <strong>분석 결과:</strong> ${data.data.analysis}<br>
+                        <strong>정렬 이유:</strong> ${data.data.reasoning}
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 파일명 정렬 실패: ${error.message}`;
+            }
+        }
+
+        // 배치 이미지 분석 테스트
+        async function testBatchAnalysis() {
+            const result = document.getElementById('analysisResult');
+            const fileInput = document.getElementById('testImages');
+            
+            if (!fileInput.files || fileInput.files.length < 3) {
+                result.className = 'result error';
+                result.textContent = '❌ 최소 3장의 이미지를 선택해주세요.';
+                return;
+            }
+
+            result.className = 'result loading';
+            result.innerHTML = `🔄 ${fileInput.files.length}장 이미지 분석 중...`;
+
+            try {
+                const formData = new FormData();
+                
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('images', fileInput.files[i]);
+                    testImages.push(fileInput.files[i]);
+                }
+                formData.append('sortMethod', 'ai');
+
+                const response = await fetch('/api/analyze-batch', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    analysisResults = data.results;
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ 배치 분석 성공!</strong><br>
+                        <strong>총 이미지:</strong> ${data.totalImages}장<br>
+                        <strong>성공:</strong> ${data.results.filter(r => r.success).length}장<br>
+                        <strong>실패:</strong> ${data.results.filter(r => !r.success).length}장<br>
+                        <strong>정렬 방식:</strong> ${data.sortMethod}<br><br>
+                        <strong>분석 결과:</strong><br>
+                        ${data.results.map((r, i) => `${i+1}. ${r.filename}: ${r.success ? '✅' : '❌'} ${r.analysis || r.error}`).join('<br>')}
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 배치 분석 실패: ${error.message}`;
+            }
+        }
+
+        // 나레이션 생성 테스트
+        async function testNarrationGeneration() {
+            const result = document.getElementById('narrationResult');
+            const btn = document.getElementById('narrationBtn');
+            
+            if (!analysisResults || analysisResults.length === 0) {
+                result.className = 'result error';
+                result.textContent = '❌ 먼저 이미지 분석을 완료해주세요.';
+                return;
+            }
+
+            btn.disabled = true;
+            result.className = 'result loading';
+            result.textContent = '🔄 2단계 나레이션 생성 중...';
+
+            try {
+                const response = await fetch('/api/generate-narration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        analysisResults: analysisResults,
+                        industry: 'wheel'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    finalStoryData = data.data;
+                    document.getElementById('videoBtn').disabled = false;
+                    
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ 2단계 나레이션 생성 성공!</strong><br>
+                        <strong>전체 길이:</strong> ${data.data.totalDuration}초<br>
+                        <strong>세그먼트 수:</strong> ${data.data.segments ? data.data.segments.length : 0}개<br>
+                        <strong>스토리 제목:</strong> ${data.data.fullStoryData ? data.data.fullStoryData.title || '제목 없음' : '전체 스토리 없음'}<br>
+                        <strong>키워드:</strong> ${data.data.keywords ? data.data.keywords.join(', ') : '없음'}<br><br>
+                        <strong>전체 스토리:</strong><br>
+                        <pre style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+${data.data.fullStoryData ? data.data.fullStoryData.fullScript || '스크립트 없음' : '전체 스토리 없음'}
+                        </pre><br>
+                        <strong>세그먼트별 나레이션:</strong><br>
+                        ${data.data.segments ? data.data.segments.map((s, i) => `${i+1}. ${s.narration || '나레이션 없음'}`).join('<br>') : '세그먼트 없음'}
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 나레이션 생성 실패: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 전체 워크플로우 테스트
+        async function testCompleteWorkflow() {
+            const result = document.getElementById('workflowResult');
+            const btn = document.getElementById('workflowBtn');
+            const fileInput = document.getElementById('testImages');
+            
+            if (!fileInput.files || fileInput.files.length < 3) {
+                result.className = 'result error';
+                result.textContent = '❌ 최소 3장의 이미지를 선택해주세요.';
+                return;
+            }
+
+            btn.disabled = true;
+            result.className = 'result loading';
+            result.innerHTML = '🔄 전체 3단계 워크플로우 실행 중...';
+
+            try {
+                const formData = new FormData();
+                
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('images', fileInput.files[i]);
+                }
+                formData.append('sortMethod', 'ai');
+                formData.append('industry', 'wheel');
+
+                const response = await fetch('/api/complete-workflow', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    analysisResults = data.analysis.results;
+                    finalStoryData = data.narration;
+                    document.getElementById('videoBtn').disabled = false;
+                    
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ 전체 워크플로우 성공!</strong><br>
+                        <strong>처리 시간:</strong> ${data.workflow.processingTime}초<br>
+                        <strong>총 이미지:</strong> ${data.workflow.totalImages}장<br>
+                        <strong>정렬 방식:</strong> ${data.workflow.sortMethod}<br>
+                        <strong>업종:</strong> ${data.workflow.industry}<br><br>
+                        <strong>분석 결과:</strong> 성공 ${data.analysis.successCount}장 / 실패 ${data.analysis.failCount}장<br>
+                        <strong>나레이션:</strong> ${data.narration.segments ? data.narration.segments.length : 0}개 세그먼트 생성<br>
+                        <strong>전체 스토리 제목:</strong> ${data.narration.fullStoryData ? data.narration.fullStoryData.title || '제목 없음' : '없음'}
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 워크플로우 실패: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 비디오 생성 테스트
+        async function testVideoGeneration() {
+            const result = document.getElementById('videoResult');
+            const btn = document.getElementById('videoBtn');
+            const fileInput = document.getElementById('testImages');
+            
+            if (!finalStoryData || !analysisResults) {
+                result.className = 'result error';
+                result.textContent = '❌ 먼저 전체 워크플로우를 완료해주세요.';
+                return;
+            }
+
+            btn.disabled = true;
+            result.className = 'result loading';
+            result.innerHTML = '🔄 향상된 비디오 생성 중... (2-3분 소요)';
+
+            try {
+                const formData = new FormData();
+                
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('images', fileInput.files[i]);
+                }
+                
+                formData.append('productName', '테스트 제품');
+                formData.append('industry', 'wheel');
+                formData.append('style', 'dynamic');
+                formData.append('duration', '30');
+                formData.append('analysisResults', JSON.stringify(analysisResults));
+                formData.append('finalStory', JSON.stringify(finalStoryData));
+
+                const response = await fetch('/api/generate-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ 비디오 생성 성공!</strong><br>
+                        <strong>파일명:</strong> ${data.filename}<br>
+                        <strong>영상 길이:</strong> ${data.duration}초<br>
+                        <strong>세그먼트 수:</strong> ${data.metadata.segmentCount}개<br>
+                        <strong>이미지 수:</strong> ${data.metadata.totalImages}개<br>
+                        <strong>처리 시간:</strong> ${Math.round(data.metadata.processingTime/1000)}초<br>
+                        <strong>스토리 제목:</strong> ${data.metadata.storyTitle || '없음'}<br><br>
+                        <a href="/output/${data.filename}" download="${data.filename}" 
+                           style="display: inline-block; padding: 10px 20px; background: linear-gradient(45deg, #4caf50, #45a049); color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                           📥 비디오 다운로드
+                        </a>
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 비디오 생성 실패: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 페이지 로드시 API 상태 자동 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIStatus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일명 정렬 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 AI 파일명 정렬 테스트</h1>
+        
+        <div class="test-section">
+            <h3>테스트 1: 기본 파일명 정렬</h3>
+            <button onclick="testBasicSort()">테스트 실행</button>
+            <div id="result1" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>테스트 2: 실제 이미지 파일명</h3>
+            <button onclick="testImageFiles()">테스트 실행</button>
+            <div id="result2" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>테스트 3: 복잡한 파일명</h3>
+            <button onclick="testComplexFiles()">테스트 실행</button>
+            <div id="result3" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testBasicSort() {
+            const result1 = document.getElementById('result1');
+            result1.textContent = '🔄 테스트 실행 중...';
+            
+            try {
+                const formData = new FormData();
+                const filenames = ['image3.jpg', 'image1.jpg', 'image2.jpg'];
+                formData.append('filenames', JSON.stringify(filenames));
+                formData.append('industry', 'auto');
+
+                const response = await fetch('/api/sort-filenames', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    result1.className = 'result success';
+                    result1.innerHTML = `
+                        <strong>✅ 성공!</strong><br>
+                        <strong>원본 순서:</strong> ${filenames.join(', ')}<br>
+                        <strong>정렬 순서:</strong> ${result.data.sortedOrder.map(i => filenames[i]).join(', ')}<br>
+                        <strong>분석:</strong> ${result.data.analysis}<br>
+                        <strong>이유:</strong> ${result.data.reasoning}
+                    `;
+                } else {
+                    result1.className = 'result error';
+                    result1.textContent = `❌ 실패: ${result.error}`;
+                }
+            } catch (error) {
+                result1.className = 'result error';
+                result1.textContent = `❌ 오류: ${error.message}`;
+            }
+        }
+
+        async function testImageFiles() {
+            const result2 = document.getElementById('result2');
+            result2.textContent = '🔄 테스트 실행 중...';
+            
+            try {
+                const formData = new FormData();
+                const filenames = ['DSC_0003.jpg', 'DSC_0001.jpg', 'DSC_0002.jpg', 'DSC_0005.jpg'];
+                formData.append('filenames', JSON.stringify(filenames));
+                formData.append('industry', 'fashion');
+
+                const response = await fetch('/api/sort-filenames', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    result2.className = 'result success';
+                    result2.innerHTML = `
+                        <strong>✅ 성공!</strong><br>
+                        <strong>원본 순서:</strong> ${filenames.join(', ')}<br>
+                        <strong>정렬 순서:</strong> ${result.data.sortedOrder.map(i => filenames[i]).join(', ')}<br>
+                        <strong>분석:</strong> ${result.data.analysis}<br>
+                        <strong>이유:</strong> ${result.data.reasoning}
+                    `;
+                } else {
+                    result2.className = 'result error';
+                    result2.textContent = `❌ 실패: ${result.error}`;
+                }
+            } catch (error) {
+                result2.className = 'result error';
+                result2.textContent = `❌ 오류: ${error.message}`;
+            }
+        }
+
+        async function testComplexFiles() {
+            const result3 = document.getElementById('result3');
+            result3.textContent = '🔄 테스트 실행 중...';
+            
+            try {
+                const formData = new FormData();
+                const filenames = ['before_damage.jpg', 'process_01.jpg', 'final_result.jpg', 'process_02.jpg'];
+                formData.append('filenames', JSON.stringify(filenames));
+                formData.append('industry', 'wheel');
+
+                const response = await fetch('/api/sort-filenames', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    result3.className = 'result success';
+                    result3.innerHTML = `
+                        <strong>✅ 성공!</strong><br>
+                        <strong>원본 순서:</strong> ${filenames.join(', ')}<br>
+                        <strong>정렬 순서:</strong> ${result.data.sortedOrder.map(i => filenames[i]).join(', ')}<br>
+                        <strong>분석:</strong> ${result.data.analysis}<br>
+                        <strong>이유:</strong> ${result.data.reasoning}
+                    `;
+                } else {
+                    result3.className = 'result error';
+                    result3.textContent = `❌ 실패: ${result.error}`;
+                }
+            } catch (error) {
+                result3.className = 'result error';
+                result3.textContent = `❌ 오류: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

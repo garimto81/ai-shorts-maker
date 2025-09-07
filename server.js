@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3006;
+const PORT = process.env.PORT || 3006;
 
 // Middleware
 app.use(cors());
@@ -78,9 +78,20 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
 });
 
 // AI 파일명 분석 및 정렬 엔드포인트
-app.post('/api/sort-filenames', async (req, res) => {
+app.post('/api/sort-filenames', upload.none(), async (req, res) => {
   try {
-    const { filenames } = req.body;
+    let { filenames } = req.body;
+    
+    // JSON 문자열로 전송된 경우 파싱
+    if (typeof filenames === 'string') {
+      try {
+        filenames = JSON.parse(filenames);
+      } catch (parseError) {
+        return res.status(400).json({
+          error: '파일명 데이터 형식이 올바르지 않습니다.'
+        });
+      }
+    }
     
     if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
       return res.status(400).json({
@@ -367,7 +378,101 @@ function extractNumberFromFilename(filename) {
   return match ? parseInt(match[1]) : 0;
 }
 
-// Generate shorts endpoint
+// Enhanced video generation endpoint with 2-stage narration support
+app.post('/api/generate-video', upload.array('images', 10), async (req, res) => {
+  try {
+    const { 
+      productName, 
+      industry = 'auto', 
+      style = 'dynamic',
+      analysisResults,
+      finalStory,
+      duration = 30
+    } = req.body;
+    
+    console.log('🎬 비디오 생성 요청 수신:', {
+      productName,
+      industry,
+      imageCount: req.files ? req.files.length : 0,
+      hasAnalysisResults: !!analysisResults,
+      hasFinalStory: !!finalStory
+    });
+    
+    // 입력 데이터 검증
+    if (!req.files || req.files.length < 3) {
+      return res.status(400).json({ 
+        error: '최소 3장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    if (!productName) {
+      return res.status(400).json({ 
+        error: '상품명을 입력해주세요.' 
+      });
+    }
+    
+    if (!finalStory) {
+      return res.status(400).json({ 
+        error: '3단계 AI 프로세스를 완료한 후 영상을 생성할 수 있습니다.' 
+      });
+    }
+    
+    // 이미지 데이터 처리
+    const imageDataUrls = req.files.map(file => {
+      const base64 = file.buffer.toString('base64');
+      return `data:${file.mimetype};base64,${base64}`;
+    });
+    
+    // 나레이션 데이터 파싱
+    let parsedAnalysisResults, parsedFinalStory;
+    try {
+      parsedAnalysisResults = typeof analysisResults === 'string' ? 
+        JSON.parse(analysisResults) : analysisResults;
+      parsedFinalStory = typeof finalStory === 'string' ? 
+        JSON.parse(finalStory) : finalStory;
+    } catch (parseError) {
+      return res.status(400).json({
+        error: '나레이션 데이터 형식이 올바르지 않습니다.',
+        details: parseError.message
+      });
+    }
+    
+    console.log('📊 처리할 데이터:', {
+      analysisCount: parsedAnalysisResults ? parsedAnalysisResults.length : 0,
+      storySegments: parsedFinalStory.segments ? parsedFinalStory.segments.length : 0,
+      fullStoryExists: !!parsedFinalStory.fullStoryData
+    });
+    
+    // 향상된 비디오 생성
+    const result = await generator.generateEnhancedVideo({
+      images: imageDataUrls,
+      productName,
+      industry,
+      style,
+      analysisResults: parsedAnalysisResults,
+      storyData: parsedFinalStory,
+      duration
+    });
+    
+    res.json({
+      success: true,
+      message: '✅ 쇼츠 비디오 생성 완료!',
+      filename: result.filename,
+      outputPath: result.outputPath,
+      duration: result.duration,
+      metadata: result.metadata
+    });
+    
+  } catch (error) {
+    console.error('❌ 비디오 생성 오류:', error);
+    res.status(500).json({ 
+      error: '비디오 생성 중 오류가 발생했습니다.',
+      details: error.message 
+    });
+  }
+});
+
+// Legacy endpoint for backwards compatibility
 app.post('/api/generate', upload.array('images', 10), async (req, res) => {
   try {
     const { productName, style = 'dynamic', industry = 'auto' } = req.body;
@@ -390,8 +495,8 @@ app.post('/api/generate', upload.array('images', 10), async (req, res) => {
       return `data:${file.mimetype};base64,${base64}`;
     });
     
-    // Generate video
-    console.log(`🚀 Generating shorts for: ${productName}`);
+    // Generate video using legacy method
+    console.log(`🚀 Legacy video generation for: ${productName}`);
     const result = await generator.generate(imageDataUrls, productName, style);
     
     res.json({
@@ -431,6 +536,121 @@ app.get('/api/videos', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ===========================================
+// FFmpeg 전환 효과 테스트 API
+// ===========================================
+
+// 기본 전환 효과 테스트
+app.post('/api/test-transitions', upload.array('images', 10), async (req, res) => {
+  try {
+    const { transitionType, duration = 2, transitionDuration = 1 } = req.body;
+    
+    if (!req.files || req.files.length < 2) {
+      return res.status(400).json({ 
+        error: '최소 2장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    console.log(`🎬 ${transitionType} 전환 효과 테스트 시작`);
+    
+    const result = await generator.testTransitionEffect({
+      images: req.files,
+      transitionType,
+      duration: parseFloat(duration),
+      transitionDuration: parseFloat(transitionDuration)
+    });
+    
+    res.json({
+      success: true,
+      filename: result.filename,
+      duration: result.duration,
+      processingTime: result.processingTime,
+      transitionType: transitionType
+    });
+    
+  } catch (error) {
+    console.error('❌ 전환 효과 테스트 오류:', error);
+    res.status(500).json({ 
+      error: '전환 효과 테스트 중 오류가 발생했습니다.',
+      details: error.message 
+    });
+  }
+});
+
+// 복합 전환 효과 테스트
+app.post('/api/test-complex-transitions', upload.array('images', 10), async (req, res) => {
+  try {
+    const { styleType, duration = 3, transitionDuration = 1.5 } = req.body;
+    
+    if (!req.files || req.files.length < 3) {
+      return res.status(400).json({ 
+        error: '최소 3장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    console.log(`🎪 ${styleType} 복합 전환 효과 테스트 시작`);
+    
+    const result = await generator.testComplexTransitions({
+      images: req.files,
+      styleType,
+      duration: parseFloat(duration),
+      transitionDuration: parseFloat(transitionDuration)
+    });
+    
+    res.json({
+      success: true,
+      filename: result.filename,
+      duration: result.duration,
+      processingTime: result.processingTime,
+      styleType: styleType,
+      effects: result.effects
+    });
+    
+  } catch (error) {
+    console.error('❌ 복합 전환 효과 테스트 오류:', error);
+    res.status(500).json({ 
+      error: '복합 전환 효과 테스트 중 오류가 발생했습니다.',
+      details: error.message 
+    });
+  }
+});
+
+// 전환 효과 비교 테스트
+app.post('/api/compare-transitions', upload.array('images', 10), async (req, res) => {
+  try {
+    const { effects } = req.body;
+    const effectsList = typeof effects === 'string' ? JSON.parse(effects) : effects;
+    
+    if (!req.files || req.files.length < 2) {
+      return res.status(400).json({ 
+        error: '최소 2장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    console.log(`⚖️ ${effectsList.length}개 전환 효과 비교 시작`);
+    
+    const result = await generator.compareTransitionEffects({
+      images: req.files,
+      effects: effectsList,
+      duration: 2,
+      transitionDuration: 1
+    });
+    
+    res.json({
+      success: true,
+      results: result.results,
+      totalProcessingTime: result.totalProcessingTime
+    });
+    
+  } catch (error) {
+    console.error('❌ 전환 효과 비교 오류:', error);
+    res.status(500).json({ 
+      error: '전환 효과 비교 중 오류가 발생했습니다.',
+      details: error.message 
+    });
   }
 });
 
