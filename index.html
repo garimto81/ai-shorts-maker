@@ -2,400 +2,936 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쇼츠 생성기</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1f2937">
+    <title>휠복원 AI 쇼츠 제작기</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 안드로이드 최적화 스타일 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            overscroll-behavior: none;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            min-height: 100vh;
+        }
+        
+        /* 안전 영역 고려 */
+        .safe-top { padding-top: env(safe-area-inset-top, 20px); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        
+        /* 터치 피드백 */
+        .touch-feedback:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+            transition: all 0.1s ease;
+        }
+        
+        /* 키보드 대응 */
+        input:focus, select:focus, textarea:focus { font-size: 16px; }
+        input[type="file"] { font-size: 16px; }
+        
+        /* 프로세스 단계 스타일 */
+        .process-step {
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        
+        .process-step.active {
+            border-left-color: #10b981;
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        
+        .process-step.completed {
+            border-left-color: #059669;
+            background-color: rgba(5, 150, 105, 0.2);
+        }
+        
+        /* 이미지 썸네일 */
+        .image-thumb {
+            position: relative;
+            aspect-ratio: 1;
+            background: #374151;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        
+        .image-thumb.sorted {
+            border-color: #10b981;
+        }
+        
+        .image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-order {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(239, 68, 68, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            line-height: 1;
+            z-index: 10;
+        }
+        
+        .analysis-panel {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .final-story-panel {
+            /* 3단계 결과는 브라우저 전체 스크롤로 확인 가능 */
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .narration-segments {
+            max-height: none; /* 높이 제한 없음 */
+            margin-top: 12px;
+        }
+        
+        /* 로딩 애니메이션 */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 프로그레스 바 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(55, 65, 81, 0.5);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.5s ease;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div id="app" class="container mx-auto px-4 py-6 max-w-6xl">
-        <!-- Header -->
-        <header class="mb-8">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold">🎬 AI 쇼츠 제작 공장</h1>
-                <div class="flex gap-3">
-                    <a href="/test-batch-analysis.html" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-sm">
-                        ⚡ 배치 분석
-                    </a>
-                    <a href="/test-condition-analysis.html" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700 transition-colors text-sm">
-                        🔍 상태 분석
-                    </a>
-                    <a href="/test-complete-workflow.html" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 rounded hover:from-purple-600 hover:to-blue-700 transition-colors text-sm">
-                        🚀 통합 워크플로우
-                    </a>
-                </div>
+<body class="text-white">
+    <div class="min-h-screen safe-top safe-bottom">
+        <!-- 헤더 -->
+        <div class="sticky top-0 z-50 bg-gray-900/90 backdrop-blur-sm border-b border-gray-700">
+            <div class="px-4 py-3">
+                <h1 class="text-xl font-bold text-center bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                    🎬 AI 쇼츠 제작 공장
+                </h1>
             </div>
-            <div class="mt-3 text-slate-400 text-sm">
-                이미지 분석 → AI 정렬 → 나레이션 생성을 한 번에! | 새로운 업종: <span class="text-blue-400 font-semibold">자동차 휠 복원</span> 추가
-            </div>
-        </header>
+        </div>
 
-        <!-- Main Content -->
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Left Panel - Input -->
-            <div class="bg-gray-800 rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">입력</h2>
-                
-                <!-- Image Upload -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">상품 이미지 (3장 이상)</label>
-                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors cursor-pointer" 
-                         onclick="document.getElementById('imageInput').click()">
-                        <p class="text-gray-300">클릭하여 이미지 업로드</p>
-                        <p class="text-sm text-gray-500 mt-1">JPG, PNG (최대 10MB)</p>
+        <div class="px-4 py-6 space-y-6">
+            <!-- 1. 업종 선택 (최상단) -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <label class="block text-sm font-medium mb-3 text-gray-300">
+                    📋 업종 선택
+                </label>
+                <select id="industrySelect" class="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-feedback">
+                    <option value="">휠 작업 타입을 선택하세요</option>
+                    <option value="auto">🚗 중고차 딜러</option>
+                    <option value="wheel-repair">🔧 휠 리페어 (균열, 휨 수정)</option>
+                    <option value="fashion">👔 패션/의류</option>
+                    <option value="craft">🎨 공예품/수공예</option>
+                    <option value="food">🍴 음식/요리</option>
+                    <option value="beauty">💄 뷰티/화장품</option>
+                    <option value="electronic">📱 전자제품</option>
+                    <option value="other">🏢 기타</option>
+                </select>
+            </div>
+
+            <!-- 2. 제목 입력 -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <label class="block text-sm font-medium mb-3 text-gray-300">
+                    🏷️ 휠 모델명 또는 작업 설명
+                </label>
+                <input 
+                    type="text" 
+                    id="productName" 
+                    placeholder="예: BMW 18인치 알로이 휠, 소나타 휠 스크래치 복원"
+                    class="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-feedback"
+                >
+            </div>
+
+            <!-- 3. 이미지 업로드 -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <label class="block text-sm font-medium mb-3 text-gray-300">
+                    📸 이미지 업로드 (3-10장)
+                </label>
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
+                    <input 
+                        type="file" 
+                        id="imageUpload" 
+                        accept="image/*" 
+                        multiple 
+                        class="hidden"
+                    >
+                    <button 
+                        onclick="document.getElementById('imageUpload').click()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg font-medium touch-feedback transition-colors"
+                    >
+                        📁 이미지 선택하기
+                    </button>
+                    <p class="text-xs text-gray-400 mt-2">JPEG, PNG 파일만 가능 (최대 10MB)</p>
+                </div>
+
+                <!-- 업로드된 이미지 미리보기 -->
+                <div id="imagePreview" class="mt-4 grid grid-cols-3 gap-2 hidden"></div>
+            </div>
+
+            <!-- 4. AI 프로세스 진행 상황 -->
+            <div id="processContainer" class="space-y-4 hidden">
+                <!-- 프로그레스 바 -->
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium">진행률</span>
+                        <span id="progressText" class="text-sm text-gray-400">0/3</span>
                     </div>
-                    <input type="file" id="imageInput" class="hidden" multiple accept="image/*">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 1단계: AI 파일명 분석 및 자동 정렬 -->
+                <div id="step1" class="process-step bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold flex items-center">
+                            <span id="step1Icon" class="mr-2">⏳</span>
+                            1단계: AI 파일명 분석 & 자동 정렬
+                        </h3>
+                        <div id="step1Loading" class="loading-spinner hidden">🔄</div>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-3">파일명을 분석하여 최적의 순서로 이미지를 자동 정렬합니다.</p>
                     
-                    <!-- Image Preview -->
-                    <div id="imagePreview" class="grid grid-cols-3 gap-2 mt-4"></div>
+                    <!-- 정렬된 이미지 표시 -->
+                    <div id="sortedImages" class="grid grid-cols-4 gap-2 hidden"></div>
                 </div>
 
-                <!-- Product Name -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">상품명</label>
-                    <input type="text" id="productName" 
-                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500"
-                           placeholder="상품명 입력">
+                <!-- 2단계: 정렬된 이미지 순차 정밀 분석 -->
+                <div id="step2" class="process-step bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold flex items-center">
+                            <span id="step2Icon" class="mr-2">⏳</span>
+                            2단계: 이미지 정밀 분석
+                        </h3>
+                        <div id="step2Loading" class="loading-spinner hidden">🔄</div>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-3">정렬된 이미지를 순서대로 분석하여 상세 내용을 추출합니다.</p>
+                    
+                    <!-- 이미지 분석 결과 -->
+                    <div id="analysisResults" class="space-y-3 hidden"></div>
                 </div>
 
-                <!-- Style Selection -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">영상 스타일</label>
-                    <select id="styleSelect" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500">
-                        <option value="dynamic">다이나믹</option>
-                        <option value="professional">프로페셔널</option>
-                        <option value="luxury">럭셔리</option>
-                    </select>
+                <!-- 3단계: 전체 맥락 기반 AI 재구성 -->
+                <div id="step3" class="process-step bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold flex items-center">
+                            <span id="step3Icon" class="mr-2">⏳</span>
+                            3단계: 맥락 기반 스토리 재구성
+                        </h3>
+                        <div id="step3Loading" class="loading-spinner hidden">🔄</div>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-3">전체 이미지의 맥락을 파악하여 완성된 스토리로 재구성합니다.</p>
+                    
+                    <!-- 최종 스토리 결과 -->
+                    <div id="finalStory" class="final-story-panel hidden">
+                        <div class="space-y-2">
+                            <div>
+                                <span class="text-blue-400 font-medium">📝 스토리 제목:</span>
+                                <p id="storyTitle" class="text-sm mt-1"></p>
+                            </div>
+                            <div>
+                                <span class="text-green-400 font-medium">🎙️ 나레이션:</span>
+                                <p id="storyNarration" class="text-sm mt-1"></p>
+                            </div>
+                            <div>
+                                <span class="text-yellow-400 font-medium">🎯 마케팅 포인트:</span>
+                                <p id="storyMarketing" class="text-sm mt-1"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Industry Type -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">업종</label>
-                    <select id="industryType" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-gray-500">
-                        <option value="auto">자동차</option>
-                        <option value="fashion">패션</option>
-                        <option value="tech">전자제품</option>
-                        <option value="food">식품</option>
-                        <option value="beauty">뷰티</option>
-                        <option value="other">기타</option>
-                    </select>
-                </div>
+            <!-- 5. 실행 버튼 -->
+            <div class="space-y-3">
+                <button 
+                    id="startProcessBtn"
+                    onclick="startAIProcess()"
+                    disabled
+                    class="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 disabled:from-gray-600 disabled:to-gray-700 disabled:opacity-50 px-6 py-4 rounded-lg font-semibold text-lg touch-feedback transition-all duration-300"
+                >
+                    🚀 AI 분석 시작하기
+                </button>
 
-                <!-- Generate Button -->
-                <button id="generateBtn" 
-                        class="w-full py-3 bg-blue-600 rounded font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>
-                    생성
+                <button 
+                    id="generateVideoBtn"
+                    onclick="generateVideo()"
+                    class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 disabled:opacity-50 px-6 py-4 rounded-lg font-semibold text-lg touch-feedback transition-all duration-300 hidden"
+                    disabled
+                >
+                    🎬 쇼츠 비디오 생성하기
                 </button>
             </div>
 
-            <!-- Right Panel - Status & Preview -->
-            <div class="bg-gray-800 rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">결과</h2>
-                
-                <!-- Status Panel -->
-                <div id="statusPanel" class="space-y-4">
-                    <!-- Initial State -->
-                    <div class="text-center py-12">
-                        <p class="text-gray-400">대기 중</p>
-                    </div>
-                </div>
-
-                <!-- Progress Steps (Hidden by default) -->
-                <div id="progressSteps" class="hidden space-y-3">
-                    <div class="step-item" data-step="1">
-                        <div class="flex items-center gap-3">
-                            <div class="step-icon">1</div>
-                            <div class="flex-1">
-                                <p class="font-medium">이미지 분석 중</p>
-                                <p class="text-sm text-gray-400">Gemini Vision으로 상품 특징 추출</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="step-item" data-step="2">
-                        <div class="flex items-center gap-3">
-                            <div class="step-icon">2</div>
-                            <div class="flex-1">
-                                <p class="font-medium">스크립트 생성 중</p>
-                                <p class="text-sm text-gray-400">AI가 마케팅 메시지 작성</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="step-item" data-step="3">
-                        <div class="flex items-center gap-3">
-                            <div class="step-icon">3</div>
-                            <div class="flex-1">
-                                <p class="font-medium">비디오 렌더링 중</p>
-                                <p class="text-sm text-gray-400">효과 적용 및 최종 영상 생성</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analysis Results (Hidden by default) -->
-                <div id="analysisResults" class="hidden mt-6 p-4 bg-gray-700 rounded">
-                    <h3 class="font-semibold mb-3">분석 결과</h3>
-                    <div id="analysisContent" class="space-y-2 text-sm">
-                        <!-- Analysis will be inserted here -->
-                    </div>
-                </div>
-
-                <!-- Video Preview (Hidden by default) -->
-                <div id="videoPreview" class="hidden mt-6">
-                    <div class="aspect-[9/16] bg-black rounded-lg overflow-hidden">
-                        <video id="previewVideo" class="w-full h-full" controls></video>
-                    </div>
-                    <div class="mt-4 flex gap-2">
-                        <button class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700 transition-colors">
-                            다운로드
-                        </button>
-                        <button class="flex-1 py-2 bg-gray-600 rounded hover:bg-gray-700 transition-colors">
-                            다시 생성
-                        </button>
+            <!-- 상태 메시지 -->
+            <div id="statusMessage" class="hidden">
+                <div class="bg-blue-900/50 border border-blue-600 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="loading-spinner mr-3">🔄</div>
+                        <span id="statusText" class="text-sm"></span>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .step-icon {
-            @apply w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-semibold;
-        }
-        
-        .step-item.active .step-icon {
-            @apply bg-blue-600 animate-pulse;
-        }
-        
-        .step-item.completed .step-icon {
-            @apply bg-green-600;
-        }
-        
-        .image-thumb {
-            @apply relative aspect-square bg-gray-700 rounded overflow-hidden;
-        }
-        
-        .image-thumb img {
-            @apply w-full h-full object-cover;
-        }
-        
-        .image-thumb button {
-            @apply absolute top-1 right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs hover:bg-red-700;
-        }
-        
-        .image-caption {
-            @apply absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 text-center;
-        }
-        
-        .loading-caption {
-            @apply animate-pulse;
-        }
-    </style>
+    <script>
+        // 전역 변수
+        let uploadedImages = [];
+        let sortedImages = [];
+        let analysisResults = [];
+        let finalStoryData = {};
+        let currentStep = 0;
 
-    <script type="module">
-        // State management
-        const state = {
-            images: [],
-            imageAnalysis: {}, // 이미지별 한줄평 저장
-            productName: '',
-            style: 'dynamic',
-            industry: 'auto',
-            isGenerating: false
-        };
+        // DOM 요소 참조
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const industrySelect = document.getElementById('industrySelect');
+        const productName = document.getElementById('productName');
+        const startProcessBtn = document.getElementById('startProcessBtn');
+        const generateVideoBtn = document.getElementById('generateVideoBtn');
+        const processContainer = document.getElementById('processContainer');
 
-        // DOM Elements
-        const elements = {
-            imageInput: document.getElementById('imageInput'),
-            imagePreview: document.getElementById('imagePreview'),
-            productName: document.getElementById('productName'),
-            styleSelect: document.getElementById('styleSelect'),
-            industryType: document.getElementById('industryType'),
-            generateBtn: document.getElementById('generateBtn'),
-            statusPanel: document.getElementById('statusPanel'),
-            progressSteps: document.getElementById('progressSteps'),
-            analysisResults: document.getElementById('analysisResults'),
-            analysisContent: document.getElementById('analysisContent'),
-            videoPreview: document.getElementById('videoPreview'),
-            previewVideo: document.getElementById('previewVideo')
-        };
-
-        // Image handling
-        elements.imageInput.addEventListener('change', (e) => {
+        // 이미지 업로드 핸들러
+        imageUpload.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            console.log(`📷 ${files.length}개 이미지 선택됨`);
-            state.images = files;
-            updateImagePreview();
-            updateGenerateButton();
-        });
+            if (files.length === 0) return;
 
-        function updateImagePreview() {
-            elements.imagePreview.innerHTML = '';
-            state.imageAnalysis = {}; // 분석 결과 초기화
-            
-            state.images.forEach((file, index) => {
-                console.log(`🖼️ 이미지 ${index + 1}: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
-                
+            uploadedImages = [];
+            imagePreview.innerHTML = '';
+            imagePreview.classList.remove('hidden');
+
+            files.forEach((file, index) => {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'image-thumb';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="Image ${index + 1}">
-                        <button onclick="removeImage(${index})">×</button>
-                        <div class="image-caption loading-caption" id="caption-${index}">
-                            <span class="loading-spinner">⏳</span> 분석 중...
+                reader.onload = function(e) {
+                    const imageData = {
+                        file: file,
+                        name: file.name,
+                        dataUrl: e.target.result,
+                        index: index
+                    };
+                    uploadedImages.push(imageData);
+
+                    // 미리보기 생성
+                    const thumbDiv = document.createElement('div');
+                    thumbDiv.className = 'image-thumb';
+                    thumbDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <div class="remove-btn" onclick="removeImage(${index})">×</div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-1 text-center">
+                            ${file.name.substring(0, 10)}...
                         </div>
                     `;
-                    elements.imagePreview.appendChild(div);
-                    
-                    // 이미지 분석 요청
-                    console.log(`🔍 이미지 ${index + 1} 분석 시작...`);
-                    analyzeImage(file, index);
-                };
-                reader.onerror = (error) => {
-                    console.error(`❌ 이미지 ${index + 1} 읽기 실패:`, error);
+                    imagePreview.appendChild(thumbDiv);
+
+                    // 버튼 상태 업데이트
+                    updateButtonState();
                 };
                 reader.readAsDataURL(file);
             });
+        });
+
+        // 이미지 제거
+        function removeImage(index) {
+            uploadedImages = uploadedImages.filter(img => img.index !== index);
+            
+            // 미리보기 다시 생성
+            imagePreview.innerHTML = '';
+            uploadedImages.forEach((img, newIndex) => {
+                img.index = newIndex;
+                const thumbDiv = document.createElement('div');
+                thumbDiv.className = 'image-thumb';
+                thumbDiv.innerHTML = `
+                    <img src="${img.dataUrl}" alt="${img.name}">
+                    <div class="remove-btn" onclick="removeImage(${newIndex})">×</div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-1 text-center">
+                        ${img.name.substring(0, 10)}...
+                    </div>
+                `;
+                imagePreview.appendChild(thumbDiv);
+            });
+
+            if (uploadedImages.length === 0) {
+                imagePreview.classList.add('hidden');
+            }
+
+            updateButtonState();
         }
 
-        // 개별 이미지 분석
-        async function analyzeImage(file, index) {
+        // 버튼 상태 업데이트
+        function updateButtonState() {
+            const hasImages = uploadedImages.length >= 3;
+            const hasIndustry = industrySelect.value !== '';
+            const hasTitle = productName.value.trim() !== '';
+
+            startProcessBtn.disabled = !(hasImages && hasIndustry && hasTitle);
+        }
+
+        // 입력 필드 이벤트 리스너
+        industrySelect.addEventListener('change', updateButtonState);
+        productName.addEventListener('input', updateButtonState);
+
+        // 프로세스 단계 업데이트
+        function updateProcessStep(step, status) {
+            const stepElement = document.getElementById(`step${step}`);
+            const iconElement = document.getElementById(`step${step}Icon`);
+            const loadingElement = document.getElementById(`step${step}Loading`);
+
+            stepElement.classList.remove('active', 'completed');
+            loadingElement.classList.add('hidden');
+
+            if (status === 'active') {
+                stepElement.classList.add('active');
+                iconElement.textContent = '🔄';
+                loadingElement.classList.remove('hidden');
+            } else if (status === 'completed') {
+                stepElement.classList.add('completed');
+                iconElement.textContent = '✅';
+            } else {
+                iconElement.textContent = '⏳';
+            }
+        }
+
+        // 프로그레스 바 업데이트
+        function updateProgress(step) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            const percentage = (step / 3) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${step}/3`;
+        }
+
+        // 상태 메시지 표시
+        function showStatus(message) {
+            const statusMessage = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            
+            statusText.textContent = message;
+            statusMessage.classList.remove('hidden');
+        }
+
+        function hideStatus() {
+            document.getElementById('statusMessage').classList.add('hidden');
+        }
+        
+        // 2단계 나레이션 표시: 전체 스토리 + 이미지별 할당
+        function displayTwoStageNarration(storyData) {
+            const narrationContainer = document.getElementById('storyNarration');
+            
+            // 데이터 검증
+            const fullStoryData = storyData.fullStoryData || {};
+            const segments = storyData.segments || [];
+            
+            if (segments.length === 0) {
+                narrationContainer.textContent = '나레이션 데이터가 없습니다.';
+                return;
+            }
+            
+            // HTML 구조 생성
+            let html = '<div class="narration-container space-y-6">';
+            
+            // 1단계: 전체 스토리 설계 표시
+            html += `
+                <div class="full-story-section">
+                    <div class="mb-4">
+                        <h4 class="text-lg font-semibold text-blue-400 mb-3">
+                            📝 1단계: 전체 맥락 스토리 설계
+                        </h4>
+                        <div class="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 space-y-3">
+                            <div>
+                                <span class="text-blue-300 font-medium">📖 완성된 스토리:</span>
+                                <p class="text-sm text-gray-200 mt-2 leading-relaxed">
+                                    ${fullStoryData.fullScript || storyData.fullScript || '전체 스토리 생성 중...'}
+                                </p>
+                            </div>
+                            ${fullStoryData.storyStructure ? `
+                            <div>
+                                <span class="text-blue-300 font-medium">🏗️ 스토리 구조:</span>
+                                <p class="text-xs text-gray-300 mt-1">${fullStoryData.storyStructure}</p>
+                            </div>
+                            ` : ''}
+                            ${fullStoryData.keyMessage ? `
+                            <div>
+                                <span class="text-blue-300 font-medium">💡 핵심 메시지:</span>
+                                <p class="text-xs text-gray-300 mt-1">${fullStoryData.keyMessage}</p>
+                            </div>
+                            ` : ''}
+                            ${fullStoryData.emotionalTone ? `
+                            <div>
+                                <span class="text-blue-300 font-medium">🎭 감정적 톤:</span>
+                                <p class="text-xs text-gray-300 mt-1">${fullStoryData.emotionalTone}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 2단계: 이미지별 할당 표시
+            html += `
+                <div class="segments-section">
+                    <h4 class="text-lg font-semibold text-green-400 mb-3">
+                        🎬 2단계: 이미지별 나레이션 할당
+                    </h4>
+                    <div class="narration-segments space-y-3">
+            `;
+            
+            segments.forEach((segment, index) => {
+                const imageIndex = segment.imageIndex || index;
+                const script = segment.script || '대사 없음';
+                const timeInfo = segment.startTime !== undefined ? `${segment.startTime}-${segment.endTime}초` : `이미지 ${index + 1}`;
+                const imageName = sortedImages && sortedImages[imageIndex] ? sortedImages[imageIndex].name : `이미지 ${imageIndex + 1}`;
+                const relatedAnalysis = segment.relatedAnalysis || '';
+                
+                // 실제 이미지 데이터 가져오기
+                const actualImage = sortedImages && sortedImages[imageIndex] ? sortedImages[imageIndex] : null;
+                const imageDisplay = actualImage ? 
+                    `<img src="${actualImage.dataUrl}" alt="${imageName}" class="w-16 h-16 object-cover rounded-lg">` :
+                    `<div class="w-16 h-16 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">${imageIndex + 1}</div>`;
+                
+                html += `
+                    <div class="bg-gray-700/30 rounded-lg p-3 border-l-4 border-green-500">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                ${imageDisplay}
+                                <div class="text-center mt-1">
+                                    <span class="text-xs text-green-400 font-medium">${imageIndex + 1}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="text-sm font-medium text-green-400 mb-1">
+                                    🎥 ${timeInfo} | 📷 ${imageName.length > 20 ? imageName.substring(0, 20) + '...' : imageName}
+                                </div>
+                                <div class="text-sm text-gray-200 leading-relaxed mb-2">
+                                    <strong>할당된 나레이션:</strong><br>
+                                    ${script}
+                                </div>
+                                ${relatedAnalysis ? `
+                                <div class="text-xs text-gray-400 border-t border-gray-600 pt-2">
+                                    <strong>이미지 분석:</strong> ${relatedAnalysis}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            html += '</div>';
+            narrationContainer.innerHTML = html;
+        }
+        
+        // 기존 함수 유지 (호환성용)
+        function displayImageNarrations(segments) {
+            // 기본 데이터 구조로 2단계 표시 함수 호출
+            displayTwoStageNarration({ segments: segments });
+        }
+
+        // AI 프로세스 시작
+        async function startAIProcess() {
+            processContainer.classList.remove('hidden');
+            startProcessBtn.disabled = true;
+            currentStep = 0;
+
             try {
-                // 파일 크기 체크 (10MB 제한)
-                if (file.size > 10 * 1024 * 1024) {
-                    throw new Error('파일 크기가 10MB를 초과합니다');
-                }
+                // 1단계: AI 파일명 분석 및 자동 정렬
+                await step1_analyzeAndSort();
                 
-                // 파일 형식 체크
-                if (!file.type.startsWith('image/')) {
-                    throw new Error('이미지 파일만 업로드 가능합니다');
-                }
+                // 2단계: 정렬된 이미지 순차 정밀 분석
+                await step2_analyzeImages();
                 
+                // 3단계: 전체 맥락 기반 AI 재구성
+                await step3_reconstructStory();
+
+                // 완료
+                generateVideoBtn.classList.remove('hidden');
+                generateVideoBtn.disabled = false;
+                
+                showStatus('✅ AI 분석이 완료되었습니다! 이제 비디오를 생성할 수 있습니다.');
+
+            } catch (error) {
+                console.error('프로세스 오류:', error);
+                showStatus('❌ 처리 중 오류가 발생했습니다: ' + error.message);
+                startProcessBtn.disabled = false;
+            }
+        }
+
+        // 1단계: AI 파일명 분석 및 자동 정렬
+        async function step1_analyzeAndSort() {
+            currentStep = 1;
+            updateProgress(0);
+            updateProcessStep(1, 'active');
+            showStatus('🔍 파일명을 분석하여 최적 순서를 결정하는 중...');
+
+            const formData = new FormData();
+            const filenames = uploadedImages && uploadedImages.length > 0 ? uploadedImages.map(img => img.name) : [];
+            formData.append('filenames', JSON.stringify(filenames));
+            formData.append('industry', industrySelect.value);
+
+            const response = await fetch('/api/sort-filenames', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
+            // 정렬된 순서 적용
+            const sortedOrder = result.data ? result.data.sortedOrder : result.order;
+            sortedImages = sortedOrder ? sortedOrder.map(index => uploadedImages[index]) : uploadedImages;
+
+            // 정렬된 이미지 표시
+            const sortedContainer = document.getElementById('sortedImages');
+            sortedContainer.innerHTML = '';
+            
+            if (sortedImages && sortedImages.length > 0) {
+                sortedImages.forEach((img, index) => {
+                    const thumbDiv = document.createElement('div');
+                    thumbDiv.className = 'image-thumb sorted';
+                thumbDiv.innerHTML = `
+                    <img src="${img.dataUrl}" alt="${img.name}">
+                    <div class="image-order">${index + 1}</div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-green-900/80 text-white text-xs p-1 text-center" title="${img.name}">
+                        ${img.name.length > 20 ? img.name.substring(0, 20) + '...' : img.name}
+                    </div>
+                    `;
+                    sortedContainer.appendChild(thumbDiv);
+                });
+            }
+
+            sortedContainer.classList.remove('hidden');
+            
+            updateProcessStep(1, 'completed');
+            updateProgress(1);
+        }
+
+        // 2단계: 정렬된 이미지 순차 정밀 분석
+        async function step2_analyzeImages() {
+            currentStep = 2;
+            updateProcessStep(2, 'active');
+            showStatus('🔍 이미지를 순차적으로 정밀 분석하는 중...');
+
+            analysisResults = [];
+            const analysisContainer = document.getElementById('analysisResults');
+            analysisContainer.innerHTML = '';
+
+            for (let i = 0; i < sortedImages.length; i++) {
+                const img = sortedImages[i];
+                showStatus(`🔍 이미지 ${i + 1}/${sortedImages.length} 분석 중...`);
+
                 const formData = new FormData();
-                formData.append('image', file);
-                
-                console.log(`📤 API 호출: 이미지 ${index + 1} 분석 요청`);
-                
+                const blob = dataURLtoBlob(img.dataUrl);
+                formData.append('image', blob, img.name);
+                formData.append('industry', industrySelect.value);
+
                 const response = await fetch('/api/analyze-image', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
-                console.log(`📥 API 응답: 이미지 ${index + 1}`, result);
                 
-                if (result.success) {
-                    // 한줄평 저장 및 표시
-                    state.imageAnalysis[index] = result.analysis;
-                    const captionEl = document.getElementById(`caption-${index}`);
-                    if (captionEl) {
-                        captionEl.innerHTML = `✨ ${result.analysis}`;
-                        captionEl.classList.remove('loading-caption');
-                        captionEl.style.color = '#4CAF50';
-                        console.log(`✅ 이미지 ${index + 1} 분석 완료: "${result.analysis}"`);
-                    }
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                // API 응답 구조에 맞춰 데이터 정규화
+                const normalizedResult = {
+                    filename: img.name,
+                    order: i + 1,
+                    success: result.success || true,
+                    analysis: result.analysis || result.mainSubject || '분석 결과 없음',
+                    mainSubject: result.analysis || result.mainSubject || '주제 분석 부족',
+                    keyFeatures: result.keyFeatures || '특징 분석 부족',
+                    marketingPoint: result.marketingPoint || '마케팅 포인트 분석 부족'
+                };
+                
+                analysisResults.push(normalizedResult);
+
+                // 분석 결과 표시
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'bg-gray-700/50 rounded-lg p-3 border-l-4 border-blue-500';
+                resultDiv.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <img src="${img.dataUrl}" alt="" class="w-16 h-16 object-cover rounded">
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <div class="text-sm font-medium text-blue-400 mb-1" title="${img.name}">
+                                ${i + 1}. ${img.name.length > 25 ? img.name.substring(0, 25) + '...' : img.name}
+                            </div>
+                            <div class="text-xs text-gray-300 space-y-1">
+                                <div><span class="text-yellow-400">🔍</span> ${normalizedResult.analysis}</div>
+                                <div><span class="text-green-400">✨</span> 분석 완료</div>
+                                <div><span class="text-purple-400">📊</span> ${normalizedResult.filename}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                analysisContainer.appendChild(resultDiv);
+            }
+
+            analysisContainer.classList.remove('hidden');
+            updateProcessStep(2, 'completed');
+            updateProgress(2);
+        }
+
+        // 3단계: 전체 맥락 기반 AI 재구성
+        async function step3_reconstructStory() {
+            currentStep = 3;
+            updateProcessStep(3, 'active');
+            showStatus('🎨 전체 맥락을 파악하여 완성된 스토리로 재구성하는 중...');
+            
+            console.log('3단계 시작 - analysisResults 배열:', analysisResults);
+            console.log('3단계 시작 - analysisResults 길이:', analysisResults ? analysisResults.length : 'undefined');
+
+            // analysisResults 배열 유효성 검사
+            if (!analysisResults || !Array.isArray(analysisResults) || analysisResults.length === 0) {
+                throw new Error('2단계 이미지 분석 결과가 비어있습니다. 2단계를 먼저 완료해주세요.');
+            }
+            
+            // 서버가 기대하는 형식에 맞춰 데이터 준비
+            const serverAnalysisResults = analysisResults.map(result => ({
+                filename: result.filename,
+                originalIndex: result.order - 1,
+                analysis: result.analysis,
+                success: result.success
+            }));
+            
+            console.log('서버로 보내는 데이터:', serverAnalysisResults);
+            
+            const requestData = {
+                analysisResults: serverAnalysisResults,
+                productName: productName.value,
+                industry: industrySelect.value
+            };
+
+            const response = await fetch('/api/generate-narration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+            
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            
+            console.log('서버에서 받은 나레이션 데이터:', result);
+            finalStoryData = result;
+
+            // 최종 스토리 표시
+            const storyContainer = document.getElementById('finalStory');
+            const storyData = result.data || result;
+            // 서버 응답 구조에 따른 데이터 추출
+            const title = storyData.title || productName.value || '제목 없음';
+            const marketing = storyData.marketingPoints || storyData.summary || storyData.keywords || 
+                            (Array.isArray(storyData.keywords) ? storyData.keywords.join(', ') : '') || 
+                            '마케팅 포인트 생성 완료';
+            
+            document.getElementById('storyTitle').textContent = title;
+            document.getElementById('storyMarketing').textContent = marketing;
+            
+            // 2단계 나레이션 처리: 전체 스토리 + 이미지별 할당
+            displayTwoStageNarration(storyData);
+
+            storyContainer.classList.remove('hidden');
+            
+            updateProcessStep(3, 'completed');
+            updateProgress(3);
+            hideStatus();
+        }
+
+        // 향상된 비디오 생성
+        async function generateVideo() {
+            generateVideoBtn.disabled = true;
+            showStatus('🎬 AI 기반 쇼츠 비디오를 생성하는 중입니다... (2-3분 소요)');
+
+            try {
+                // 3단계 AI 프로세스가 완료되었는지 확인
+                if (!finalStoryData || !finalStoryData.segments || !analysisResults) {
+                    throw new Error('먼저 3단계 AI 프로세스를 완료해주세요.');
+                }
+
+                const formData = new FormData();
+                
+                // 정렬된 이미지들 추가
+                if (sortedImages && sortedImages.length > 0) {
+                    sortedImages.forEach((img, index) => {
+                        const blob = dataURLtoBlob(img.dataUrl);
+                        formData.append('images', blob, `sorted_${index}_${img.name}`);
+                    });
                 } else {
-                    throw new Error(result.error || '분석 실패');
+                    throw new Error('이미지 데이터가 없습니다. 다시 업로드해주세요.');
                 }
+                
+                // 메타데이터
+                formData.append('productName', productName.value);
+                formData.append('industry', industrySelect.value);
+                formData.append('style', 'dynamic');
+                formData.append('duration', '30'); // 30초 비디오
+                
+                // AI 분석 결과
+                formData.append('analysisResults', JSON.stringify(analysisResults));
+                formData.append('finalStory', JSON.stringify(finalStoryData));
+                
+                console.log('📤 비디오 생성 요청 데이터:', {
+                    productName: productName.value,
+                    industry: industrySelect.value,
+                    imageCount: sortedImages.length,
+                    hasAnalysisResults: !!analysisResults,
+                    hasFinalStory: !!finalStoryData,
+                    segmentCount: finalStoryData.segments ? finalStoryData.segments.length : 0
+                });
+
+                const response = await fetch('/api/generate-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok || result.error) {
+                    throw new Error(result.error || `서버 오류 (${response.status})`);
+                }
+
+                console.log('✅ 비디오 생성 성공:', result);
+
+                // 성공 메시지 및 비디오 정보 표시
+                showStatus(`✅ AI 쇼츠 비디오 생성 완료!`);
+                
+                // 비디오 정보 컨테이너 생성
+                const videoInfoContainer = document.createElement('div');
+                videoInfoContainer.className = 'mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
+                videoInfoContainer.innerHTML = `
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">🎬 생성된 비디오 정보</h3>
+                    <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <div><span class="font-semibold">파일명:</span> ${result.filename}</div>
+                        <div><span class="font-semibold">영상 길이:</span> ${result.duration}초</div>
+                        <div><span class="font-semibold">세그먼트 수:</span> ${result.metadata.segmentCount}개</div>
+                        <div><span class="font-semibold">이미지 수:</span> ${result.metadata.totalImages}개</div>
+                        <div><span class="font-semibold">처리 시간:</span> ${Math.round(result.metadata.processingTime/1000)}초</div>
+                        ${result.metadata.storyTitle ? `<div><span class="font-semibold">스토리 제목:</span> ${result.metadata.storyTitle}</div>` : ''}
+                    </div>
+                `;
+                
+                // 다운로드 버튼 생성
+                const downloadBtn = document.createElement('a');
+                downloadBtn.href = `/output/${result.filename}`;
+                downloadBtn.download = result.filename;
+                downloadBtn.className = 'w-full bg-green-600 hover:bg-green-700 px-6 py-4 rounded-lg font-semibold text-lg touch-feedback transition-colors text-center block';
+                downloadBtn.textContent = '📥 AI 쇼츠 비디오 다운로드';
+                
+                videoInfoContainer.appendChild(downloadBtn);
+                
+                // 기존 다운로드 버튼이 있다면 제거
+                const existingInfo = document.querySelector('.video-info-container');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                videoInfoContainer.classList.add('video-info-container');
+                generateVideoBtn.parentNode.insertBefore(videoInfoContainer, generateVideoBtn.nextSibling);
+                
+                // 비디오 생성 버튼 텍스트 변경
+                generateVideoBtn.textContent = '🎬 새 비디오 생성';
+                generateVideoBtn.disabled = false;
+
             } catch (error) {
-                console.error(`❌ 이미지 ${index + 1} 분석 실패:`, error);
-                const captionEl = document.getElementById(`caption-${index}`);
-                if (captionEl) {
-                    captionEl.innerHTML = `❌ ${error.message || '분석 실패'}`;
-                    captionEl.classList.remove('loading-caption');
-                    captionEl.style.color = '#f44336';
-                }
+                console.error('❌ 비디오 생성 오류:', error);
+                showStatus('❌ 비디오 생성 중 오류가 발생했습니다: ' + error.message);
+                generateVideoBtn.disabled = false;
             }
         }
 
-        window.removeImage = (index) => {
-            state.images.splice(index, 1);
-            delete state.imageAnalysis[index]; // 한줄평도 삭제
-            updateImagePreview();
-            updateGenerateButton();
-        };
-
-        // Product name handling
-        elements.productName.addEventListener('input', (e) => {
-            state.productName = e.target.value;
-            updateGenerateButton();
-        });
-
-        // Style selection
-        elements.styleSelect.addEventListener('change', (e) => {
-            state.style = e.target.value;
-        });
-
-        // Industry selection
-        elements.industryType.addEventListener('change', (e) => {
-            state.industry = e.target.value;
-        });
-
-        // Update generate button state
-        function updateGenerateButton() {
-            elements.generateBtn.disabled = state.images.length < 3 || !state.productName || state.isGenerating;
-        }
-
-        // Generate video
-        elements.generateBtn.addEventListener('click', async () => {
-            if (state.isGenerating) return;
-            
-            state.isGenerating = true;
-            updateGenerateButton();
-            
-            // Show progress
-            elements.statusPanel.classList.add('hidden');
-            elements.progressSteps.classList.remove('hidden');
-            
-            // Simulate processing steps
-            const steps = ['1', '2', '3'];
-            for (let i = 0; i < steps.length; i++) {
-                const step = document.querySelector(`[data-step="${steps[i]}"]`);
-                step.classList.add('active');
-                
-                // Simulate processing time
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                step.classList.remove('active');
-                step.classList.add('completed');
-                
-                // Show analysis after step 1
-                if (i === 0) {
-                    showAnalysis();
-                }
+        // 데이터 URL을 Blob으로 변환
+        function dataURLtoBlob(dataURL) {
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--) {
+                u8arr[n] = bstr.charCodeAt(n);
             }
-            
-            // Show video preview
-            showVideoPreview();
-            
-            state.isGenerating = false;
-            updateGenerateButton();
+            return new Blob([u8arr], {type: mime});
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtonState();
         });
-
-        function showAnalysis() {
-            elements.analysisResults.classList.remove('hidden');
-            elements.analysisContent.innerHTML = `
-                <div><strong>타겟층:</strong> 30-40대 품질 중시 고객</div>
-                <div><strong>핵심 특징:</strong> 프리미엄 디자인, 실용성, 가성비</div>
-                <div><strong>추천 메시지:</strong> "당신의 일상을 특별하게"</div>
-                <div><strong>음악 스타일:</strong> Upbeat & Modern</div>
-            `;
-        }
-
-        function showVideoPreview() {
-            elements.videoPreview.classList.remove('hidden');
-            // In real implementation, this would show the actual generated video
-            elements.previewVideo.src = '#';
-        }
-
-        // Initialize
-        updateGenerateButton();
     </script>
 </body>
 </html>
