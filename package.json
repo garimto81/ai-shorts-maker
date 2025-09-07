@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "process": "node scripts/process-video.js",
     "test-api": "node test-api.js",
-    "server": "node server.js"
+    "server": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
