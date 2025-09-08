@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 생성 테스트 - FFmpeg 집중</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading { display: none; }
+        .loading.show { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-3xl">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-green-600">
+                🎬 영상 생성 테스트 (FFmpeg 집중)
+            </h1>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 기본 영상 생성 -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-lg font-semibold mb-4 text-blue-600">📹 기본 영상 (연결만)</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            이미지 선택 (최소 2장):
+                        </label>
+                        <input 
+                            type="file" 
+                            id="basicImages" 
+                            accept="image/*" 
+                            multiple 
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        >
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            각 이미지 지속시간 (초):
+                        </label>
+                        <input 
+                            type="number" 
+                            id="basicDuration" 
+                            value="3" 
+                            min="1" 
+                            max="10" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                    </div>
+
+                    <button 
+                        onclick="testBasicVideo()" 
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                    >
+                        🎬 기본 영상 생성
+                    </button>
+
+                    <div id="basicResult" class="mt-4 hidden">
+                        <pre id="basicResultText" class="text-sm bg-gray-100 p-3 rounded border overflow-x-auto"></pre>
+                        <div id="basicDownload" class="hidden mt-2">
+                            <a id="basicDownloadLink" href="#" download class="inline-block bg-green-600 text-white py-1 px-3 rounded text-sm hover:bg-green-700">
+                                📥 다운로드
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 전환 효과 테스트 -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-lg font-semibold mb-4 text-purple-600">✨ 전환 효과 테스트</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            이미지 선택 (최소 2장):
+                        </label>
+                        <input 
+                            type="file" 
+                            id="transitionImages" 
+                            accept="image/*" 
+                            multiple 
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                        >
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            전환 효과:
+                        </label>
+                        <select 
+                            id="transitionType" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="crossfade">크로스페이드</option>
+                            <option value="slideleft">왼쪽 슬라이드</option>
+                            <option value="slideright">오른쪽 슬라이드</option>
+                            <option value="slideup">위쪽 슬라이드</option>
+                            <option value="slidedown">아래쪽 슬라이드</option>
+                            <option value="dissolve">디졸브</option>
+                            <option value="circleopen">원형 확장</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">이미지 지속시간:</label>
+                            <input 
+                                type="number" 
+                                id="transitionDuration" 
+                                value="2" 
+                                min="1" 
+                                max="5" 
+                                class="block w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">전환 시간:</label>
+                            <input 
+                                type="number" 
+                                id="transitionTime" 
+                                value="1" 
+                                min="0.5" 
+                                max="3" 
+                                step="0.5" 
+                                class="block w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <button 
+                        onclick="testTransitionVideo()" 
+                        class="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition duration-200"
+                    >
+                        ✨ 전환 효과 테스트
+                    </button>
+
+                    <div id="transitionResult" class="mt-4 hidden">
+                        <pre id="transitionResultText" class="text-sm bg-gray-100 p-3 rounded border overflow-x-auto"></pre>
+                        <div id="transitionDownload" class="hidden mt-2">
+                            <a id="transitionDownloadLink" href="#" download class="inline-block bg-green-600 text-white py-1 px-3 rounded text-sm hover:bg-green-700">
+                                📥 다운로드
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 로딩 상태 -->
+            <div id="loading" class="loading text-center py-4 mt-6">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                <p class="text-gray-600 mt-2">영상 생성 중...</p>
+                <div id="progressText" class="text-sm text-gray-500 mt-1"></div>
+            </div>
+
+            <!-- FFmpeg 명령어 표시 -->
+            <div id="ffmpegCommand" class="mt-6 hidden">
+                <h3 class="font-semibold text-gray-800 mb-2">🛠️ FFmpeg 명령어:</h3>
+                <pre class="text-xs bg-black text-green-400 p-3 rounded overflow-x-auto" id="commandText"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTest = null;
+
+        async function testBasicVideo() {
+            const fileInput = document.getElementById('basicImages');
+            const duration = document.getElementById('basicDuration').value;
+            
+            if (!fileInput.files || fileInput.files.length < 2) {
+                alert('최소 2장의 이미지를 선택해주세요.');
+                return;
+            }
+
+            await runTest('/api/test-simple-video', {
+                files: fileInput.files,
+                duration: duration
+            }, 'basic');
+        }
+
+        async function testTransitionVideo() {
+            const fileInput = document.getElementById('transitionImages');
+            const transitionType = document.getElementById('transitionType').value;
+            const duration = document.getElementById('transitionDuration').value;
+            const transitionTime = document.getElementById('transitionTime').value;
+            
+            if (!fileInput.files || fileInput.files.length < 2) {
+                alert('최소 2장의 이미지를 선택해주세요.');
+                return;
+            }
+
+            await runTest('/api/test-transitions', {
+                files: fileInput.files,
+                transitionType: transitionType,
+                duration: duration,
+                transitionDuration: transitionTime
+            }, 'transition');
+        }
+
+        async function runTest(endpoint, params, testType) {
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById(`${testType}Result`);
+            const resultText = document.getElementById(`${testType}ResultText`);
+            const downloadSection = document.getElementById(`${testType}Download`);
+            const downloadLink = document.getElementById(`${testType}DownloadLink`);
+            const ffmpegCommand = document.getElementById('ffmpegCommand');
+            const commandText = document.getElementById('commandText');
+
+            currentTest = testType;
+            loading.classList.add('show');
+            resultDiv.classList.add('hidden');
+            ffmpegCommand.classList.add('hidden');
+
+            const formData = new FormData();
+            
+            for (let i = 0; i < params.files.length; i++) {
+                formData.append('images', params.files[i]);
+            }
+            
+            Object.keys(params).forEach(key => {
+                if (key !== 'files') {
+                    formData.append(key, params[key]);
+                }
+            });
+
+            try {
+                console.log(`🎬 ${testType} 테스트 시작`);
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                loading.classList.remove('show');
+                resultDiv.classList.remove('hidden');
+
+                if (data.success) {
+                    resultText.textContent = JSON.stringify({
+                        status: '✅ 성공',
+                        filename: data.filename,
+                        duration: data.duration + '초',
+                        processingTime: data.processingTime ? Math.round(data.processingTime/1000) + '초' : '미측정',
+                        transitionType: data.transitionType || '없음'
+                    }, null, 2);
+
+                    if (data.downloadUrl || data.filename) {
+                        const url = data.downloadUrl || `/output/${data.filename}`;
+                        downloadLink.href = url;
+                        downloadSection.classList.remove('hidden');
+                    }
+                } else {
+                    resultText.textContent = JSON.stringify({
+                        status: '❌ 실패',
+                        error: data.error,
+                        details: data.details
+                    }, null, 2);
+                }
+
+            } catch (error) {
+                loading.classList.remove('show');
+                resultDiv.classList.remove('hidden');
+                
+                resultText.textContent = JSON.stringify({
+                    status: '❌ 네트워크 오류',
+                    error: error.message
+                }, null, 2);
+
+                console.error('API 호출 오류:', error);
+            }
+        }
+
+        // 파일 선택 시 정보 표시
+        document.getElementById('basicImages').addEventListener('change', function(e) {
+            console.log(`기본 테스트: ${e.target.files.length}개 이미지 선택`);
+        });
+
+        document.getElementById('transitionImages').addEventListener('change', function(e) {
+            console.log(`전환 효과 테스트: ${e.target.files.length}개 이미지 선택`);
+        });
+    </script>
+</body>
+</html>

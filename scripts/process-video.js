@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import https from 'https';
 import dotenv from 'dotenv';
+import fetch from 'node-fetch';
 
 // 환경 변수 로드
 dotenv.config();
@@ -365,7 +366,7 @@ class ShortsGenerator {
   }
 
   // 휠 복원 스토리텔링 나레이션 생성 (말하는 속도 고려한 타이밍)
-  async generateNarration(analysisResults, industry = 'auto') {
+  async generateNarration(analysisResults, industry = 'auto', productTitle = '') {
     try {
       console.log(`🎙️ ${industry} 업종 나레이션 생성 시작...`);
       
@@ -378,7 +379,7 @@ class ShortsGenerator {
       
       // 휠 복원 전용 스토리텔링 나레이션
       if (industry === 'wheel-restoration') {
-        return await this.generateWheelRestorationNarration(successfulResults, charactersPerSecond);
+        return await this.generateWheelRestorationNarration(successfulResults, charactersPerSecond, productTitle || '');
       }
       
       // 기존 업종들은 기본 나레이션으로 처리
@@ -392,9 +393,79 @@ class ShortsGenerator {
     }
   }
 
+  // 제목에서 자동차/차종 정보 추출
+  extractCarInfo(productTitle) {
+    const title = productTitle.toLowerCase();
+    
+    // 고급 브랜드 및 차종 정보
+    const luxuryBrands = {
+      '벤츠': { brand: '메르세데스-벤츠', category: '독일 럭셔리', price: '고가', market: 'S급' },
+      'bmw': { brand: 'BMW', category: '독일 프리미엄', price: '고가', market: '3/5/7시리즈' },
+      '아우디': { brand: '아우디', category: '독일 프리미엄', price: '고가', market: 'A/Q시리즈' },
+      '포르쉐': { brand: '포르쉐', category: '독일 스포츠카', price: '초고가', market: '911/카이엔' },
+      '람보르기니': { brand: '람보르기니', category: '이탈리아 슈퍼카', price: '초고가', market: '우라칸/아벤타도르' },
+      '페라리': { brand: '페라리', category: '이탈리아 슈퍼카', price: '초고가', market: '488/F8' },
+      '렉서스': { brand: '렉서스', category: '일본 럭셔리', price: '고가', market: 'ES/RX/LS' },
+      '제네시스': { brand: '제네시스', category: '국산 럭셔리', price: '중고가', market: 'G90/GV80' }
+    };
+    
+    // 휠 브랜드 정보
+    const wheelBrands = {
+      'oz': { brand: 'OZ Racing', origin: '이탈리아', reputation: '모터스포츠 전문' },
+      'bbs': { brand: 'BBS', origin: '독일', reputation: '포뮬러1 공급업체' },
+      'enkei': { brand: 'ENKEI', origin: '일본', reputation: 'RPF1 명작' },
+      'vossen': { brand: 'Vossen', origin: '미국', reputation: '프리미엄 포지드' },
+      '레이즈': { brand: 'RAYS', origin: '일본', reputation: 'TE37 레전드' },
+      'work': { brand: 'WORK', origin: '일본', reputation: '메이스터 시리즈' }
+    };
+    
+    const result = {
+      brand: '고급 수입차',
+      category: '프리미엄',
+      wheelBrand: '명품 휠',
+      specific: '',
+      marketValue: '고가',
+      targetAudience: '차 애호가'
+    };
+    
+    // 차종 브랜드 매칭
+    for (const [key, info] of Object.entries(luxuryBrands)) {
+      if (title.includes(key)) {
+        result.brand = info.brand;
+        result.category = info.category;
+        result.marketValue = info.price;
+        result.specific = info.market;
+        break;
+      }
+    }
+    
+    // 휠 브랜드 매칭  
+    for (const [key, info] of Object.entries(wheelBrands)) {
+      if (title.includes(key)) {
+        result.wheelBrand = info.brand;
+        result.wheelOrigin = info.origin;
+        result.wheelReputation = info.reputation;
+        break;
+      }
+    }
+    
+    // 크기 정보 추출
+    const sizeMatch = title.match(/(\d{2})\s*인치|(\d{2})\"|(\d{3}\/\d{2}R\d{2})/);
+    if (sizeMatch) {
+      result.size = sizeMatch[1] || sizeMatch[2] || sizeMatch[3];
+      result.sizeCategory = parseInt(result.size) >= 19 ? '대형' : '중형';
+    }
+    
+    return result;
+  }
+
   // 휠 복원 전용 스토리텔링 나레이션 생성 (1:1 이미지 매핑)
-  async generateWheelRestorationNarration(successfulResults, charactersPerSecond) {
+  async generateWheelRestorationNarration(successfulResults, charactersPerSecond, productTitle = '') {
     try {
+      // 제목에서 차종/브랜드 정보 추출
+      const carInfo = this.extractCarInfo(productTitle);
+      console.log('🚗 추출된 자동차 정보:', carInfo);
+      
       // 이미지 분석을 통한 스토리 단계 분류
       const storyPhases = this.classifyWheelRestorationPhases(successfulResults);
       
@@ -409,12 +480,32 @@ class ShortsGenerator {
         휠 복원 전문가가 제작하는 전문적인 쇼츠 영상 나레이션을 작성하세요.
         시청자가 즉시 연락하고 싶게 만드는 임팩트 있는 스토리텔링이 필요합니다.
         
+        **🚗 매우 중요: 제목 정보 "${productTitle}"는 나레이션에 반드시 언급되어야 합니다!**
+        
         **중요: 반드시 ${successfulResults.length}개의 이미지 각각에 대해 개별 스크립트를 생성해야 합니다.**
         
         **타이밍 기준**: 
         - 한국어 말하기 속도: 초당 ${charactersPerSecond}자
         - 각 세그먼트: 약 ${segmentDuration}초 (15-25자 분량)
         - 전체 duration: ${totalDuration}초
+        
+        **복원 대상 자동차 정보** (제목에서 추출):
+        - 차량 브랜드: ${carInfo.brand}
+        - 카테고리: ${carInfo.category}
+        - 휠 브랜드: ${carInfo.wheelBrand}
+        - 시장가치: ${carInfo.marketValue}
+        - 크기: ${carInfo.size || '미확인'}인치
+        - 타겟: ${carInfo.targetAudience}
+        
+        **🎯 필수 레퍼런스 스타일 (이 스타일로 반드시 작성해야 함!)**:
+        
+        BMW X5 예시: "오늘은 bmw 브랜드의 영원한 스테디 셀러 x5 차량이 입고되었습니다. 1억이 넘어가는 고가의 차량이 휠기스로 인해서 들어오는 모습이 상당히 가슴이 아팠습니다."
+        
+        벤츠 E클래스 예시: "오늘입고된 차량은 벤츠 e클래스 차량입니다. 명품삼각별의 품격을 자랑하는 벤츠가 지금까지 허름한 신발을 신고다닌것 같아 너무속상합니다."
+        
+        작업 과정 예시: "일단 유분제거를 철저히 해주고 세척과 샌딩후 전용 컷팅을 해서 작업을 했더니 다시금 신차급 퍼포먼스를 보여줍니다."
+        
+        완성 표현 예시: "완벽하게 새휠이 되었습니다. 고객님도 저희도 둘다 만족한 공정 이었습니다."
         
         **스토리 흐름 분석**: ${storyPhases.story}
         
@@ -438,12 +529,13 @@ class ShortsGenerator {
         4. **감정적 몰입** (결과 이미지들): 신차보다 완벽한 복원 결과에 대한 감탄
         5. **강력한 클로징** (마지막 이미지): 즉시 행동을 유도하는 메시지
         
-        **필수 전문 표현 (실제 업계 언어)**:
-        - "20년 장인의 손길로 되살려낸", "독일 최첨단 CNC 장비의 정밀함"
-        - "OEM 수준을 뛰어넘는 완성도", "유분제거부터 최종 클리어 코팅까지"
-        - "미세한 스크래치도 놓치지 않는 정밀함", "이것이 진짜 허브휠 복원입니다"
-        - "당신의 소중한 휠, 신차보다 완벽하게", "가슴 아팠던 휠 기스가 이렇게"
-        - "허브휠복원 주치의의 집도", "명품 브랜드 본연의 품격을 되찾다"
+        **필수 전문 표현 (레퍼런스 기반 실제 업계 언어)**:
+        - 차량 소개: "오늘은 [브랜드] [모델] 차량이 입고되었습니다", "영원한 스테디 셀러", "1억이 넘어가는 고가의 차량"
+        - 감정 표현: "가슴이 아팠습니다", "너무속상합니다", "허름한 신발을 신고다닌것 같아"
+        - 작업 과정: "유분제거를 철저히 해주고", "샌드블라스터 작업을하고", "전문 cnc 기계로 돌려깍기"
+        - 품질 언급: "신차급 퍼포먼스를 보여줍니다", "완벽하게 새휠이 되었습니다", "작업자로써 너무 만족하게"
+        - 전문성: "허브휠복원 주치의", "집도", "꼼꼼하게 크랙 굴절까지 체크", "숙련도가 퀄리티에 직접적인 영향"
+        - 고객 관점: "차주분이 휠복원 자체를 고민하시다", "새차같은 느낌을 원하신다", "고객님도 저희도 둘다 만족한"
         
         **절대 사용 금지 (AI 티 나는 표현)**:
         - 모든 감정적 형용사: "멋진", "좋은", "아름다운", "훌륭한"
@@ -1663,7 +1755,9 @@ class ShortsGenerator {
         
         // 출력 레이블이 있는 경우 매핑 추가
         if (command.outputLabel) {
-          const mapLabel = command.outputLabel.replace(/[\[\]]/g, '');
+          // 대괄호가 없으면 추가, 있으면 그대로 사용
+          const mapLabel = command.outputLabel.startsWith('[') ? 
+            command.outputLabel : `[${command.outputLabel}]`;
           outputOptions.unshift('-map', mapLabel);
           console.log('출력 매핑:', mapLabel);
         }
@@ -1866,6 +1960,231 @@ class ShortsGenerator {
       
     } catch (error) {
       console.error('Error generating shorts:', error);
+      throw error;
+    }
+  }
+
+  // 간단한 비디오 생성 (디버깅용)
+  async generateSimpleVideo(imagePaths, options = {}) {
+    const ffmpeg = (await import('fluent-ffmpeg')).default;
+    const { duration = 3, outputName = null } = options;
+    
+    const filename = outputName || `simple_video_${Date.now()}.mp4`;
+    const outputPath = path.join(this.outputDir, filename);
+    
+    console.log('🎬 간단한 비디오 생성 시작:', { imagePaths, duration, outputPath });
+    
+    return new Promise((resolve, reject) => {
+      const command = ffmpeg();
+      
+      // 이미지들을 순차적으로 입력 추가 (페이드 전환을 고려한 시간 계산)
+      const transitionDuration = 0.5; // 0.5초 페이드 전환
+      
+      imagePaths.forEach((imagePath, index) => {
+        console.log(`입력 이미지 ${index + 1}: ${imagePath}`);
+        
+        // 마지막 이미지가 아니면 전환시간을 고려해서 더 길게
+        const imageDuration = index === imagePaths.length - 1 ? 
+          duration : duration + transitionDuration;
+        
+        command.input(imagePath)
+          .inputOptions([
+            '-loop', '1',
+            '-t', imageDuration.toString(),
+            '-r', '30'
+          ]);
+      });
+      
+      // 페이드 전환 효과 적용
+      let filterComplex = '';
+      
+      if (imagePaths.length === 1) {
+        // 이미지가 1개인 경우 단순 스케일링
+        filterComplex = `[0:v]scale=1080:1920,setsar=1[out]`;
+      } else {
+        // 각 이미지 스케일링
+        const scaleFilters = imagePaths.map((_, index) => {
+          return `[${index}:v]scale=1080:1920,setsar=1[v${index}]`;
+        }).join(';');
+        
+        // 페이드 전환 체인 생성
+        let fadeChain = scaleFilters + ';';
+        let currentLabel = 'v0';
+        
+        for (let i = 1; i < imagePaths.length; i++) {
+          const nextLabel = `v${i}`;
+          const outputLabel = i === imagePaths.length - 1 ? 'out' : `fade${i}`;
+          const offset = (duration - transitionDuration) * i;
+          
+          fadeChain += `[${currentLabel}][${nextLabel}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[${outputLabel}]`;
+          
+          if (i < imagePaths.length - 1) {
+            fadeChain += ';';
+            currentLabel = `fade${i}`;
+          }
+        }
+        
+        filterComplex = fadeChain;
+      }
+      
+      command
+        .complexFilter(filterComplex)
+        .outputOptions([
+          '-map', '[out]',
+          '-c:v', 'libx264',
+          '-pix_fmt', 'yuv420p',
+          '-preset', 'fast',
+          '-crf', '23',
+          '-r', '30'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('FFmpeg 실행 명령어:', commandLine);
+        })
+        .on('progress', (progress) => {
+          if (progress.percent) {
+            console.log(`🎬 처리 중: ${Math.round(progress.percent)}%`);
+          }
+        })
+        .on('end', () => {
+          console.log('✅ 간단한 비디오 생성 완료:', outputPath);
+          resolve({ filename, outputPath });
+        })
+        .on('error', (err) => {
+          console.error('❌ 간단한 비디오 생성 실패:', err.message);
+          reject(err);
+        })
+        .run();
+    });
+  }
+
+  // ElevenLabs TTS를 사용한 음성 생성
+  async generateTTSAudio(text, voiceId = 'EXAVITQu4vr4xnSDxMaL', outputPath) {
+    if (!process.env.ELEVENLABS_API_KEY) {
+      console.warn('⚠️ ElevenLabs API 키가 없습니다. 음성 생성을 건너뜁니다.');
+      return null;
+    }
+
+    try {
+      console.log(`🎙️ TTS 음성 생성 시작: "${text.substring(0, 50)}..."`);
+      
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': process.env.ELEVENLABS_API_KEY
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_turbo_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5,
+            style: 0.5,
+            use_speaker_boost: true
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API 오류: ${response.status} - ${response.statusText}`);
+      }
+
+      const audioBuffer = await response.buffer();
+      await fsPromises.writeFile(outputPath, audioBuffer);
+      
+      console.log(`✅ TTS 음성 생성 완료: ${outputPath}`);
+      return outputPath;
+
+    } catch (error) {
+      console.error('❌ TTS 음성 생성 실패:', error);
+      return null;
+    }
+  }
+
+  // 비디오에 음성 추가
+  async addAudioToVideo(videoPath, audioPath, outputPath) {
+    const ffmpeg = (await import('fluent-ffmpeg')).default;
+    
+    return new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(videoPath)
+        .input(audioPath)
+        .outputOptions([
+          '-c:v', 'copy',
+          '-c:a', 'aac',
+          '-strict', 'experimental',
+          '-shortest'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🎵 비디오에 음성 추가 시작:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 음성 추가 완료:', outputPath);
+          resolve(outputPath);
+        })
+        .on('error', (err) => {
+          console.error('❌ 음성 추가 실패:', err);
+          reject(err);
+        })
+        .run();
+    });
+  }
+
+  // 완전한 비디오 생성 (이미지 + 음성)
+  async generateVideoWithNarration(imagePaths, narrationText, options = {}) {
+    const { duration = 3, outputName = null } = options;
+    
+    try {
+      const timestamp = Date.now();
+      const baseFilename = outputName || `video_with_narration_${timestamp}`;
+      
+      // 1. 비디오 생성 (음성 없음)
+      const videoOnlyFilename = `${baseFilename}_video_only.mp4`;
+      const videoOnlyResult = await this.generateSimpleVideo(imagePaths, { 
+        duration, 
+        outputName: videoOnlyFilename 
+      });
+      
+      // generateSimpleVideo는 output 디렉토리에 저장하므로 temp로 이동
+      const videoOnlyPath = path.join(this.tempDir, videoOnlyFilename);
+      const generatedVideoPath = path.join(this.outputDir, videoOnlyResult.filename);
+      await fsPromises.rename(generatedVideoPath, videoOnlyPath);
+      
+      // 2. TTS 음성 생성
+      const audioPath = path.join(this.tempDir, `${baseFilename}_audio.mp3`);
+      const ttsResult = await this.generateTTSAudio(narrationText, 'EXAVITQu4vr4xnSDxMaL', audioPath);
+      
+      if (!ttsResult) {
+        console.warn('⚠️ 음성 생성 실패, 음성 없는 비디오만 반환');
+        // 비디오 파일을 output 폴더로 이동
+        const finalPath = path.join(this.outputDir, `${baseFilename}.mp4`);
+        await fsPromises.rename(videoOnlyPath, finalPath);
+        return { filename: path.basename(finalPath), outputPath: finalPath, hasAudio: false };
+      }
+      
+      // 3. 비디오 + 음성 결합
+      const finalPath = path.join(this.outputDir, `${baseFilename}.mp4`);
+      await this.addAudioToVideo(videoOnlyPath, audioPath, finalPath);
+      
+      // 4. 임시 파일 정리
+      try {
+        await fsPromises.unlink(videoOnlyPath);
+        await fsPromises.unlink(audioPath);
+      } catch (cleanupError) {
+        console.warn('⚠️ 임시 파일 정리 실패:', cleanupError.message);
+      }
+      
+      return { 
+        filename: path.basename(finalPath), 
+        outputPath: finalPath, 
+        hasAudio: true 
+      };
+      
+    } catch (error) {
+      console.error('❌ 나레이션 비디오 생성 실패:', error);
       throw error;
     }
   }

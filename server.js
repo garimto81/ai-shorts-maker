@@ -25,7 +25,12 @@ app.use(express.static('.'));
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { 
+    fileSize: 20 * 1024 * 1024,    // 20MB per file
+    fieldSize: 25 * 1024 * 1024,   // 25MB for field data (Base64)
+    files: 10,                     // Maximum 10 files
+    fields: 20                     // Maximum 20 fields
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (allowedTypes.includes(file.mimetype)) {
@@ -662,6 +667,116 @@ app.post('/api/compare-transitions', upload.array('images', 10), async (req, res
       error: '전환 효과 비교 중 오류가 발생했습니다.',
       details: error.message 
     });
+  }
+});
+
+// 간단한 비디오 테스트 API
+app.post('/api/test-simple-video', upload.array('images', 10), async (req, res) => {
+  try {
+    const { duration = 3 } = req.body;
+    
+    if (!req.files || req.files.length < 2) {
+      return res.status(400).json({ 
+        error: '최소 2장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    console.log('🧪 간단한 비디오 테스트 시작');
+    
+    // 임시 이미지 저장
+    await generator.init();
+    const imagePaths = await generator.saveUploadedImages(req.files);
+    
+    // 간단한 비디오 생성
+    const result = await generator.generateSimpleVideo(imagePaths, {
+      duration: parseFloat(duration),
+      outputName: `test_simple_${Date.now()}.mp4`
+    });
+    
+    // 임시 파일 정리
+    await generator.cleanupTempFiles(imagePaths);
+    
+    res.json({
+      success: true,
+      filename: result.filename,
+      message: '간단한 비디오 생성 완료',
+      downloadUrl: `/output/${result.filename}`
+    });
+    
+  } catch (error) {
+    console.error('❌ 간단한 비디오 테스트 오류:', error);
+    res.status(500).json({ 
+      error: '간단한 비디오 테스트 중 오류가 발생했습니다.',
+      details: error.message 
+    });
+  }
+});
+
+// 나레이션 포함 비디오 테스트 API
+app.post('/api/test-video-with-narration', upload.array('images', 10), async (req, res) => {
+  try {
+    const { duration = 3, narrationText = "안녕하세요! 이것은 테스트 나레이션입니다. AI가 생성한 음성으로 비디오를 만들어 보겠습니다." } = req.body;
+    
+    if (!req.files || req.files.length < 2) {
+      return res.status(400).json({ 
+        error: '최소 2장의 이미지가 필요합니다.' 
+      });
+    }
+    
+    const { productTitle = "휠 복원 테스트" } = req.body; // 제품 제목 추가
+    
+    console.log('🎙️ 나레이션 포함 비디오 테스트 시작');
+    console.log('제품 제목:', productTitle);
+    console.log('나레이션 텍스트:', narrationText);
+    console.log('이미지 개수:', req.files.length);
+    
+    let imagePaths = [];
+    
+    try {
+      // 임시 이미지 저장
+      await generator.init();
+      imagePaths = await generator.saveUploadedImages(req.files);
+      console.log('✅ 이미지 저장 완료:', imagePaths.length);
+      
+      // 나레이션 포함 비디오 생성
+      const result = await generator.generateVideoWithNarration(imagePaths, narrationText, {
+        duration: parseFloat(duration),
+        outputName: `test_narration_${Date.now()}`
+      });
+      
+      console.log('✅ 나레이션 비디오 생성 완료:', result);
+      
+      res.json({
+        success: true,
+        filename: result.filename,
+        hasAudio: result.hasAudio,
+        message: `나레이션 ${result.hasAudio ? '포함' : '없는'} 비디오 생성 완료`,
+        downloadUrl: `/output/${result.filename}`,
+        narrationText: narrationText
+      });
+      
+    } finally {
+      // 임시 파일 정리 (오류 발생 시에도 실행)
+      if (imagePaths.length > 0) {
+        try {
+          await generator.cleanupTempFiles(imagePaths);
+          console.log('✅ 임시 파일 정리 완료');
+        } catch (cleanupError) {
+          console.warn('⚠️ 임시 파일 정리 실패:', cleanupError.message);
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ 나레이션 비디오 테스트 오류:', error);
+    
+    // JSON 응답을 확실히 반환
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: '나레이션 비디오 테스트 중 오류가 발생했습니다.',
+        details: error.message 
+      });
+    }
   }
 });
 

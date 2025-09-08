@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제목 기반 AI 나레이션 테스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading { display: none; }
+        .loading.show { display: block; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-center mb-6 text-purple-600">
+                🎙️ 제목 기반 AI 나레이션 테스트
+            </h1>
+            <p class="text-center text-gray-600 mb-8">
+                휠 복원 전문 AI가 제목을 분석해서 맞춤형 나레이션을 생성합니다
+            </p>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 입력 섹션 -->
+                <div class="space-y-6">
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h2 class="text-xl font-semibold mb-4 text-purple-800">📝 제품 정보 입력</h2>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                제품 제목 (차종/휠 정보):
+                            </label>
+                            <input 
+                                type="text" 
+                                id="productTitle" 
+                                value="벤츠 S클래스 20인치 OZ Racing 휠 복원"
+                                placeholder="예: BMW 5시리즈 19인치 BBS 휠 복원"
+                                class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            >
+                            <p class="text-xs text-gray-500 mt-1">
+                                AI가 브랜드, 차종, 휠 정보를 분석합니다
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                휠 이미지 선택 (최소 2장):
+                            </label>
+                            <input 
+                                type="file" 
+                                id="wheelImages" 
+                                accept="image/*" 
+                                multiple 
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                            >
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    이미지 지속시간:
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="imageDuration" 
+                                    value="3" 
+                                    min="2" 
+                                    max="6" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    나레이션 속도:
+                                </label>
+                                <select id="narrationSpeed" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="3">느림 (3자/초)</option>
+                                    <option value="4" selected>보통 (4자/초)</option>
+                                    <option value="5">빠름 (5자/초)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button 
+                            onclick="generateNarrationVideo()" 
+                            class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 transition duration-200 font-semibold text-lg"
+                        >
+                            🎬 AI 나레이션 비디오 생성
+                        </button>
+                    </div>
+
+                    <!-- 제목 분석 결과 -->
+                    <div id="titleAnalysis" class="hidden bg-green-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-green-800 mb-3">🔍 제목 분석 결과</h3>
+                        <div id="analysisContent" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- 결과 섹션 -->
+                <div class="space-y-6">
+                    <!-- 로딩 상태 -->
+                    <div id="loading" class="loading text-center py-8">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                        <p class="text-gray-600 text-lg">AI 나레이션 생성 중...</p>
+                        <div id="progressText" class="text-sm text-gray-500 mt-2"></div>
+                        <div class="mt-4 space-y-2">
+                            <div class="text-xs text-gray-400">🔍 이미지 분석 중...</div>
+                            <div class="text-xs text-gray-400">🎙️ 맞춤 나레이션 생성 중...</div>
+                            <div class="text-xs text-gray-400">🎵 AI 음성 합성 중...</div>
+                            <div class="text-xs text-gray-400">✨ 페이드 전환 효과 적용 중...</div>
+                            <div class="text-xs text-gray-400">🎬 비디오 편집 중...</div>
+                        </div>
+                    </div>
+
+                    <!-- 결과 표시 -->
+                    <div id="result" class="hidden">
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 생성 결과</h3>
+                            <pre id="resultText" class="text-sm bg-white p-4 rounded-lg border overflow-x-auto mb-4"></pre>
+                            
+                            <div id="downloadSection" class="hidden">
+                                <a id="downloadLink" href="#" download class="inline-block bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-6 rounded-lg hover:from-green-600 hover:to-blue-600 transition duration-200 font-semibold">
+                                    📥 나레이션 비디오 다운로드
+                                </a>
+                                <div class="mt-3 text-sm text-gray-600">
+                                    <span class="inline-block mr-4">🎙️ <span id="audioStatus">음성 포함</span></span>
+                                    <span class="inline-block">⏱️ 처리시간: <span id="processingTime">-</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 샘플 제목들 -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">💡 샘플 제목들</h3>
+                        <div class="space-y-2 text-sm">
+                            <button onclick="setTitle('포르쉐 911 터보 20인치 BBS 휠 복원')" class="block w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50">
+                                포르쉐 911 터보 20인치 BBS 휠 복원
+                            </button>
+                            <button onclick="setTitle('BMW M3 19인치 Enkei RPF1 휠 복원')" class="block w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50">
+                                BMW M3 19인치 Enkei RPF1 휠 복원
+                            </button>
+                            <button onclick="setTitle('아우디 A8 21인치 OZ Racing 휠 복원')" class="block w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50">
+                                아우디 A8 21인치 OZ Racing 휠 복원
+                            </button>
+                            <button onclick="setTitle('람보르기니 우라칸 Vossen 포지드 휠 복원')" class="block w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50">
+                                람보르기니 우라칸 Vossen 포지드 휠 복원
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setTitle(title) {
+            document.getElementById('productTitle').value = title;
+            analyzeTitle(title);
+        }
+
+        function analyzeTitle(title = null) {
+            const titleText = title || document.getElementById('productTitle').value;
+            if (!titleText) return;
+
+            // 클라이언트 사이드 제목 분석 (미리보기)
+            const analysis = {
+                brand: '미분석',
+                category: '미분석', 
+                wheelBrand: '미분석',
+                size: '미확인'
+            };
+
+            // 간단한 브랜드 매칭
+            if (titleText.includes('벤츠')) analysis.brand = '메르세데스-벤츠';
+            else if (titleText.includes('BMW') || titleText.includes('bmw')) analysis.brand = 'BMW';
+            else if (titleText.includes('포르쉐')) analysis.brand = '포르쉐';
+            else if (titleText.includes('아우디')) analysis.brand = '아우디';
+            else if (titleText.includes('람보르기니')) analysis.brand = '람보르기니';
+
+            if (titleText.includes('BBS') || titleText.includes('bbs')) analysis.wheelBrand = 'BBS';
+            else if (titleText.includes('OZ') || titleText.includes('oz')) analysis.wheelBrand = 'OZ Racing';
+            else if (titleText.includes('Enkei') || titleText.includes('enkei')) analysis.wheelBrand = 'ENKEI';
+            else if (titleText.includes('Vossen') || titleText.includes('vossen')) analysis.wheelBrand = 'Vossen';
+
+            const sizeMatch = titleText.match(/(\d{2})\s*인치/);
+            if (sizeMatch) analysis.size = sizeMatch[1] + '인치';
+
+            // 분석 결과 표시
+            const analysisDiv = document.getElementById('titleAnalysis');
+            const contentDiv = document.getElementById('analysisContent');
+            
+            contentDiv.innerHTML = `
+                <div><span class="font-semibold">🚗 차량 브랜드:</span> ${analysis.brand}</div>
+                <div><span class="font-semibold">⭕ 휠 브랜드:</span> ${analysis.wheelBrand}</div>
+                <div><span class="font-semibold">📏 휠 크기:</span> ${analysis.size}</div>
+                <div class="text-green-600 font-medium mt-2">→ AI가 이 정보를 바탕으로 전문적인 나레이션을 생성합니다</div>
+            `;
+            
+            analysisDiv.classList.remove('hidden');
+        }
+
+        async function generateNarrationVideo() {
+            const fileInput = document.getElementById('wheelImages');
+            const productTitle = document.getElementById('productTitle').value;
+            const duration = document.getElementById('imageDuration').value;
+            const speed = document.getElementById('narrationSpeed').value;
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const resultText = document.getElementById('resultText');
+            const downloadSection = document.getElementById('downloadSection');
+            const downloadLink = document.getElementById('downloadLink');
+            const audioStatus = document.getElementById('audioStatus');
+
+            if (!fileInput.files || fileInput.files.length < 2) {
+                alert('최소 2장의 휠 이미지를 선택해주세요.');
+                return;
+            }
+
+            if (!productTitle.trim()) {
+                alert('제품 제목을 입력해주세요. (예: BMW M3 19인치 BBS 휠)');
+                return;
+            }
+
+            loading.classList.add('show');
+            result.classList.add('hidden');
+
+            const formData = new FormData();
+            
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('images', fileInput.files[i]);
+            }
+            
+            formData.append('productTitle', productTitle);
+            formData.append('duration', duration);
+            formData.append('narrationSpeed', speed);
+
+            try {
+                console.log('🎙️ 제목 기반 나레이션 비디오 생성 시작');
+                console.log('제품 제목:', productTitle);
+                
+                const startTime = Date.now();
+                const response = await fetch('/api/test-video-with-narration', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                const processingTime = Math.round((Date.now() - startTime) / 1000);
+                
+                loading.classList.remove('show');
+                result.classList.remove('hidden');
+
+                if (data.success) {
+                    resultText.textContent = JSON.stringify({
+                        status: '✅ 성공',
+                        제목: productTitle,
+                        파일명: data.filename,
+                        음성포함: data.hasAudio ? '예' : '아니오',
+                        처리시간: processingTime + '초',
+                        메시지: data.message
+                    }, null, 2);
+
+                    if (data.downloadUrl) {
+                        downloadLink.href = data.downloadUrl;
+                        downloadSection.classList.remove('hidden');
+                        audioStatus.textContent = data.hasAudio ? '✅ AI 음성 포함' : '❌ 음성 생성 실패';
+                        document.getElementById('processingTime').textContent = processingTime + '초';
+                    }
+                } else {
+                    resultText.textContent = JSON.stringify({
+                        status: '❌ 실패',
+                        오류: data.error,
+                        상세: data.details
+                    }, null, 2);
+                }
+
+            } catch (error) {
+                loading.classList.remove('show');
+                result.classList.remove('hidden');
+                
+                resultText.textContent = JSON.stringify({
+                    status: '❌ 네트워크 오류',
+                    오류: error.message
+                }, null, 2);
+
+                console.error('API 호출 오류:', error);
+            }
+        }
+
+        // 제품 제목 실시간 분석
+        document.getElementById('productTitle').addEventListener('input', function(e) {
+            if (e.target.value.length > 3) {
+                analyzeTitle();
+            }
+        });
+
+        // 파일 선택 시 정보 표시
+        document.getElementById('wheelImages').addEventListener('change', function(e) {
+            const fileCount = e.target.files.length;
+            if (fileCount > 0) {
+                console.log(`${fileCount}개 휠 이미지 선택됨`);
+            }
+        });
+
+        // 페이지 로드 시 기본 제목 분석
+        window.addEventListener('load', function() {
+            analyzeTitle();
+        });
+    </script>
+</body>
+</html>

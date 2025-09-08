@@ -1,7 +1,7 @@
 {
   "name": "ai-shorts-maker",
-  "version": "2.6.0",
-  "description": "Wheel restoration specialized AI shorts video generator",
+  "version": "2.7.0",
+  "description": "Car restoration specialized AI shorts video generator",
   "type": "module",
   "scripts": {
     "dev": "vite",
